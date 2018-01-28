@@ -1,6 +1,5 @@
 package com.savdev.io;
 
-import com.savdev.io.zip.File2ZipFileTest;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
 
@@ -22,7 +21,7 @@ public class BaseTest {
             = "withDefaultEntryName.zip";
 
     public File getFileFromTestResource(String fileName){
-        URL fileUrl = File2ZipFileTest.class.getClassLoader()
+        URL fileUrl = BaseTest.class.getClassLoader()
                 .getResource(fileName);
         try {
             return new File(fileUrl.toURI());
@@ -34,10 +33,10 @@ public class BaseTest {
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
 
-    public File createFileTemporary(final String fileName){
+    public String filePathInTestTempFolder(final String fileName){
         try {
             File testTempFolder = folder.newFolder();
-            return new File(testTempFolder, fileName);
+            return new File(testTempFolder, fileName).getAbsolutePath();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

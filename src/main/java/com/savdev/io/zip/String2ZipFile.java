@@ -1,10 +1,8 @@
 package com.savdev.io.zip;
 
-import java.io.File;
-import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 public class String2ZipFile {
 
@@ -13,20 +11,22 @@ public class String2ZipFile {
         puts as an entry into zip archive root
      */
     public static void zipFileFromString(
-            final File zipFile,
+            final String zipFilePath,
+            final Charset encoding,
             final String fileNameEntryInsideZip,
-            final String content, Charset encoding) {
-        try (ZipOutputStream out = new ZipOutputStream(
-                new FileOutputStream(zipFile));) {
+            final String content) {
 
-            ZipEntry e = new ZipEntry(fileNameEntryInsideZip);
-            out.putNextEntry(e);
-
-            byte[] data = content.getBytes(encoding);
-            out.write(data, 0, data.length);
-            out.closeEntry();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        ZipUtils.archiveZipBeforeJava7(zipFilePath, encoding,
+                zos -> {
+            try {
+                ZipEntry e = new ZipEntry(fileNameEntryInsideZip);
+                zos.putNextEntry(e);
+                byte[] data = content.getBytes(encoding);
+                zos.write(data, 0, data.length);
+                zos.closeEntry();
+            } catch (IOException e) {
+                throw new IllegalStateException(e);
+            }
+        });
     }
 }

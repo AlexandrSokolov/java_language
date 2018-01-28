@@ -7,140 +7,128 @@ import net.lingala.zip4j.util.Zip4jConstants;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URI;
 import java.nio.charset.Charset;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 public class File2ZipFile {
 
     private static byte[] buffer = new byte[1024];
 
     /*
-        Zips original files
-            and adds them to original zip archive.
+        Solution Via Java 7 FileSystems.newFileSystem
+
+        Creates a new zip file,
+            adds content from other files into it
 
         fileNameEntryInsideZip2ExternalFile
             - a mapping between entry name inside of zip archive
             - and external real file that is zipped with the function
 
-        Via Java 7 FileSystems.newFileSystem
+        thows IllegalStateException if zip file is not zip,
+            for instance if File is created via:
+            new File(filePath).createNewFile();
      */
-    public static void addFiles2ZipArchive(
-            final File zipFile, final Charset encoding,
+    public static void createZipArchive(
+            final String filePath, final Charset encoding,
             final Map<String, File> fileNameEntryInsideZip2ExternalFile) {
-        Map<String, String> env = new HashMap<>();
-        env.put("create", "true");
-        env.put("encoding", encoding.name());
 
-        URI uri = URI.create("jar:file:" + zipFile.getAbsolutePath());
-
-        try (FileSystem zipfs = FileSystems.newFileSystem(uri, env)) {
+        ZipUtils.archiveZip(filePath, encoding, zipfs -> {
             fileNameEntryInsideZip2ExternalFile
-                    .forEach((fileNameEntryInsideZip, externalFile) -> {
-                        Path externalTxtFile = externalFile.toPath();
-                        Path pathInZipfile = zipfs.getPath(fileNameEntryInsideZip);
-                        // copy a file into the zip file
-                        try {
-                            Files.copy(externalTxtFile, pathInZipfile,
-                                    StandardCopyOption.REPLACE_EXISTING);
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
-
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+                .forEach((fileNameEntryInsideZip, externalFile) -> {
+                    Path externalTxtFile = externalFile.toPath();
+                    Path pathInZipfile = zipfs.getPath(fileNameEntryInsideZip);
+                    // copy a file into the zip file
+                    try {
+                        Files.copy(externalTxtFile, pathInZipfile,
+                                StandardCopyOption.REPLACE_EXISTING);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+        });
     }
 
     /*
-        Zips original files
-            and adds them to original zip archive.
+        Solution Via Java 7 FileSystems.newFileSystem
 
-        Inside of zip archive,
-        entries have the same name as names in external original files
+        Creates a new zip file,
+            adds content from other files into it
 
-        Via Java 7 FileSystems.newFileSystem
+        Uses names of original files as entry names in the zip archive
+
+        thows IllegalStateException if zip file is not zip,
+            for instance if File is created via:
+            new File(filePath).createNewFile();
      */
-    public static void addFiles2ZipArchive(
-            final File zipFile, final Charset encoding,
+    public static void createZipArchive(
+            final String filePath, final Charset encoding,
             final Iterable<File> externalFiles) {
-        Map<String, String> env = new HashMap<>();
-        env.put("create", "true");
-        env.put("encoding", encoding.name());
+        ZipUtils.archiveZip(filePath, encoding, zipfs -> {
+            externalFiles.forEach(externalFile -> {
+                Path externalTxtFile = externalFile.toPath();
+                Path pathInZipfile = zipfs.getPath(externalFile.getName());
+                // copy a file into the zip file
+                try {
+                    Files.copy(externalTxtFile, pathInZipfile,
+                            StandardCopyOption.REPLACE_EXISTING);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        });
 
-        URI uri = URI.create("jar:file:" + zipFile.getAbsolutePath());
-
-        try (FileSystem zipfs = FileSystems.newFileSystem(uri, env)) {
-            externalFiles
-                    .forEach(externalFile -> {
-                        Path externalTxtFile = externalFile.toPath();
-                        Path pathInZipfile = zipfs.getPath(externalFile.getName());
-                        // copy a file into the zip file
-                        try {
-                            Files.copy(externalTxtFile, pathInZipfile,
-                                    StandardCopyOption.REPLACE_EXISTING);
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
-
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
+
+
+
+
+
 
     /*
         Uses original Java features to copy bytes,
             via ZipOutputStream and ZipEntry
             without usage of Files.copy() function
 
+        The difference with createZipArchive,
+            implemented via FileSystems.newFileSystem()
+            this solution can zip a file, created via new File().createNewFile()
+            solution in createZipArchive throws java.util.zip.ZipError
+            in this case
+
         Inside of zip archive,
         entries have the same name as names in external original files
     */
-    public static void zipFileFromFileBeforeJava7(
-            final File zipFile, final Charset encoding,
+    public static void createZipArchiveBeforeJava7(
+            final String zipFilePath, final Charset encoding,
             final Iterable<File> externalFiles) {
-        FileOutputStream fos;
-        ZipOutputStream zos = null;
-        try {
 
-            fos = new FileOutputStream(zipFile.getAbsoluteFile());
-            zos = new ZipOutputStream(fos, encoding);
-            for(File file : externalFiles){
-                ZipEntry ze = new ZipEntry(file.getName());
-                //ze.setMethod(ZipEntry.DEFLATED);
-                //ze.setCrc();
-                zos.putNextEntry(ze);
-                FileInputStream in = new FileInputStream(file);
-                int len;
-                while ((len = in.read(buffer)) > 0) {
-                    zos.write(buffer, 0, len);
-                }
-                in.close();
-                zos.closeEntry();
-            }
-        } catch(IOException e){
-            throw new RuntimeException(e);
-        } finally {
-            if (zos != null){
-                try {
-                    zos.close();
-                } catch (IOException e) {
-                    throw new RuntimeException("Could not close archive", e);
+        ZipUtils.archiveZipBeforeJava7(
+            zipFilePath, encoding, zos -> {
+                for(File file : externalFiles){
+                    try {
+                        ZipEntry ze = new ZipEntry(file.getName());
+                        //ze.setMethod(ZipEntry.DEFLATED);
+                        //ze.setCrc();
+                        zos.putNextEntry(ze);
+                        FileInputStream in = new FileInputStream(file);
+                        int len;
+                        while ((len = in.read(buffer)) > 0) {
+                            zos.write(buffer, 0, len);
+                        }
+                        in.close();
+                        zos.closeEntry();
+                    } catch (IOException e){
+                        throw new IllegalStateException(e);
+                    }
+
                 }
             }
-        }
+        );
     }
 
     /*
@@ -163,25 +151,26 @@ public class File2ZipFile {
         - and external real file that is zipped with the function
     */
     public static void zipFileFromFileViaZip4J(
-            final File zipFile, final Charset encoding,
+            final String zipFilePath, final Charset encoding,
             final Map<String, File> fileNameEntryInsideZip2ExternalFile) {
         if (true)
-            throw new RuntimeException("Not fixed bug:"
-                + "");
+            throw new RuntimeException(
+                "Not fixed bug:"
+                + "java.lang.ClassCastException: "
+                + "java.io.File cannot be cast to "
+                + "net.lingala.zip4j.core.NativeStorage");
         try {
-            ZipFile zipFileWrapper = new ZipFile(zipFile.getAbsolutePath());
+            ZipFile zipFileWrapper = new ZipFile(zipFilePath);
             zipFileWrapper.setFileNameCharset(encoding.name());
             fileNameEntryInsideZip2ExternalFile
-                    .forEach((entryName, externalfile) -> {
-                        try {
-                            zipFileWrapper.addFile(externalfile,
-                                    configureZipParameters(entryName));
-                        } catch (ZipException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
-
-
+                .forEach((entryName, externalfile) -> {
+                    try {
+                        zipFileWrapper.addFile(externalfile,
+                                configureZipParameters(entryName));
+                    } catch (ZipException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

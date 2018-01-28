@@ -8,6 +8,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 
@@ -19,17 +20,43 @@ public class File2ZipFileTest extends BaseTest {
         we explicit specify zip entry inside of zip archive
      */
     @Test
-    public void testAddFiles2ZipArchive() {
-        File zipFile2Archive = createFileTemporary(ZIP_FILE_NAME);
-        File2ZipFile.addFiles2ZipArchive(zipFile2Archive,
+    public void testCreateZipArchive() {
+        String zipFilePath2Archive = filePathInTestTempFolder(ZIP_FILE_NAME);
+
+        File2ZipFile.createZipArchive(zipFilePath2Archive,
                 StandardCharsets.UTF_8,
                 ImmutableMap.of(ZIP_ENTRY_NAME, textFileFromResource));
 
         File zipFileFromResource = getFileFromTestResource(
                 ZIP_FILE_NAME_EXPLICIT_ENTRY);
 
-        Assert.assertFalse(zipFile2Archive == zipFileFromResource);
-        ZipFileAssert.assertEquals(zipFile2Archive, zipFileFromResource);
+        File zipFile = new File(zipFilePath2Archive);
+        ZipFileAssert.assertEquals(zipFile, zipFileFromResource);
+    }
+
+    /*
+        we explicit specify zip entry inside of zip archive
+            file for zip is created incorrectly
+    */
+    @Test(expected = IllegalStateException.class )
+    public void testCreateZipArchiveWrongZip() throws IOException {
+        String zipFilePath2Archive =
+                filePathInTestTempFolder(ZIP_FILE_NAME);
+
+        new File(zipFilePath2Archive).createNewFile();
+
+        try {
+            File2ZipFile.createZipArchive(zipFilePath2Archive,
+                    StandardCharsets.UTF_8,
+                    ImmutableMap.of(ZIP_ENTRY_NAME,
+                            textFileFromResource));
+            Assert.fail();
+        } catch (IllegalStateException e) {
+            Assert.assertTrue(e.getMessage().startsWith(
+                    "File for zip exists, but it is not zip:"
+            ));
+            throw e;
+        }
     }
 
     /*
@@ -37,18 +64,44 @@ public class File2ZipFileTest extends BaseTest {
             is taken from original file
      */
     @Test
-    public void testAddFiles2ZipArchiveNoExplicitName() {
+    public void testCreateZipArchiveNoExplicitName() {
 
-        File zipFile2Archive = createFileTemporary(ZIP_FILE_NAME);
-        File2ZipFile.addFiles2ZipArchive(zipFile2Archive,
+        String zipFile2ArchivePath =
+                filePathInTestTempFolder(ZIP_FILE_NAME);
+        File2ZipFile.createZipArchive(zipFile2ArchivePath,
                 StandardCharsets.UTF_8,
                 Collections.singleton(textFileFromResource));
 
         File zipTarget2Compare =
                 getFileFromTestResource(ZIP_FILE_NAME_DEFAULT_ENTRY);
 
-        Assert.assertFalse(zipFile2Archive == zipTarget2Compare);
-        ZipFileAssert.assertEquals(zipFile2Archive, zipTarget2Compare);
+        ZipFileAssert.assertEquals(new File(zipFile2ArchivePath),
+                zipTarget2Compare);
+    }
+
+    /*
+        in this case a name of entry inside of zip file
+            is taken from original file
+    */
+    @Test(expected = IllegalStateException.class)
+    public void testCreateZipArchiveNoExplicitNameWrongZipFile()
+            throws IOException {
+
+        String zipFile2ArchivePath =
+                filePathInTestTempFolder(ZIP_FILE_NAME);
+        new File(zipFile2ArchivePath).createNewFile();
+
+        try {
+            File2ZipFile.createZipArchive(zipFile2ArchivePath,
+                    StandardCharsets.UTF_8,
+                    Collections.singleton(textFileFromResource));
+            Assert.fail();
+        } catch (IllegalStateException e) {
+            Assert.assertTrue(e.getMessage().startsWith(
+                    "File for zip exists, but it is not zip:"
+            ));
+            throw e;
+        }
     }
 
     /*
@@ -56,35 +109,58 @@ public class File2ZipFileTest extends BaseTest {
         even if it has no extension, it will be zip archive
     */
     @Test
-    public void testAddZippedFiles2TextFile() {
-        File zipFile2Archive = createFileTemporary(WRONG_ZIP_EXTENSION_FILE_NAME);
-        File2ZipFile.addFiles2ZipArchive(zipFile2Archive,
+    public void testCreateZipArchiveWrongZipFileExtension() {
+        String zipFile2ArchivePath = filePathInTestTempFolder(WRONG_ZIP_EXTENSION_FILE_NAME);
+        File2ZipFile.createZipArchive(zipFile2ArchivePath,
                 StandardCharsets.UTF_8,
                 Collections.singleton(textFileFromResource));
 
         File zipTarget2Compare =
                 getFileFromTestResource(ZIP_FILE_NAME_DEFAULT_ENTRY);
-
-        Assert.assertFalse(zipFile2Archive == zipTarget2Compare);
-        ZipFileAssert.assertEquals(zipFile2Archive, zipTarget2Compare);
+        ZipFileAssert.assertEquals(new File(zipFile2ArchivePath),
+                zipTarget2Compare);
     }
 
     /*
         before java 7
      */
     @Test
-    public void testZipFileFromFileBeforeJava7() {
+    public void testCreateZipArchiveBeforeJava7() {
 
-        File zipFile2Archive = createFileTemporary(ZIP_FILE_NAME);
-        File2ZipFile.zipFileFromFileBeforeJava7(zipFile2Archive,
+        String zipFile2Archive = filePathInTestTempFolder(ZIP_FILE_NAME);
+        File2ZipFile.createZipArchiveBeforeJava7(zipFile2Archive,
                 StandardCharsets.UTF_8,
                 Collections.singleton(textFileFromResource));
 
         File zipTarget2Compare =
                 getFileFromTestResource(ZIP_FILE_NAME_DEFAULT_ENTRY);
 
-        Assert.assertFalse(zipFile2Archive == zipTarget2Compare);
-        ZipFileAssert.assertEquals(zipFile2Archive, zipTarget2Compare);
+        ZipFileAssert.assertEquals(new File(zipFile2Archive),
+                zipTarget2Compare);
+    }
+
+    /**
+     * In this case, if a zip file is created via
+     *      new File().createNewFile();
+     *      it is totally legal, and can be used for zipping
+     *
+     * @throws IOException
+     */
+    @Test
+    public void testCreateZipArchiveBeforeJava7WrongZipFile()
+            throws IOException {
+
+        String zipFile2Archive = filePathInTestTempFolder(ZIP_FILE_NAME);
+        File newFile = new File(zipFile2Archive);
+        newFile.createNewFile();
+
+        File2ZipFile.createZipArchiveBeforeJava7(zipFile2Archive,
+                StandardCharsets.UTF_8,
+                Collections.singleton(textFileFromResource));
+
+        File zipTarget2Compare =
+                getFileFromTestResource(ZIP_FILE_NAME_DEFAULT_ENTRY);
+        ZipFileAssert.assertEquals(newFile, zipTarget2Compare);
     }
 
     /*
@@ -94,16 +170,16 @@ public class File2ZipFileTest extends BaseTest {
     @Ignore
     public void testZipFileFromFileViaZip4J() {
 
-        File zipFile2Archive = createFileTemporary(ZIP_FILE_NAME);
-        File2ZipFile.zipFileFromFileViaZip4J(zipFile2Archive,
+        String zipFile2ArchivePath = filePathInTestTempFolder(ZIP_FILE_NAME);
+        File2ZipFile.zipFileFromFileViaZip4J(zipFile2ArchivePath,
                 StandardCharsets.UTF_8,
                 ImmutableMap.of(ZIP_ENTRY_NAME, textFileFromResource));
 
         File zipFileFromResource = getFileFromTestResource(
                 ZIP_FILE_NAME_EXPLICIT_ENTRY);
 
-        Assert.assertFalse(zipFile2Archive == zipFileFromResource);
-        ZipFileAssert.assertEquals(zipFile2Archive, zipFileFromResource);
+        ZipFileAssert.assertEquals(new File(zipFile2ArchivePath),
+                zipFileFromResource);
 
     }
 }
