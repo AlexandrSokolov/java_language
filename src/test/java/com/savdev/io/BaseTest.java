@@ -19,6 +19,12 @@ public class BaseTest {
     public static final String ZIP_ENTRY_NAME = "entryName.txt";
     public static final String ZIP_FILE_NAME_DEFAULT_ENTRY
             = "withDefaultEntryName.zip";
+    public static final String ZIP_FILE_NAME_2ENTRIES =
+            "with2ZipEntries.zip";
+    public static final String FILE1_CONTENT =
+            "content of the 1st file\n";
+    public static final String FILE2_CONTENT =
+            "content of the 2nd file\n";
 
     public File getFileFromTestResource(String fileName){
         URL fileUrl = BaseTest.class.getClassLoader()
