@@ -23,4 +23,7 @@ public interface DateTimeTestConstants {
   // 24.11.2020T21:45:54.964+0500
   String DATE_TIME_TIMEZONE_OFFSET = String.format("%d.%d.%dT%d:%d:%d.%d+0%d00",
     DAY,  MONTH, YEAR, HOUR, MINUTE, SECONDS, MILLISECONDS, OFFSET);
+
+  String DATE_TIME_TIMEZONE_OFFSET_JACKSON = String.format("%d.%d.%dT%d:%d:%d.%d+0%d:00",
+    DAY,  MONTH, YEAR, HOUR, MINUTE, SECONDS, MILLISECONDS, OFFSET);
 }

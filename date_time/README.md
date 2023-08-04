@@ -1,54 +1,47 @@
 ##
 
-* [Classes that represent datetime]()
+* [Classes that represent datetime](#datetime-classes)
 * [Issues of the old original Java date-time API](#issues-of-the-old-original-java-date-time-api)
 * [New Java date-time API, motivation](#how-new-java-date-time-api-solves-issues-of-the-old-api)
 
 ### Datetime classes
 
-1. If you want to handle offsets and time zones, you must choose between `ZonedDateTime` and `OffsetDateTime`
+These classes are:
+* `OffsetDateTime`
+* `ZonedDateTime`
+* `LocalDateTime`
 
-Both work pretty much similar. 
+##### `OffsetDateTime` vs `ZonedDateTime`
 
-ObjctMapper can do that, need to be tested:
-2023-07-07T11:58:42Z
+When external system exchange datetime information they must explicitly specify one of the following:
+* time offset (existing offset or zero-zone)
+* time zone
 
-Disadvantage: `24.11.2020T21:45:54.964Z` date format with zero zone, cannot be parsed.
+Keep in mind that a time zone can have different time offset values.
+For the same ZoneId like `Europe/Berlin`, there is one offset for summer and a different offset for winter.
+
+You can easily convert `OffsetDateTime` to `ZonedDateTime` and back, 
+so both classes can be used for communication between systems.
+
+But if you want to display in one system datetime information for a human, provided from a system with another timezone,
+then `ZonedDateTime` is a preferable type. Based on it, I would say `ZonedDateTime` is preferable.
+
+`ZonedDateTime` class usage:
+* [`ZonedDateTime` creation](src/test/java/com/savdev/dt/ZonedDateTimeCreationTest.java)
+* [`ZonedDateTime` parsing](src/test/java/com/savdev/dt/ZonedDateTimeParsingTest.java)
+* [`ZonedDateTime` parsing by jackson (via `ObjectMapper`)](src/test/java/com/savdev/dt/ZonedDateTimeObjectMapperParsingTest.java)
+
+`OffsetDateTime` class usage:
+* [`OffsetDateTime` creation](src/test/java/com/savdev/dt/OffsetDateTimeCreationTest.java)
+* [`OffsetDateTime` parsing](src/test/java/com/savdev/dt/OffsetDateTimeParsingTest.java)
 
 
+##### `LocalDateTime` (don't use it)
 
-2. `java.time.LocalDateTime`.
-
-Never use this type if you construct it from string values, that might contain offset or timezone name!
-
-This type does not represent `local` datetime, but UTC datetime with no information about offset/timezone!
-
-For instance your locale time has `+0200` offset.
-
-You get a string value: `2020-11-24T21:45:54.964+0500`
-
-You construct instance of `java.time.LocalDateTime` as:
-```java
-var ldt = LocalDateTime.parse(
-  "2020-11-24T21:45:54.964+0500",
-  DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ"))
-```
-
-You might expect the `ldt` will have:
-```21 (hour) - 5(offset in input) + 2(correction to local offset) = 18 (hours of your local time)```
-
-No, it does not work this way.
-
-The instance of `java.time.LocalDateTime` will represent only date-time information without offset: 
-``java
-ldt.toString();
-``
-Prints:
-```text
-2020-11-24T21:45:54.964
-```
-
-2. 
+It is **not local** datetime, it just class that represents only date and time.
+It ignores any information about time zone or offset.
+Using this class is very error-prone option and should be avoided.
+Only for certain performance issues, it might be useful.
 
 ### Issues of the old original Java date-time API
 

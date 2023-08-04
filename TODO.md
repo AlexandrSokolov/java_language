@@ -1,10 +1,6 @@
-```java
-Optional.ofNullable(gc.getModifiedAt())
-          .orElse(gc.getSentAt())
-          .toInstant()
-          .atZone(ZoneId.systemDefault())
-          .toLocalDateTime()
-```
 
+### stream api - grouping (into Map, into statistics report, nested grouping (valid/failed))
+### stream api - collecting (to Map, test with `null` values and not unique keys)
+### stream api - async handling
 
-### todo refactor module - extract and move
+### refactore old code from `refactore` module
