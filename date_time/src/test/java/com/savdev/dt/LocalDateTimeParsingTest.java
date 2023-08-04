@@ -94,7 +94,8 @@ public class LocalDateTimeParsingTest {
     //A better approach, convert to ZonedDateTime and then get LocalDateTime with a corrected time defined Zone
     var zdt = ZonedDateTime.parse(
         DATE_TIME_TIMEZONE_OFFSET,
-        DateTimeFormatter.ofPattern(DATE_TIME_ZONE_FORMAT).withZone(BERLIN_ZONE_ID));
+        DateTimeFormatter.ofPattern(DATE_TIME_ZONE_FORMAT)
+          .withZone(BERLIN_ZONE_ID));
     //and then to LocalDateTime
     var ldt = zdt.toLocalDateTime();
 

@@ -5,24 +5,14 @@ import org.junit.jupiter.api.Test;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.ZonedDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-import java.time.temporal.ChronoField;
-import java.util.concurrent.TimeUnit;
+import java.time.ZonedDateTime;
 
 import static com.savdev.dt.DateTimeFormatters.DATE_TIME_SIMPLE_FORMAT;
-import static com.savdev.dt.DateTimeFormatters.DATE_TIME_ZERO_ZONE_FORMAT;
-import static com.savdev.dt.DateTimeFormatters.DATE_TIME_ZONE_FORMAT;
 import static com.savdev.dt.DateTimeTestConstants.DATE_TIME_STRING;
-import static com.savdev.dt.DateTimeTestConstants.DATE_TIME_TIMEZONE_OFFSET;
-import static com.savdev.dt.DateTimeTestConstants.DATE_TIME_ZERO_TIMEZONE;
 import static com.savdev.dt.DateTimeTestConstants.DAY;
 import static com.savdev.dt.DateTimeTestConstants.HOUR;
 import static com.savdev.dt.DateTimeTestConstants.MINUTE;
@@ -36,55 +26,6 @@ public class ZonedDateTimeCreationTest {
   public void now() {
     ZonedDateTime now = ZonedDateTime.now();
     Assertions.assertNotNull(now);
-  }
-
-  @Test
-  public void createFromNoTimezoneStringThrows() {
-    DateTimeParseException thrown = Assertions.assertThrows(
-      DateTimeParseException.class,
-      () -> ZonedDateTime.parse(
-          DATE_TIME_STRING,
-          DateTimeFormatter.ofPattern(DATE_TIME_SIMPLE_FORMAT)),
-      "Datetime value with no offset must throw an exception, but it didn't"
-    );
-
-    Assertions.assertTrue(thrown.getMessage().contains("Text '24.11.2020 21:45' could not be parsed"));
-    Assertions.assertTrue(thrown.getMessage().contains("Unable to obtain ZonedDateTime"));
-  }
-
-  @Test
-  public void createFromZeroTimezoneStringThrows() {
-    DateTimeParseException thrown = Assertions.assertThrows(
-      DateTimeParseException.class,
-      () -> ZonedDateTime.parse(
-        DATE_TIME_ZERO_TIMEZONE,
-        DateTimeFormatter.ofPattern(DATE_TIME_ZERO_ZONE_FORMAT)),
-      "Datetime value with no offset must throw an exception, but it didn't"
-    );
-
-    Assertions.assertTrue(thrown.getMessage().contains("Text '24.11.2020T21:45:54.964Z' could not be parsed"));
-    Assertions.assertTrue(thrown.getMessage().contains("Unable to obtain ZonedDateTime"));
-  }
-
-  @Test
-  public void createFromTimezoneString() {
-    var zdt = ZonedDateTime.parse(
-      DATE_TIME_TIMEZONE_OFFSET,
-      DateTimeFormatter.ofPattern(DATE_TIME_ZONE_FORMAT));
-
-    Assertions.assertEquals(HOUR, zdt.getHour());
-
-    Instant instant = zdt.toInstant(); //2020-11-24T21:45:54.964-05:00 -> 2020-11-25T02:45:54.964Z"
-    ZoneId systemZone = ZoneId.systemDefault(); //ZoneId.of( "Europe/Berlin" );
-    ZoneOffset currentOffsetForMyZone = systemZone.getRules().getOffset(instant);
-    long systemHoursOffset = TimeUnit.HOURS.convert(currentOffsetForMyZone.getTotalSeconds(), TimeUnit.SECONDS);
-
-    /* `+0500` offset */
-    long zdtHoursOffset = TimeUnit.HOURS.convert(zdt.getOffset().get(ChronoField.OFFSET_SECONDS), TimeUnit.SECONDS);
-
-    Assertions.assertEquals(
-      (HOUR - zdtHoursOffset + systemHoursOffset) % 24,
-      zdt.withZoneSameInstant(ZoneId.systemDefault()).getHour());
   }
 
   @Test

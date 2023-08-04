@@ -1,15 +1,6 @@
-###
-convert ´OffsetDateTime` to `ZonedDateTime` and back
+### Convert date and time attributes (hours into seconds, for instance)
 
-###
-
-```java
-Optional.ofNullable(gc.getModifiedAt())
-          .orElse(gc.getSentAt())
-          .toInstant()
-          .atZone(ZoneId.systemDefault())
-          .toLocalDateTime()
-```
+TimeUnit.HOURS.convert(currentOffsetForMyZone.getTotalSeconds(), TimeUnit.SECONDS);
 
 ### Math on date and time, comparison
 

@@ -7,9 +7,9 @@
 ### Datetime classes
 
 These classes are:
-* `OffsetDateTime`
-* `ZonedDateTime`
-* `LocalDateTime`
+* `ZonedDateTime` (preferable)
+* `OffsetDateTime` 
+* `LocalDateTime` (don't use)
 
 ##### `OffsetDateTime` vs `ZonedDateTime`
 

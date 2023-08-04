@@ -87,7 +87,7 @@ public class ZonedDateTimeParsingTest {
       String.format("Text '%s' could not be parsed", DATE_TIME_ZERO_TIMEZONE)));
     Assertions.assertTrue(thrownWithFormatter.getMessage().contains("Unable to obtain ZonedDateTime"));
 
-    // Parse as ZonedDateTime and covert to ZonedDateTime
+    // Parse as ZonedDateTime with both formatter and time zone
     var zdt = ZonedDateTime.parse(
       DATE_TIME_ZERO_TIMEZONE,
       DateTimeFormatter.ofPattern(DATE_TIME_ZERO_ZONE_FORMAT)
@@ -113,6 +113,7 @@ public class ZonedDateTimeParsingTest {
     Assertions.assertTrue(thrown.getMessage().contains(
       String.format("Text '%s' could not be parsed", DATE_TIME_TIMEZONE_OFFSET)));
 
+    // parse with formatter that includes time zone configuration
     var zdt = ZonedDateTime.parse(
       DATE_TIME_TIMEZONE_OFFSET,
       DateTimeFormatter.ofPattern(DATE_TIME_ZONE_FORMAT)

@@ -10,6 +10,7 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 
 import static com.savdev.dt.DateTimeFormatters.DATE_TIME_SIMPLE_FORMAT;
 import static com.savdev.dt.DateTimeTestConstants.DATE_TIME_STRING;
@@ -26,6 +27,12 @@ public class OffsetDateTimeCreationTest {
   public void now() {
     OffsetDateTime now = OffsetDateTime.now();
     Assertions.assertNotNull(now);
+  }
+
+  @Test
+  public void fromZonedDateTime() {
+    var odt = ZonedDateTime.now().toOffsetDateTime();
+    Assertions.assertNotNull(odt);
   }
 
   @Test
