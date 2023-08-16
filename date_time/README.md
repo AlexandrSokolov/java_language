@@ -23,8 +23,13 @@ For the same ZoneId like `Europe/Berlin`, there is one offset for summer and a d
 You can easily convert `OffsetDateTime` to `ZonedDateTime` and back, 
 so both classes can be used for communication between systems.
 
-But if you want to display in one system datetime information for a human, provided from a system with another timezone,
-then `ZonedDateTime` is a preferable type. Based on it, I would say `ZonedDateTime` is preferable.
+Reasons why `ZonedDateTime` might be preferable:
+* if you want to display in one system datetime information for a human, provided from a system with another timezone,
+then `ZonedDateTime` is a preferable type. Offset can be different for the same zone! 
+So you must know (and use) time zone, but not offset.
+* parsing datatime string values just with formatter is not enough. Often you must provide zone id. 
+As a result, it makes not much sense to convert `ZonedDateTime` to `OffsetDateTime` and use `OffsetDateTime`
+
 
 `ZonedDateTime` class usage:
 * [`ZonedDateTime` creation](src/test/java/com/savdev/dt/ZonedDateTimeCreationTest.java)
