@@ -12,27 +12,52 @@
 
   <properties>
 
-    <maven.compiler.source>17</maven.compiler.source>
-    <maven.compiler.target>17</maven.compiler.target>
+    <jackson.version>2.15.2</jackson.version>
+
+    <maven.compiler.source>21</maven.compiler.source>
+    <maven.compiler.target>21</maven.compiler.target>
+
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+    <!-- test frameworks -->
+    <junit5.version>5.9.3</junit5.version>
 
   </properties>
 
   <modules>
-    <module>deps</module>
     <module>date_time</module>
+    <module>streams</module>
   </modules>
 
   <dependencyManagement>
     <dependencies>
+      <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson/jackson-bom -->
       <dependency>
-        <groupId>com.savdev</groupId>
-        <artifactId>java-demo-deps</artifactId>
-        <version>1.0.0</version>
+        <groupId>com.fasterxml.jackson</groupId>
+        <artifactId>jackson-bom</artifactId>
+        <version>${jackson.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+
+      <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-lang3</artifactId>
+        <version>3.17.0</version>
+      </dependency>
+
+      <!-- TEST START -->
+      <!-- https://mvnrepository.com/artifact/org.junit/junit-bom -->
+      <dependency>
+        <groupId>org.junit</groupId>
+        <artifactId>junit-bom</artifactId>
+        <version>${junit5.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <!-- TEST END -->
     </dependencies>
   </dependencyManagement>
 
