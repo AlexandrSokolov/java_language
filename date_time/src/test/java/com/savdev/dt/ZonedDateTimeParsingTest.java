@@ -29,6 +29,16 @@ import static com.savdev.dt.DateTimeTestConstants.SECONDS;
 import static com.savdev.dt.DateTimeTestConstants.YEAR;
 
 public class ZonedDateTimeParsingTest {
+
+  @Test
+  @DisplayName("`2025-08-11T18:35:06.091903206+02:00[Europe/Berlin]` with default formatter")
+  public void defaultFormatting() {
+    var current = ZonedDateTime.parse("2025-08-11T18:35:06.091903206+02:00[Europe/Berlin]");
+    Assertions.assertNotNull(current);
+    Assertions.assertEquals("+02:00",current.getOffset().toString());
+    Assertions.assertEquals("Europe/Berlin",current.getZone().toString());
+  }
+
   @Test
   @DisplayName("`24.11.2020 21:45` parsing")
   public void parseFromNoTimezoneString() {
