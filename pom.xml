@@ -29,6 +29,7 @@
     <module>date_time</module>
     <module>streams</module>
     <module>collections/queues</module>
+    <module>collections/maps</module>
   </modules>
 
   <dependencyManagement>

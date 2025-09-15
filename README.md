@@ -5,3 +5,4 @@
 
 FAQs:
 - [FAQ on Queues](collections/queues/faq.queues.md)
+- [FAQ on Maps](collections/maps/faq.maps.md)
