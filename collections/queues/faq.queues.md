@@ -38,18 +38,7 @@ A queue is a collection designed to hold elements for processing, yielding them 
 
 ### `Queue` vs `List`
 
-`Queue` inspection and removal methods:
-```java
-Task nextTask = taskQueue.peek();
-if (nextTask instanceof PhoneTask) {
-  taskQueue.remove();
-  // process nextTask
-}
-```
-are a major benefit of the `Queue` interface; Collection has nothing like them (though `NavigableSet` does). 
-
-The price we pay for this benefit is that the methods of `Queue` are useful to us 
-only if the head element is actually one that we want. 
+The methods of `Queue` are useful to us only if the head element is actually one that we want. 
 
 For example, it might help to know something about all the outstanding tasks before you choose the next one.
 Otherwise, in a situation of limited time with an entirely queue-based to-do manager,

@@ -9,7 +9,7 @@ When you collect stream(s) of elements into the Java map you need to think about
     ```java
     .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
     ```
-   [See `MapsConcatenationTest.testUniqueKeysNotNullableValues()`](src/test/java/com/savdev/maps/MapsConcatenationTest.java)
+   [See `MapsConcatenationTest.uniqueKeys_NotNullableValues()`](src/test/java/com/savdev/maps/MapsConcatenationTest.java)
 2. If value might contain null, you cannot use `toMap` collector, you get NPE, use more generic collector instead:
     ```java
     .collect(
@@ -17,8 +17,12 @@ When you collect stream(s) of elements into the Java map you need to think about
         (m,e)-> m.put(e.getKey(), e.getValue()),
         HashMap::putAll);
     ```
-   [See `MapsConcatenationTest.testUniqueKeysNullableValues()`](src/test/java/com/savdev/maps/MapsConcatenationTest.java)
-3. If keys might contain duplicated keys, you need to decide:
+   [See `MapsConcatenationTest.uniqueKeys_NullableValues()`](src/test/java/com/savdev/maps/MapsConcatenationTest.java)
+3. If keys might contain duplicated keys, you get NPE by default.
+    
+    See [`.MapsConcatenationTest.duplicatedKeys_DefaultMerge()`](src/test/java/com/savdev/maps/MapsConcatenationTest.java)
+
+    Possible solutions:
 
     either you can merge duplicated elements into a single one:
     ```java
@@ -28,7 +32,7 @@ When you collect stream(s) of elements into the Java map you need to think about
       //in this test  example we merge id from one employee with the name from another
       (v1, v2) -> new Employee(v1.id(), v2.name())));
     ```
-   [See `MapsConcatenationTest.testDuplicatedKeyExplicitMerging()`](src/test/java/com/savdev/maps/MapsConcatenationTest.java)
+   [See `MapsConcatenationTest.duplicatedKey_ExplicitMerging()`](src/test/java/com/savdev/maps/MapsConcatenationTest.java)
     or you create map, where value is a list of elements with:
     ```java
     .collect(groupingBy(SomeObject::someField);
@@ -41,4 +45,4 @@ When you collect stream(s) of elements into the Java map you need to think about
           Map.Entry::getValue,
           toList())));
     ```
-   [See `MapsConcatenationTest.testDuplicatedKeyGrouping()`](src/test/java/com/savdev/maps/MapsConcatenationTest.java)
+   [See `MapsConcatenationTest.duplicatedKey_Grouping()`](src/test/java/com/savdev/maps/MapsConcatenationTest.java)

@@ -20,7 +20,7 @@ public class MapsConcatenationTest {
   public static final String DUPLICATED_NAME = "name1";
 
   @Test
-  public void testUniqueKeysNotNullableValues() {
+  public void uniqueKeys_NotNullableValues() {
     var map1 = Map.of(
       NAME1, new Employee(1L, NAME1),
       NAME2, new Employee(2L, NAME2));
@@ -31,13 +31,41 @@ public class MapsConcatenationTest {
 
     var combined = Stream.of(map1, map2, map3)
       .flatMap(map -> map.entrySet().stream())
-        .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
+      .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
 
     Assertions.assertEquals(4, combined.size());
   }
 
+  /**
+   * Useful, when you combine streams with Maps
+   */
   @Test
-  public void testUniqueKeysNullableValues() {
+  public void mapsAsStreams_UniqueKeys_NotNullableValues() {
+    var map1 = Map.of(
+      NAME1, new Employee(1L, NAME1),
+      NAME2, new Employee(2L, NAME2));
+    var map2 = Map.of(
+      NAME3, new Employee(3L, NAME3));
+    var map3 = Map.of(
+      NAME4, new Employee(4L, NAME4));
+
+    var combined = Stream.of(
+      map1.entrySet().stream(),
+        map2.entrySet().stream(),
+        map3.entrySet().stream())
+      .flatMap(i -> i)
+      .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+    Assertions.assertEquals(4, combined.size());
+  }
+
+  /**
+   * If maps contains null values, you cannot combine them using `toMap`,
+   * but you must use a generic collector and pass `HashMap` constructor explicitly.
+   * HashMap - allows to have null values.
+   */
+  @Test
+  public void uniqueKeys_NullableValues() {
     var map1 = new HashMap<String, Employee>();
     map1.put(NAME1, new Employee(1L, NAME1));
     map1.put(NAME2, null);
@@ -66,8 +94,11 @@ public class MapsConcatenationTest {
     Assertions.assertNull(combined.get(NAME2));
   }
 
+  /**
+   * By default, merging maps with duplicated keys throws an exception
+   */
   @Test
-  public void testDuplicatedKeyDefaultMerge() {
+  public void duplicatedKeys_DefaultMerge() {
     var map1 = Map.of(
       NAME1, new Employee(1L, NAME1),
       NAME2, new Employee(2L, NAME2));
@@ -87,8 +118,12 @@ public class MapsConcatenationTest {
       e.getMessage());
   }
 
+  /**
+   * Explicitly merging maps with duplicated keys
+   *  You decide - how to handle cases, in case there are entries with the same keys
+   */
   @Test
-  public void testDuplicatedKeyExplicitMerging() {
+  public void duplicatedKey_ExplicitMerging() {
     var map1 = Map.of(
       NAME1, new Employee(1L, NAME1),
       NAME2, new Employee(2L, NAME2));
@@ -109,8 +144,13 @@ public class MapsConcatenationTest {
     Assertions.assertEquals(3, combined.size());
   }
 
+  /**
+   * Collecting a map of elements with possible duplicated keys
+   *  into a map of lists.
+   *  Elements with the same key are collected into the list
+   */
   @Test
-  public void testDuplicatedKeyGrouping() {
+  public void duplicatedKey_Grouping() {
     var map1 = Map.of(
       NAME1, new Employee(1L, NAME1),
       NAME2, new Employee(2L, NAME2));
