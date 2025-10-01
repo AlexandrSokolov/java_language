@@ -27,6 +27,7 @@
 
   <modules>
     <module>date_time</module>
+    <module>numeric_data_types</module>
     <module>streams</module>
     <module>java_statements</module>
     <module>collections/queues</module>
