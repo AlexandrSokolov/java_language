@@ -1,4 +1,15 @@
 
+### SequencedMap
+
+A `SequencedMap` is a Map that maintains its entries in a defined order.
+Its keys form a `SequencedSet`.
+Some implementations of `SequencedMap` (like `TreeMap`) sort their entries automatically according to a key ordering.
+
+### NavigableMap
+
+A `NavigableMap` is a `SequencedMap` whose keys form a `NavigableSet` so that its entries are automatically sorted 
+by the key ordering and its methods can find keys and key-value pairs adjacent to a target key value.
+
 ### Collecting streams of elements into the Map
 
 When you collect stream(s) of elements into the Java map you need to think about if:

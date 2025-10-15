@@ -1,7 +1,9 @@
 
+- [Queue, its purpose](#queue)
 - [Queues in Java collections hierarchy](#what-is-specific-about-queues-among-other-java-collections)
 - [`Queue` vs `List`](#queue-vs-list)
 - [Queue implementations, the main difference](#what-is-the-main-difference-in-queue-implementations)
+- [Deque](#deque)
 - [Queue orders examples](#queue-orders-examples)
 - [Queue Implementations, what affects the choice](#queue-implementations)
 - [Queue attributes (properties)](#queue-attributes-properties)
@@ -30,11 +32,24 @@
 - [Concurrent algorithm used by `ConcurrentLinkedQueue`](#concurrent-algorithm-used-by-concurrentlinkedqueue)
 - [`PriorityBlockingQueue`, what must you care about?](#priorityblockingqueue-what-must-you-care-about)
 
-### What is specific about queues among other Java collections?
+### Queue
 
 ```text
 A queue is a collection designed to hold elements for processing, yielding them up in the order in which they are to be processed. 
 ```
+
+### What is specific about queues among other Java collections?
+
+Queue is different in kind from the other collections. 
+Sets, lists, and maps are typically 
+["owned" by another object and form part of its state](../faq.collections.md#respect-the-ownership-of-collections).
+
+
+By contrast, queues are not usually owned by a single object, 
+but are used for transmission of values from producers to consumers. 
+
+A queue can have multiple producers and multiple consumers; these can be objects, or threads, or processes.
+
 
 ### `Queue` vs `List`
 
@@ -56,6 +71,14 @@ for choosing the next task.
 
 `ordering` - in choosing a Queue implementation, you’re also choosing the ordering of elements (tasks) processing.
 Different implementations embodying different rules about what the order should be in which elements are to be processed.
+
+### Deque
+
+A Deque (pronounced “deck”) is a double-ended queue that can both accept and yield up elements at either end. 
+A Deque, like a Queue, can be used as a conduit of information between producers and consumers. 
+The ability to remove elements from the tail facilitates work stealing, 
+a load-balancing technique in which idle threads “steal” tasks from busier threads to maximize parallel efficiency. 
+Deques can also be used to store the state of an object, if updates to the state require operations at either end.
 
 ### Queue orders examples
 
