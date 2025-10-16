@@ -17,6 +17,10 @@
 - [Arrays vs Linked Lists](#arrays-vs-linked-lists)
 - [Arrays/Linked Lists vs Hash tables](#arrayslinked-lists-vs-hash-tables)
 - [What is used internally for implementations based on hash tables, requirements](#what-is-used-internally-for-implementations-based-on-hash-tables-requirements)
+- [Working with arrays](#working-with-arrays)
+- [What can and cannot be done with a list, created from an array `Arrays.asList(arr)`](#what-can-and-cannot-be-done-with-a-list-created-from-an-array-arraysaslistarr)
+- [Views in the Collection Framework](#views-in-the-collection-framework)
+- [Performance of the collections](#performance-of-the-collections)
 - [Comment the following code](#comment-the-following-code)
 
 ### Java Collections Framework
@@ -94,7 +98,7 @@ Using `Iterator`:
     ```
    The target of a foreach statement can be an array or any class that implements the interface `Iterable`. 
    Since the `Collection` interface extends Iterable, any set, list, or queue can be the target of foreach.
-   
+
 ### When `for` loop via explicit use of an iterator is necessary? 
 
 It is necessary when you want to make a structural change to a collection-broadly speaking, 
@@ -250,6 +254,240 @@ One way this can occur is if you do not override `Object::hashCode` at all;
 the value that it returns in this case will be implementation-dependent (in OpenJDK, it is usually randomly generated) 
 but is in any case highly unlikely to be the same for two different instances.
 
+### Working with arrays
+
+Suppose we want to test for the presence of a particular object in an array. 
+One obvious way to do this is to iterate over the array elements, 
+testing each for equality with the search target. 
+
+An alternative would be to use `contains` method of `List` interface to do that work instead. 
+An array is not a `List`, though, so how can a `List` method be useful in handling it? 
+
+We might well want to avoid the overhead of creating a new `ArrayList` object, 
+physically copying all the elements of the array into a new collection. 
+
+In this situation, a better answer is to get a `List` view of the array - an object that "looks like" a `List`, 
+but implements all its operations **directly on the underlying array**. 
+
+The method `asList` of the utility class `Arrays` provides such a view:
+```java
+Integer[] arr = {1, 2, 3};
+var list = Arrays.asList(arr);
+```
+
+The data “of” the view actually resides in the underlying structure,
+so changes made to that structure are immediately visible in the view, and vice versa. 
+For example, the following code compiles and runs without errors:
+
+```java
+Integer[] arr = {1, 2, 3};
+var list = Arrays.asList(arr);
+list.set(0, 3);                 // change the list view...
+assert arr[0] == 3;             // and the underlying array changes
+arr[2] = 0;                     // now change the underlying array...
+assert list.get(2) == 0;        // and the list view changes
+```
+
+### What can and cannot be done with a list, created from an array `Arrays.asList(arr)`
+
+The simple view that it returns supports some List operations, 
+such as contains, 
+and methods like get and set that access or replace the array elements, 
+but it won’t allow you to make structural modifications, 
+like adding or removing elements, which aren’t supported by the underlying array.
+
+### Views in the Collection Framework
+
+Views allows to avoid the overhead of creating an object copy,
+physically copying all the elements of one collection into a new collection.
+
+The Collections API exposes many methods returning views. 
+For example, the keys of a `Map` can be viewed as a `Set`, as can its entries; 
+collections can be viewed as unmodifiable, and so on. 
+
+Each of these views has different rules 
+dictating which modifications they will accept and reflect into the backing collection. 
+In descending order of permissiveness, they may allow:
+
+- All changes
+- Some structural and all nonstructural modifications
+- Only nonstructural modifications
+- No modifications at all (fully unmodifiable)
+
+So the interfaces that these views implement have some of their operations labeled `optional`.
+
+Views can generally be composed for read operations and are often commutative - that is, can be applied in any order. 
+For example:
+
+```java
+List<String> names = List.of("alpha", "bravo", "charlie", "delta");
+List<String> reverseThenSublist = names.reversed().subList(1, 3);
+List<String> subListThenReverse = names.subList(1, 3).reversed();
+assert reverseThenSublist.equals(subListThenReverse);
+```
+
+### Performance of the collections
+
+Unfortunately, this is very difficult both to predict in theory and to assess in practice. 
+Many factors contribute to it, including:
+
+- How often any of the collection’s operations are executed
+- Which operations are executed most frequently
+- The time cost of each of the operations that are executed
+- How many orphaned objects each produces, and what overhead is incurred in collecting them
+- The locality properties (discussed in the following subsection) of the collection
+- How much parallelism is involved, both at instruction and thread level
+
+The study of how these factors combine to affect the speed of a real-life system 
+belongs to the subject of performance tuning, 
+the most important rule of which is often quoted in the form provided by Donald Knuth (1974):
+"_Premature optimization is the root of all evil._"
+
+The explanation of this remark is twofold. 
+1. First, for many programs, performance is just not a critical issue. 
+   If a program is rarely executed or already uses few resources, optimization is a waste of effort, 
+   and indeed may well be harmful. 
+2. Second, even for performance-critical programs, 
+   assessing which part is critical normally requires accurate measurement; 
+   in the same paper, Knuth added, 
+   “_It is often a mistake to make a priori judgments about what parts of a program are really critical, 
+   since the universal experience of programmers who have been using measurement tools 
+   has been that their intuitive guesses fail._”
+
+This carries an important implication about comparing the performance of different collections. 
+For example, `CopyOnWriteArrayList` provides highly efficient concurrent read operations 
+at the cost of very expensive writes. 
+
+So to use it in a system that requires highly performant concurrent access to a List, 
+you have to have confidence, gained by measurement if necessary, 
+that read operations greatly outnumber writes.
+
+### Operation complexity
+
+Big-O notation: 
+
+|  **Time**  | **Common Name** | **Effect on the execution count <br/> if N is doubled** |                 	**Example algorithms**                  |
+|:----------:|:---------------:|:-------------------------------------------------------:|:--------------------------------------------------------:|
+|    O(1)    |    Constant     |                        Unchanged                        |               Insertion into a hash table                |
+|  O(log N)  |   Logarithmic   |             Increased by a constant amount              |                  Insertion into a tree                   |
+|    O(N)    |     Linear      |                         Doubled                         |                      Linear search                       |
+| O(N log N) |                 |        Doubled plus an amount proportional to N         |                        Merge sort                        |
+|   O(N2)    |    Quadratic    |                   Increased fourfold                    | Insertion sort worst case <br/> (input in reverse order) |
+
+### Preventing collections changing, benefits, challenges
+
+One important feature of the functional style is that its data structures are _immutable_ - 
+that is, their state cannot be modified after their creation. Immutability confers a number of advantages on a program:
+- Immutable objects are thread-safe
+- Immutable objects are perfectly encapsulated, thus removing the need for _defensive copying_
+- Immutability guarantees stable lookup in keyed and ordered collections
+- Immutability reduces the number of states a program can be in, making it simpler, clearer, 
+  and easier to understand and reason about.
+
+Realizing these advantages in a Java program is difficult.
+For mutable components the often difficult requirement is that the entire object graph must 
+have guaranteed exclusive access to them.
+
+This has led to alternative conflicting terminologies for describing immutability of collections:
+- Frameworks like Guava and Eclipse Collections refer to immutability of an entire object graph as _deep immutability_. 
+  They refer to a collection that refuses modification **at the first level** - that is, 
+  an attempt to add, remove, or replace an element - as _shallow immutability_, or often just _immutability_.
+- The Java Collections Framework documentation uses _immutability_ to mean immutability of the entire object graph. 
+  What the other frameworks refer to as “_shallow immutability_”, 
+  the Java documentation calls _unmodifiability_.
+
+### Advantages of Unmodifiability
+
+Unmodifiability (also referred as _shallow immutability_ by Guava and Eclipse Collections) -
+refusing modification **at the first level** - that is,
+an attempt to add, remove, or replace an element.
+
+Its advantages:
+- Collections of immutable objects, including wrapper objects and strings, are not uncommon, 
+  and unmodifiable collections of these provide the full benefits of immutability.
+- Even partial immutability reduces the number of program states that you have to consider 
+  when understanding a program and reasoning about its correctness.
+- Because unmodifiable sets and maps can be backed by arrays instead of hashed structures, 
+  they can provide very significant space savings.
+
+### What you must think about when you are storing objects in a Set, a Map, or an internally ordered Queue?
+
+Whenever you are storing objects in a Set, a Map, or an internally ordered Queue, 
+ensure that the fields used by the collection to organize its contents are immutable.
+
+### Collection modifying
+
+You should use streams to modify collection and its elements.
+Streams are a mechanism for transporting a sequence of values from a source to a destination 
+through a series of operations, typically implemented as lambdas, 
+each of which can transform, drop, or insert values on the way
+
+#### Modify via Streams API
+```java
+Point origin = new Point(0, 0);
+List<Integer> intList = Arrays.asList(1, 2, 3, 4, 5);
+OptionalDouble maxDistance = intList.stream()
+    .map(i -> new Point(i % 3, i / 3))
+    .mapToDouble(p -> p.distanceFrom(origin))
+    .max();
+```
+Advantages:
+1. more concise and readable, 
+2. often uses less intermediate storage, 
+3. handles an empty source gracefully, and 
+4. can never attempt to mutate the source collection
+
+#### Modify without Streams
+```java
+Point origin = new Point(0, 0);
+List<Integer> intList = Arrays.asList(1, 2, 3, 4, 5);
+List<Point> pointList = new ArrayList<>();
+for (Integer i : intList) {
+  pointList.add(new Point(i % 3, i / 3));
+}
+double maxDistance = 0;
+for (Point p : pointList) {
+  maxDistance = Math.max(p.distanceFrom(origin), maxDistance);
+}
+```
+Disadvantages:
+1. very verbose
+2. the intermediate collection `pointList` is an overhead on the operation of the program, 
+   resulting in increased garbage collection costs or even in heap space exhaustion
+3. the intent of the program is hard to discern, 
+   because the crucial operations are interspersed with the code for collection handling
+
+
+### Distributed workloads
+
+Distributed workloads - distributes workloads over multiple cores.
+This is achieved by use of _recursive decomposition_, 
+in which a data set is broken down into parts for separate processing, 
+with the results of the constituent processes being combined on completion.
+
+Implementing recursive decomposition requires knowing how to split tasks and how eventually to execute sufficiently 
+small ones without further splitting. The strategy for these operations depends on the source of the data: 
+accordingly, every implementation of `Iterable` - in other words, every `Collection` subtype - 
+has an associated `Spliterator` object, which contains the appropriate strategies for that collection.
+
+The stream framework hides the complexity of programming _recursive decomposition_ in the convenient abstraction 
+of parallel streams. If a stream is created parallel or made parallel by a call of the `parallel` method, 
+the framework applies _recursive decomposition_ to the data set being streamed and 
+assigns each of the resulting parts to its own thread:
+
+```java
+OptionalDouble maxDistance = intList.stream()
+    .parallelStream()
+    .map(i -> new Point(i % 3, i / 3))
+    .mapToDouble(p -> p.distance(0, 0))
+    .max();
+```
+Each thread is, ideally, assigned a core on which it can execute without interruption. 
+In the best case - that of a large data set requiring compute-intensive processing with very little I/O - 
+this can result in near-perfect parallelization.
+
+
+
 ### Respect the ‘Ownership’ of Collections
 
 todo
@@ -332,4 +570,36 @@ class Person {
 }
 ```
 
-### fds
+#### Content-Based Organization
+```java
+class Person {
+  private String name;
+  public Person(String name) {
+    this.name = name;
+  }
+  public void setName(String name) {
+    this.name = name;
+  }
+  public int hashCode() {
+    return name.hashCode();
+  }
+  public boolean equals(Object o) {
+    return o instanceof Person p && name.equals(p.name);
+  }
+}
+Set<Person> people = new HashSet<>();
+Person alice = new Person("Alice");
+people.add(alice);
+alice.setName("Bob");
+//what the following checks return:
+people.contains(new Person("Alice"));
+people.contains(new Person("Bob"));
+```
+An object of type Person can be reliably retrieved, but only if the value of name is unchanged. 
+If that field is modified, the collection can no longer match the object with either the old or the new value.
+
+To avoid problems like this, the best guideline is this: 
+whenever you are storing objects in a Set, a Map, or an internally ordered Queue, 
+ensure that the fields used by the collection to organize its contents are immutable.
+
+### 
