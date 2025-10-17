@@ -486,7 +486,128 @@ Each thread is, ideally, assigned a core on which it can execute without interru
 In the best case - that of a large data set requiring compute-intensive processing with very little I/O - 
 this can result in near-perfect parallelization.
 
+### Collections and Thread Safety, options
 
+#### Synchronized Wrapper Collections
+
+The performance cost of internal synchronization in the JDK 1.0 collections led the designers 
+to avoid it when the Collections Framework was first introduced in JDK 1.2.
+
+#### Concurrent Collections
+
+The concurrent collections remove the necessity for client-side locking.
+External synchronization is not even possible with these collections, 
+as there is no one object that when locked will block all methods. 
+Where operations need to be atomic - for example, inserting an element into a `Map` only if it is currently absent - 
+the concurrent collections provide a method specified to perform atomically; in this case, `ConcurrentMap.putIfAbsent`.
+
+If you need thread safety, the concurrent collections generally provide much better performance 
+than synchronized collections. 
+This is primarily because their throughput is not reduced by the need to serialize access, 
+as is the case with the synchronized collections. 
+Synchronized collections also suffer the overhead of managing locks, 
+which can be high if there is much contention. 
+These differences can lead to efficiency differences of two orders of magnitude 
+for concurrent access by more than a few threads.
+
+### Mechanisms of concurrent collections
+
+#### copy-on-write
+
+This is the only one that does not use the new primitives. 
+Classes that use _copy-on-write_ store their values in an internal array, which is effectively immutable; 
+any change to the value of the collection results in a new array being created to represent the new values. 
+Synchronization is used by these classes, though only briefly, during the creation of a new array. 
+Because read operations do not need to be synchronized, 
+copy-on-write collections perform well in the situations for which they are designed - 
+those in which reads greatly predominate over writes. 
+
+The collection classes `CopyOnWriteArrayList` and `CopyOnWriteArraySet` use this mechanism.
+
+#### compare-and-set (CAS)
+
+This group of thread-safe collections relies on hardware operations generically known as _compare-and-set_ (CAS), 
+which provide a fundamental improvement on traditional synchronization. 
+To see how CAS works, consider a computation in which the value of a single variable is used as input 
+to a long-running calculation whose eventual result is used to update the variable. 
+Traditional synchronization makes the whole computation atomic,
+excluding any other thread from concurrently accessing the variable. 
+This reduces opportunities for parallel execution and therefore throughput. 
+An algorithm based on CAS behaves differently: a thread makes a local copy of the variable and 
+performs the calculation without getting exclusive access. 
+Only when it is ready to update the variable does it call CAS, 
+which in one atomic operation compares the variable’s value with its value at the start and, 
+if they are the same, updates it with the new value. 
+If they are not the same, the variable must have been modified by another thread; 
+in this situation, the CAS thread can try the whole computation again using the new value, 
+or give up, or - in some algorithms - continue, 
+because the interference will have actually done its work for it! 
+This style of locking is called _optimistic concurrency control_, 
+in contrast to the traditional _pessimistic_ style, 
+which blocks all other threads from access to the variable while this thread’s operation is in progress. 
+
+Collections using CAS include _ConcurrentLinkedQueue_ and _ConcurrentSkipListMap_.
+
+#### `java.util.concurrent.locks.Lock` based implementation
+
+The third group uses implementations of `java.util.concurrent.locks.Lock`, 
+an interface introduced in Java 5 as a more flexible alternative to classical synchronization. 
+A Lock has the same basic behavior as classical synchronization, 
+but a thread can also acquire it under special conditions: 
+- only if the lock is not currently held, or 
+- if it becomes free only within a set timeout period, or 
+- if the thread is not interrupted. 
+
+Unlike synchronized code, in which an object lock is held while a code block or a method is executed, 
+a Lock is held until its unlock method is called 
+(making it possible for a Lock to be released in a different block or method from that in which it was acquired). 
+
+Some of the collection classes in this group make use of these features to divide the collection into parts 
+that can be separately locked, giving improved concurrency. 
+For example, `LinkedBlockingQueue` has separate locks for the head and tail ends of the queue so that elements 
+can be added and removed in parallel. Other collections using these locks include 
+most of the implementations of `BlockingQueue`.
+
+### Collection iterators and Thread Safety
+
+#### Fail-Fast Iterators
+
+These iterators are default for not-concurrent collections
+
+Every time the iterators access the backing collection,
+they check it for structural modification
+(which, in general, means that elements have been added to or removed from the collection)
+by comparing the collection’s modification counter with their own internal copy.
+
+A discrepancy implies that the collection has been modified, but not by one of the iterator’s own methods;
+in that case, the iterator fails immediately, throwing `ConcurrentModificationException` rather
+than continuing to attempt to iterate over the modified collection with unpredictable results.
+
+Note that this fail-fast behavior is provided to help find and diagnose bugs;
+it is not guaranteed as part of the collection contract.
+
+#### Snapshot iterators
+
+Copy-on-write collections have snapshot iterators.
+
+These collections are backed by arrays that, once created, are never changed; 
+if a value in the collection needs to be changed, a new array is created. 
+This means an iterator can read the values in one of these arrays (but never modify them) 
+without danger of them being changed by another thread. 
+Snapshot iterators do not throw `ConcurrentModificationException`.
+
+#### Weakly consistent iterators
+
+Weakly consistent iterators reflect some but not necessarily all the changes that 
+have been made to their backing collections since they were created. 
+For example, if elements in the collection have been modified or removed before the iterator reaches them, 
+it definitely will reflect these changes, but no such guarantee is made for insertions. 
+
+Weakly consistent iterators do not throw `ConcurrentModificationException`.
+
+Collections that have weakly consistent iterators:
+- those which rely on CAS
+- collections, that are implemented based on `java.util.concurrent.locks.Lock`
 
 ### Respect the ‘Ownership’ of Collections
 
