@@ -17,10 +17,19 @@
 - [Arrays vs Linked Lists](#arrays-vs-linked-lists)
 - [Arrays/Linked Lists vs Hash tables](#arrayslinked-lists-vs-hash-tables)
 - [What is used internally for implementations based on hash tables, requirements](#what-is-used-internally-for-implementations-based-on-hash-tables-requirements)
-- [Working with arrays](#working-with-arrays)
+- [Working with native arrays](#working-with-native-arrays)
 - [What can and cannot be done with a list, created from an array `Arrays.asList(arr)`](#what-can-and-cannot-be-done-with-a-list-created-from-an-array-arraysaslistarr)
 - [Views in the Collection Framework](#views-in-the-collection-framework)
 - [Performance of the collections](#performance-of-the-collections)
+- [Operation complexity](#operation-complexity)
+- [Preventing collections changing, benefits, challenges](#preventing-collections-changing-benefits-challenges)
+- [Advantages of Unmodifiability](#advantages-of-unmodifiability)
+- [What you must think about when you are storing objects in a Set, a Map, or an internally ordered Queue?](#what-you-must-think-about-when-you-are-storing-objects-in-a-set-a-map-or-an-internally-ordered-queue)
+- [Collection modifying](#collection-modifying)
+- [Distributed workloads](#distributed-workloads)
+- [Collections and Thread Safety, options](#collections-and-thread-safety-options)
+- [Mechanisms of concurrent collections](#mechanisms-of-concurrent-collections)
+- [Collection iterators and Thread Safety](#collection-iterators-and-thread-safety)
 - [Comment the following code](#comment-the-following-code)
 
 ### Java Collections Framework
@@ -254,7 +263,7 @@ One way this can occur is if you do not override `Object::hashCode` at all;
 the value that it returns in this case will be implementation-dependent (in OpenJDK, it is usually randomly generated) 
 but is in any case highly unlikely to be the same for two different instances.
 
-### Working with arrays
+### Working with native arrays
 
 Suppose we want to test for the presence of a particular object in an array. 
 One obvious way to do this is to iterate over the array elements, 
@@ -457,7 +466,6 @@ Disadvantages:
 3. the intent of the program is hard to discern, 
    because the crucial operations are interspersed with the code for collection handling
 
-
 ### Distributed workloads
 
 Distributed workloads - distributes workloads over multiple cores.
@@ -608,6 +616,7 @@ Weakly consistent iterators do not throw `ConcurrentModificationException`.
 Collections that have weakly consistent iterators:
 - those which rely on CAS
 - collections, that are implemented based on `java.util.concurrent.locks.Lock`
+
 
 ### Respect the ‘Ownership’ of Collections
 
