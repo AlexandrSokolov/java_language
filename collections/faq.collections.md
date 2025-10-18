@@ -30,6 +30,10 @@
 - [Collections and Thread Safety, options](#collections-and-thread-safety-options)
 - [Mechanisms of concurrent collections](#mechanisms-of-concurrent-collections)
 - [Collection iterators and Thread Safety](#collection-iterators-and-thread-safety)
+- [Removing Elements API](#removing-elements-api)
+- [Adding the element into collection vs its removing, regarding method signature](#adding-the-element-into-collection-vs-its-removing-regarding-method-signature)
+- [Collection methods that copy elements into array. Why are they needed?](#collection-methods-that-copy-elements-into-array-why-are-they-needed)
+- [Why is any type allowed for T in the declarations of the `toArray` methods?](#why-is-any-type-allowed-for-t-in-the-declarations-of-the-toarray-methods)
 - [Comment the following code](#comment-the-following-code)
 
 ### Java Collections Framework
@@ -135,10 +139,11 @@ assert modifiedStrings.equals(List.of("bravo", "charlie"));
 
 Collection, which exposes the core functionality required of any collection other than a Map. 
 Its methods support managing elements by:
-- adding or removing single or multiple elements, 
-- checking membership of a single or multiple values, and 
-- inspecting and 
-- exporting elements.
+- adding or removing single or multiple elements
+- checking membership of a single - `contains()` or multiple values - `containsAll()` 
+- inspecting - `isEmpty()`, `size()` 
+- exporting elements - making elements available for further processing - 
+  `iterator()`, `spliterator()`, `stream()`, `parallelStream()`, `toArray()` 
 
 ### SequencedCollection
 
@@ -617,6 +622,144 @@ Collections that have weakly consistent iterators:
 - those which rely on CAS
 - collections, that are implemented based on `java.util.concurrent.locks.Lock`
 
+### Removing Elements API
+
+- `void clear()` - removes all elements
+- `boolean remove(Object o)` - remove an element o
+- `boolean removeAll(Collection<?> c)` - remove all occurrences of the elements in c
+- `boolean retainAll(Collection<?> c)` - remove the elements not in c
+- `boolean removeIf(Predicate<? super E> p)` remove the elements for which p is true
+
+### Adding the element into collection vs its removing, regarding method signature
+
+- `boolean add(E e)` - add the element e
+- `boolean remove(Object o)` - remove an element o
+
+If the argument `o` to remove is `null`, the method will remove a single `null` from the collection if one is present. 
+Otherwise, if any elements `e` are present for which `o.equals(e)`, it removes one; 
+if not, it leaves the collection unchanged and returns false.
+
+Why isn't `Collection.remove(Object o)` generic?
+
+The signatures of `Collection` methods `contains`, `remove`, and `retain`, 
+each of which take a parameter of type `Object`, and the corresponding collection-oriented versions 
+`containsAll`, `removeAll`, and `retainAll`, which take a `Collection<?>`. 
+Why are these methods not generified to take parameters of type `E` or (respectively) `Collection<E>`?
+
+A moment’s thought shows that these methods, which remove elements from the collection or test for membership, 
+do not have the potential to compromise its type safety - unlike `add` and `addAll`, 
+whose signatures do indeed specify the type `E`. 
+So the designers could safely choose these parameter types. But why did they? 
+Different reasons have been proposed (including by the designers themselves), including:
+
+- Backward compatibility. To minimize the number of breaking changes caused by the introduction of generics, 
+  the **only methods generified were those that were necessary to ensure type safety**, like `add` and `addAll`.
+- Allowing the use of bounded wildcard types.
+  Suppose that a collection parameter to a method is given a type `Set<? extends Foo>`. 
+  If `contains` required that parametric type, it could never be used in this situation, 
+  since no argument could be supplied of type `? extends Foo` (except null). 
+  Giving the parameter of contains the type `Object` ensures that it can be used with collections of any type.
+- Accommodating unrelated types. The most compelling reason is that in many situations, 
+  such as calculating the intersection of two collections, the types of the elements may be completely unrelated. 
+  In that example, the intersection being calculated was between a collection of type `PhoneTask` 
+  and a collection of its supertype `Task`, but even this relationship is unnecessary. 
+  For example, think of calculating the intersection of two collections of List objects. 
+  Two Lists are equal if they contain the same elements, 
+  so `retainAll` could plausibly be used to preserve in a `Collection<ArrayList>` only those `ArrayLists` 
+  that were equal to some element of a different `Collection<LinkedList>`. 
+  The only parameter type for `retainAll` that makes that possible is `Collection<?>`.
+
+The trade-off between the two alternatives for these collection method types is quite subtle. 
+On the one hand, it can be argued that using `Object` as the parameter type means that some errors will be missed 
+that would be caught by the more precise typing.
+After all, one of the key advantages of generics is that their precise typing enables more errors 
+to be caught at compile time. 
+But in cases like those mentioned here, where the precise typing would be inappropriate, 
+it would have to be evaded with additional unchecked casts - one of the major sources of imprecision 
+in the generics type system. 
+
+Whether you feel that the designers made the right or the wrong choice, 
+it is worth knowing the issues that lay behind the decision.
+
+### Collection methods that copy elements into array. Why are they needed?
+
+- `Object[] toArray()` return a new created array containing the elements of this collection
+- `<T> T[] toArray(T[] t)` copy contents to an existing `T[]` array (for any T)
+- `<T> T[] toArray(IntFunction<T[]> generator)` copy contents to a new `T[]` array, 
+  created by a function producing a new `T[]` of a given size
+
+These methods are important because many APIs - principally older ones and those 
+for which performance is especially important - expose methods that accept or return arrays.
+
+The arguments of the last two methods are required in order to provide the virtual machine 
+with the reifiable type of the array.
+
+The new array will be created during the method execution.
+If the array supplied as the argument to the second overload of `toArray` is long enough, 
+it is used to receive the elements of the collection, overwriting its existing elements.
+
+### Why is any type allowed for T in the declarations of the `toArray` methods?
+
+- `<T> T[] toArray(T[] t)` copy contents to an existing `T[]` array (for any T)
+- `<T> T[] toArray(IntFunction<T[]> generator)` copy contents to a new `T[]` array,
+  created by a function producing a new `T[]` of a given size
+
+The type variable `T` is unrelated to the collection type parameter `E`, 
+permitting errors at run time that it seems should have been caught at compile time.
+
+```java
+List.of(1, 2, 3).toArray(new String[0])    // array store exception
+```
+compiles successfully but throws `ArrayStoreException` at run time.
+
+Why not restrict the array component type to exactly `E`, the parametric type of the collection? 
+The principal reason is to allow the possibility of giving the array a more specific component type 
+than that of the collection, when the elements of the collection all happen to belong to the same subtype:
+```java
+List<Object> l = List.of("zero", "one");
+String[] a = l.toArray(new String[0]);
+```
+Here, a list of objects happens to contain only strings, so it can be converted into a `String[]`.
+If the list contains an object that is not a string, the error is caught at run time rather than compile time:
+
+```java
+List<Object> l = List.of("zero", "one", 2);
+String[] a = l.toArray(new String[0]);      // throws ArrayStoreException
+```
+
+In general, you may want to copy a collection of a given type into:
+- an array of a more specific type (for instance, copying a list of objects into an array of strings, as just shown) or 
+- of a more general type (for instance, copying a list of strings into an array of objects).
+
+One drawback of this design is that, applied to collections of wrapper types, 
+it doesn’t accommodate automatic unboxing into the corresponding array of primitives:
+
+```java
+List<Integer> l = List.of(0, 1, 2);
+int[] a = l.toArray(new int[0]);  // compile-time error
+```
+This is illegal because the parameter T in the method call must - as for any type parameter - be a reference type.
+
+Solutions:
+1. resort to copying the array explicitly:
+    ```java
+    jshell> List<Integer> integers = List.of(0, 1, 2);
+    integers ==> [0, 1, 2]
+    jshell> int[] ints = new int[integers.size()];
+    ints ==> int[3] { 0, 0, 0 }
+    jshell> for (int i=0; i<integers.size(); i++) { ints[i] = integers.get(i); }
+    jshell> ints
+    ints ==> int[3] { 0, 1, 2 }
+    ```
+2. using the Stream API:
+    ```java
+    jshell> int[] ints = integers.stream()
+       ...>     .mapToInt(Integer::intValue)
+       ...>     .toArray();
+    ints ==> int[3] { 0, 1, 2 
+    ```
+
+###
 
 ### Respect the ‘Ownership’ of Collections
 
@@ -732,4 +875,51 @@ To avoid problems like this, the best guideline is this:
 whenever you are storing objects in a Set, a Map, or an internally ordered Queue, 
 ensure that the fields used by the collection to organize its contents are immutable.
 
-### 
+#### Collection to array #1
+
+```java
+Collection<String> cs = ...
+String[] sa = cs.toArray(new String[0]);
+```
+The new array will be created during `toArray` method execution, 
+although if the array supplied as the argument to the second overload of toArray is long enough, 
+it is used to receive the elements of the collection, overwriting its existing elements.
+
+#### Collection to array #2
+
+```java
+List.of(1, 2, 3).toArray(new String[0]);
+```
+
+The code compiles successfully but throws `ArrayStoreException` at run time.
+
+#### Collection to array of primitives
+
+```java
+List<Integer> l = List.of(0, 1, 2);
+int[] a = l.toArray(new int[0]);  
+```
+
+You get compile-time error. 
+This is illegal because the parameter T in the method call must - as for any type parameter - be a reference type.
+
+Solutions:
+1. resort to copying the array explicitly:
+    ```java
+    jshell> List<Integer> integers = List.of(0, 1, 2);
+    integers ==> [0, 1, 2]
+    jshell> int[] ints = new int[integers.size()];
+    ints ==> int[3] { 0, 0, 0 }
+    jshell> for (int i=0; i<integers.size(); i++) { ints[i] = integers.get(i); }
+    jshell> ints
+    ints ==> int[3] { 0, 1, 2 }
+    ```
+2. using the Stream API:
+    ```java
+    jshell> int[] ints = integers.stream()
+       ...>     .mapToInt(Integer::intValue)
+       ...>     .toArray();
+    ints ==> int[3] { 0, 1, 2 
+    ```
+
+#### dd
