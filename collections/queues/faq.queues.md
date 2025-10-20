@@ -1,19 +1,21 @@
 
 - [Queue, its purpose](#queue)
-- [Queues in Java collections hierarchy](#what-is-specific-about-queues-among-other-java-collections)
+- [What is specific about queues among other Java collections?](#what-is-specific-about-queues-among-other-java-collections)
+- [Implementations of Queue in the Collections Framework](#implementations-of-queue-in-the-collections-framework)
 - [`Queue` vs `List`](#queue-vs-list)
 - [Queue implementations, the main difference](#what-is-the-main-difference-in-queue-implementations)
-- [Deque](#deque)
+- [Deque, compare with Queue, its purpose](#deque-compare-with-queue-its-purpose)
 - [Queue orders examples](#queue-orders-examples)
-- [Queue Implementations, what affects the choice](#queue-implementations)
+- [Queue Implementation Options. What does affect the choice?](#queue-implementation-options-what-does-affect-the-choice)
 - [Queue attributes (properties)](#queue-attributes-properties)
 - [Bounded/unbounded `Queue` implementations](#boundedunbounded-queue-implementations)
 - [`Queue` implementations that support priority ordering](#queue-implementations-that-supports-priority-ordering)
-- [`Queue` implementations designed for use in producer/consumer scenarios](#queue-implementations-designed-for-use-in-producerconsumer-scenarios)
+- [Queue blocking facilities](#queue-blocking-facilities)
 - [What must you care about when use methods of `BlockingQueue`?](#what-must-you-care-about-when-use-methods-of-blockingqueue)
 - [`Queue` implementation that supports ordering based on the delay time](#queue-implementation-that-supports-ordering-based-on-the-delay-time)
 - [`Queue` implementation that is thread-safe but without blocking facility](#queue-implementation-that-is-thread-safe-but-without-blocking-facility)
 - [You want to exchange information between a producer and a consumer. What options are available?](#you-want-to-exchange-information-between-a-producer-and-a-consumer-what-options-are-available)
+- [Purpose of `SynchronousQueue`](#purpose-of-synchronousqueue)
 - [You want to use both synchronous and asynchronous messages in producer/consumer scenarios](#you-want-to-use-both-synchronous-and-asynchronous-messages-in-producerconsumer-scenarios)
 - [What must you remember about when use `Queue` interface methods](#queue-interface-methods-what-must-you-remember-about)
 - [What functionality do `Queue` interface methods offer?](#what-functionality-do-queue-interface-methods-offer)
@@ -50,6 +52,8 @@ but are used for transmission of values from producers to consumers.
 
 A queue can have multiple producers and multiple consumers; these can be objects, or threads, or processes.
 
+### Implementations of Queue in the Collections Framework
+<img src="../../docs/images/Implementations_of_Queue.png" alt="Implementations of Queue in the Collections Framework" width="800"/>
 
 ### `Queue` vs `List`
 
@@ -72,13 +76,16 @@ for choosing the next task.
 `ordering` - in choosing a Queue implementation, you’re also choosing the ordering of elements (tasks) processing.
 Different implementations embodying different rules about what the order should be in which elements are to be processed.
 
-### Deque
+### Deque, compare with Queue, its purpose
 
 A Deque (pronounced “deck”) is a double-ended queue that can both accept and yield up elements at either end. 
 A Deque, like a Queue, can be used as a conduit of information between producers and consumers. 
 The ability to remove elements from the tail facilitates work stealing, 
 a load-balancing technique in which idle threads “steal” tasks from busier threads to maximize parallel efficiency. 
 Deques can also be used to store the state of an object, if updates to the state require operations at either end.
+
+`Deque` extends both `Queue` and `SequencedCollection` interfaces:
+<img src="../../docs/images/Sequenced_Collections.png" alt="Implementations of Queue in the Collections Framework" width="800"/>
 
 ### Queue orders examples
 
@@ -88,14 +95,14 @@ Deques can also be used to store the state of an object, if updates to the state
 - priority queues order elements according to a supplied comparator - `PriorityQueue`
 - hold elements until their delay has expired - `DelayQueue`
 
-### Queue Implementations
+### Queue Implementation Options. What does affect the choice?
 
 - [order](#queue-orders-examples) 
-- thread-safe - most of them are thread-safe 
+- thread-safe - most of them are thread-safe
   (except `PriorityQueue`, `ArrayDeque`, `LinkedList` - the ones that are not located under `java.util.concurrent`)
 - blocking facilities (that is, operations that wait for conditions to be right for them to execute) - most of them 
   are blocking queues (except `PriorityQueue`, `ConcurrentLinkedQueue`)
-- a synchronization facility
+- a synchronization facility [see `SynchronousQueue`](#blockingqueue-implementations)
 
 ### Queue attributes (properties)
 
@@ -116,7 +123,7 @@ Bounded:
 - `PriorityQueue` - not thread-safe, nor does it provide blocking behavior
 - `PriorityBlockingQueue` thread-safe version of `PriorityQueue`
 
-### `Queue` implementations designed for use in producer/consumer scenarios
+### Queue blocking facilities
 
 `BlockingQueue<E>` - is designed primarily for use in producer/consumer scenarios.
 
@@ -217,6 +224,8 @@ You need to exchange information between threads in a thread-safe manner. You ha
 - With the 1st solution, based on `AtomicInteger` shared variable and `CountDownLatch`
   you must coordinate data putting and getting with both variables. 
 - With `SynchronousQueue`-based solution you only manage to put and get data from the queue.
+
+### Purpose of `SynchronousQueue`
 
 See also: [A Guide to Java `SynchronousQueue`](https://www.baeldung.com/java-synchronous-queue)
 
