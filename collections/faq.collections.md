@@ -10,6 +10,8 @@
 - [Alternative way to applying structural changes, requirement](#alternative-way-to-applying-structural-changes-requirement)
 - [`java.util.Collection`](#javautilcollection)
 - [`java.util.SequencedCollection`](#sequencedcollection)
+- [How does it work if you apply changes on the collection, returned by `SequencedCollection.reversed()`?](#how-does-it-work-if-you-apply-changes-on-the-collection-returned-by-sequencedcollectionreversed)
+- [Type hierarchy for SequencedCollection](#type-hierarchy-for-sequencedcollection)
 - [There are several ways of implementing each of these interfaces. Why doesn’t the framework just use the best implementation for each interface?](#there-are-several-ways-of-implementing-each-of-these-interfaces-why-doesnt-the-framework-just-use-the-best-implementation-for-each-interface)
 - [What is used to choose the right implementation?](#what-is-used-to-choose-the-right-implementation)
 - [The main kinds of operations that most collection interfaces require](#the-main-kinds-of-operations-that-most-collection-interfaces-require)
@@ -34,6 +36,10 @@
 - [Adding the element into collection vs its removing, regarding method signature](#adding-the-element-into-collection-vs-its-removing-regarding-method-signature)
 - [Collection methods that copy elements into array. Why are they needed?](#collection-methods-that-copy-elements-into-array-why-are-they-needed)
 - [Why is any type allowed for T in the declarations of the `toArray` methods?](#why-is-any-type-allowed-for-t-in-the-declarations-of-the-toarray-methods)
+- [Adding multiple elements into existing collection](#adding-multiple-elements-into-existing-collection)
+- [Combining existing collections](#combining-existing-collections)
+- [How to control implementation with Stream API collectors?](#how-to-control-implementation-with-stream-api-collectors)
+- [Removing elements from a collection with Stream API](#removing-elements-from-a-collection-with-stream-api)
 - [Comment the following code](#comment-the-following-code)
 
 ### Java Collections Framework
@@ -147,14 +153,24 @@ Its methods support managing elements by:
 
 ### SequencedCollection
 
-The SequencedCollection interface provides versions of these 
-that can be applied to the first and last element of the collection: 
-`addFirst`, `addLast`, `removeFirst`, `removeLast`, `getFirst`, and `getLast`. 
-
-In addition, SequencedCollection provides a reversed view - that is, a way of working with the collection 
-as though the ordering has been reversed. 
+The SequencedCollection interface provides:
+- versions of these that can be applied to the first and last element of the collection: 
+  `addFirst`, `addLast`, `removeFirst`, `removeLast`, `getFirst`, and `getLast`.
+- a reverse-ordered view of a collection: `reversed` - that is, a way of working with the collection 
+  as though the ordering has been reversed. 
 
 This simplifies many programming problems and often provides more efficient implementations.
+
+### How does it work if you apply changes on the collection, returned by `SequencedCollection.reversed()`?
+
+The contract states that any successful modifications to this view must write through to the underlying collection, 
+but that the inverse - visibility in this view of changes to the underlying collection - is implementation-dependent. 
+The most commonly used implementation, `ArrayList`, does provide this feature: 
+modifications to the underlying collection are visible in the reversed view.
+
+### Type hierarchy for SequencedCollection
+
+<img src="../docs/images/SequencedCollection_hierarchy.png" alt="Main Interfaces" width="600">
 
 ### There are several ways of implementing each of these interfaces. Why doesn’t the framework just use the best implementation for each interface?
 
@@ -759,7 +775,58 @@ Solutions:
     ints ==> int[3] { 0, 1, 2 
     ```
 
-###
+### Adding multiple elements into existing collection
+
+#### using `java.util.Collections.addAll(Collection<? super T> c, T... elements)` utility:
+
+```java
+Collections.addAll(phoneTasks, mikePhone, paulPhone);
+Collections.addAll(codingTasks, databaseCode, guiCode, logicCode);
+```
+
+#### using `java.util.Collection.addAll(Collection<? extends E> c);` instance method:
+
+This option requires to create another collection for the elements:
+```java
+phoneTasks.addAll(List.of(mikePhone, paulPhone));
+codingTasks.addAll(List.of(databaseCode, guiCode, logicCode));
+```
+
+### Combining existing collections
+
+- using `java.util.Collection.addAll(Collection<? extends E> c);`
+- via Stream API:
+    ```java
+    Collection<Task> allTasks_2 = Stream.of(mondayTasks,tuesdayTasks)
+      .flatMap(Collection::stream)
+      .collect(Collectors.toSet());
+    ```
+
+### How to control implementation with Stream API collectors?
+```java
+Collection<Task> allTasks_2 = Stream.of(mondayTasks,tuesdayTasks)
+  .flatMap(Collection::stream)
+  .collect(Collectors.toSet());
+```
+The contract for `Collectors::toSet` provides no guarantees on the type of the set returned. 
+At Java 21, the OpenJDK returns a `HashSet`. 
+But it is possible, if unlikely, that future implementations could return, for example, an unmodifiable set.
+
+If you want to specify the type of the returned set precisely, use `Collectors::toCollection`, 
+supplying a collection constructor:
+```java
+Collection<Task> allTasks_2 = Stream.of(mondayTasks,tuesdayTasks)
+  .flatMap(Collection::stream)
+  .collect(Collectors.toCollection(HashSet::new));
+```
+
+### Removing elements from a collection with Stream API
+
+```java
+Collection<Task> tuesdayNonPhoneTasks = tuesdayTasks.stream()
+  .filter(t -> ! phoneTasks.contains(t))
+  .collect(Collectors.toSet());
+```
 
 ### Respect the ‘Ownership’ of Collections
 
