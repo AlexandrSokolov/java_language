@@ -1,24 +1,26 @@
 
 - [Java Collections Framework](#java-collections-framework)
 - [The Main Interfaces of the Java Collections Framework](#the-main-interfaces-of-the-java-collections-framework)
-- [Sequenced Collections, the purpose](#sequenced-collections)
-- [Iteration via collection of elements](#iteration-via-collection-of-elements)
+- [Sequenced Collections, the purpose, compare with other types](#sequenced-collections-purpose-compare-with-other-types)
+- [Hierarchy for Sequenced Collections](#hierarchy-for-sequenced-collections)
+- [Externally ordered collections](#externally-ordered-collections)
+- [Internally ordered collections](#internally-ordered-collections)
+- [Iteration via collection of elements, API methods](#iteration-via-collection-of-elements-api-methods)
 - [Iterate over a collection and consume its elements one-by-one](#iterate-over-a-collection-and-consume-its-elements-one-by-one)
 - [What is used in `for` loops?](#what-is-used-in-for-loops)
 - [When `for` loop via explicit use of an iterator is necessary?](#when-for-loop-via-explicit-use-of-an-iterator-is-necessary-)
 - [What structural changes you could apply when iterate via `for`](#what-structural-changes-you-could-apply-when-iterate-via-for)
-- [Alternative way to applying structural changes, requirement](#alternative-way-to-applying-structural-changes-requirement)
+- [Applying structural changes without iterators using, requirement](#applying-structural-changes-without-iterators-using-requirement)
 - [`java.util.Collection`](#javautilcollection)
-- [`java.util.SequencedCollection`](#sequencedcollection)
+- [`java.util.SequencedCollection`](#javautilsequencedcollection)
 - [How does it work if you apply changes on the collection, returned by `SequencedCollection.reversed()`?](#how-does-it-work-if-you-apply-changes-on-the-collection-returned-by-sequencedcollectionreversed)
-- [Type hierarchy for SequencedCollection](#type-hierarchy-for-sequencedcollection)
-- [There are several ways of implementing each of these interfaces. Why doesn’t the framework just use the best implementation for each interface?](#there-are-several-ways-of-implementing-each-of-these-interfaces-why-doesnt-the-framework-just-use-the-best-implementation-for-each-interface)
+- [There are several ways of implementing each of collection interfaces. Why doesn’t the framework just use the best implementation for each interface?](#there-are-several-ways-of-implementing-each-of-collection-interfaces-why-doesnt-the-framework-just-use-the-best-implementation-for-each-interface)
 - [What is used to choose the right implementation?](#what-is-used-to-choose-the-right-implementation)
 - [The main kinds of operations that most collection interfaces require](#the-main-kinds-of-operations-that-most-collection-interfaces-require)
 - [Data structures used as the basis of the implementations](#data-structures-used-as-the-basis-of-the-implementations)
 - [Arrays vs Linked Lists](#arrays-vs-linked-lists)
 - [Arrays/Linked Lists vs Hash tables](#arrayslinked-lists-vs-hash-tables)
-- [What is used internally for implementations based on hash tables, requirements](#what-is-used-internally-for-implementations-based-on-hash-tables-requirements)
+- [Hash tables, what must you care about?](#hash-tables-what-must-you-care-about)
 - [Working with native arrays](#working-with-native-arrays)
 - [What can and cannot be done with a list, created from an array `Arrays.asList(arr)`](#what-can-and-cannot-be-done-with-a-list-created-from-an-array-arraysaslistarr)
 - [Views in the Collection Framework](#views-in-the-collection-framework)
@@ -60,12 +62,12 @@ specifying and implementing common data structures, following consistent design 
 
 <img src="../docs/images/Main_Collection_Interfaces.png" alt="Main Interfaces" width="600">
 
-### Sequenced Collections
+### Sequenced Collections, purpose, compare with other types.
 
-These sequenced collections differ from `Collection`, `Set`, or `Map` in that they have a defined _order_, 
-called in the documentation an _encounter order_.
+These sequenced collections differ from:
+- `Collection`, `Set`, or `Map` in that they have a defined _order_, called in the documentation an _encounter order_.
+- `Queue`, which also has a defined _order_, in that they can be iterated in either direction.
 
-They differ from Queue, which also has a defined _order_, in that they can be iterated in either direction. 
 The ordering of sequenced collections can be derived in two different ways: 
 1. for some, like `List`, elements retain the order in which they were added (sometimes called externally ordered types), 
 2. whereas for others, like `NavigableSet` (see [`SequencedSet` and `NavigableSet`](sets/faq.sets.md#sequencedset-and-navigableset)), 
@@ -75,15 +77,33 @@ Externally ordered and internally ordered terms reflect the difference between
 an order that is arbitrarily imposed on the elements, for example by the order in which they are added,
 and an order that is an inherent property of the elements themselves, such as alphabetic ordering on strings.
 
+### Hierarchy for Sequenced Collections
+
 - [`SequencedCollection`](#sequenced-collections)
 - [`SequencedSet` and `NavigableSet`](sets/faq.sets.md#sequencedset-and-navigableset)
 - [`Deque`](queues/faq.queues.md#deque)
 - [`SequencedMap`](maps/faq.maps.md#sequencedmap)
 - [`NavigableMap`](maps/faq.maps.md#navigablemap)
 
-<img src="../docs/images/Sequenced_Collections.png" alt="Main Interfaces" width="600">
+<img src="../docs/images/Sequenced_Collections_Hierarchy.png" alt="Main Interfaces" width="600">
 
-### Iteration via collection of elements
+### Externally ordered collections
+
+- implementations of `java.util.List`
+- implementations of `Dequeue`
+- `LinkedHashSet`
+- `LinkedHashMap`
+
+All of them extend or implement `SequencedSet`/`SequencedMap`
+
+### Internally ordered collections
+
+- Implementations of `SortedSet`, `NavigableSet`
+- Implementations of `SortedSet`, `NavigableMap`
+
+All of them extend or implement `SequencedSet`/`SequencedMap`
+
+### Iteration via collection of elements, API methods
 
 This ability to iterate over the collection of elements is provided by `java.lang.Iterable` interface.
 
@@ -129,7 +149,7 @@ adding or removing elements-in the course of iteration.
 but its subinterface `ListIterator`, available to `List` implementations, 
 also provides methods to add and replace elements.
 
-### Alternative way to applying structural changes, requirement
+### Applying structural changes without iterators using, requirement
 
 If memory constraints don’t prevent you from making a new copy of the list, 
 streams offer a neater solution to this problem:
@@ -151,7 +171,7 @@ Its methods support managing elements by:
 - exporting elements - making elements available for further processing - 
   `iterator()`, `spliterator()`, `stream()`, `parallelStream()`, `toArray()` 
 
-### SequencedCollection
+### `java.util.SequencedCollection`
 
 The SequencedCollection interface provides:
 - versions of these that can be applied to the first and last element of the collection: 
@@ -168,11 +188,7 @@ but that the inverse - visibility in this view of changes to the underlying coll
 The most commonly used implementation, `ArrayList`, does provide this feature: 
 modifications to the underlying collection are visible in the reversed view.
 
-### Type hierarchy for SequencedCollection
-
-<img src="../docs/images/SequencedCollection_hierarchy.png" alt="Main Interfaces" width="600">
-
-### There are several ways of implementing each of these interfaces. Why doesn’t the framework just use the best implementation for each interface?
+### There are several ways of implementing each of collection interfaces. Why doesn’t the framework just use the best implementation for each interface?
 
 That would certainly make life simpler.
 If an implementation is a greyhound for some operations, Murphy’s law tells us that it will be a tortoise for others.
@@ -267,7 +283,7 @@ but insertion and removal operations can be performed in constant time by rearra
 In contrast to arrays and linked lists, hash tables provide no support for accessing elements by position,
 but access by content is usually very fast, as are insertion and removal.
 
-### What is used internally for implementations based on hash tables, requirements
+### hash tables, what must you care about?
 
 The content-based indexing of hashed collections depends on two Object methods, `hashCode` and `equals`, 
 which are applied in succession to position an element for insertion or to locate it for retrieval. 
@@ -283,6 +299,9 @@ then the first stage of a retrieval operation will very likely be misdirected.
 One way this can occur is if you do not override `Object::hashCode` at all; 
 the value that it returns in this case will be implementation-dependent (in OpenJDK, it is usually randomly generated) 
 but is in any case highly unlikely to be the same for two different instances.
+
+Ideally objects must be ideally immutable, or at least cannot be changed after adding to the collection. 
+Changing the element attributes will make the element not accessible via the hash-table based collection.
 
 ### Working with native arrays
 
@@ -320,8 +339,7 @@ assert list.get(2) == 0;        // and the list view changes
 
 ### What can and cannot be done with a list, created from an array `Arrays.asList(arr)`
 
-The simple view that it returns supports some List operations, 
-such as contains, 
+The simple view that it returns supports some List operations, such as contains, 
 and methods like get and set that access or replace the array elements, 
 but it won’t allow you to make structural modifications, 
 like adding or removing elements, which aren’t supported by the underlying array.

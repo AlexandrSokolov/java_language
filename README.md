@@ -6,6 +6,7 @@
 * [Java statements: switch and the other](java_statements/README.md)
 
 FAQs:
+- [FAQ on Collections](collections/faq.collections.md)
 - [FAQ on Queues](collections/queues/faq.queues.md)
 - [FAQ on Maps](collections/maps/faq.maps.md)
 - [FAQ on Numeric Data Types](numeric_data_types/faq.numeric.data.types.md)
