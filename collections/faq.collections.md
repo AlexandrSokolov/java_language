@@ -38,7 +38,8 @@
 - [Adding the element into collection vs its removing, regarding method signature](#adding-the-element-into-collection-vs-its-removing-regarding-method-signature)
 - [Collection methods that copy elements into array. Why are they needed?](#collection-methods-that-copy-elements-into-array-why-are-they-needed)
 - [Why is any type allowed for T in the declarations of the `toArray` methods?](#why-is-any-type-allowed-for-t-in-the-declarations-of-the-toarray-methods)
-- [Adding multiple elements into existing collection](#adding-multiple-elements-into-existing-collection)
+- [What issue exist with `toArray` design?](#what-issue-exist-with-toarray-design)
+- [Adding multiple elements into existing collection, options](#adding-multiple-elements-into-existing-collection-options)
 - [Combining existing collections](#combining-existing-collections)
 - [How to control implementation with Stream API collectors?](#how-to-control-implementation-with-stream-api-collectors)
 - [Removing elements from a collection with Stream API](#removing-elements-from-a-collection-with-stream-api)
@@ -99,7 +100,7 @@ All of them extend or implement `SequencedSet`/`SequencedMap`
 ### Internally ordered collections
 
 - Implementations of `SortedSet`, `NavigableSet`
-- Implementations of `SortedSet`, `NavigableMap`
+- Implementations of `SortedMap`, `NavigableMap`
 
 All of them extend or implement `SequencedSet`/`SequencedMap`
 
@@ -485,6 +486,10 @@ Advantages:
 3. handles an empty source gracefully, and 
 4. can never attempt to mutate the source collection
 
+Disadvantage:
+You are making a new copy of the collection.
+So streams can be used only if memory constraints don’t prevent you from making a new copy of such collections.
+
 #### Modify without Streams
 ```java
 Point origin = new Point(0, 0);
@@ -504,6 +509,11 @@ Disadvantages:
    resulting in increased garbage collection costs or even in heap space exhaustion
 3. the intent of the program is hard to discern, 
    because the crucial operations are interspersed with the code for collection handling
+
+Advantage:
+The only collection is used. (if we consider operations like `add`, `remove`, but not the example above)
+Applying structural modifications doesn't create a new collection, but they are applied on the collection itself.
+So this is a preferable approach, when you do have memory constraints when you from making a new copy of such collections.
 
 ### Distributed workloads
 
@@ -765,6 +775,8 @@ In general, you may want to copy a collection of a given type into:
 - an array of a more specific type (for instance, copying a list of objects into an array of strings, as just shown) or 
 - of a more general type (for instance, copying a list of strings into an array of objects).
 
+### What issue exist with `toArray` design?
+
 One drawback of this design is that, applied to collections of wrapper types, 
 it doesn’t accommodate automatic unboxing into the corresponding array of primitives:
 
@@ -793,7 +805,7 @@ Solutions:
     ints ==> int[3] { 0, 1, 2 
     ```
 
-### Adding multiple elements into existing collection
+### Adding multiple elements into existing collection, options
 
 #### using `java.util.Collections.addAll(Collection<? super T> c, T... elements)` utility:
 
