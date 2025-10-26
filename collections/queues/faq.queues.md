@@ -1,7 +1,7 @@
 
 - [Queue, its purpose](#queue)
 - [What is specific about queues among other Java collections?](#what-is-specific-about-queues-among-other-java-collections)
-- [Implementations of Queue in the Collections Framework](#implementations-of-queue-in-the-collections-framework)
+- [Hierarchy of `Queue` in the Collections Framework](#hierarchy-of-queue-in-the-collections-framework)
 - [`Queue` vs `List`](#queue-vs-list)
 - [Queue implementations, the main difference](#what-is-the-main-difference-in-queue-implementations)
 - [Deque, compare with Queue, its purpose](#deque-compare-with-queue-its-purpose)
@@ -52,8 +52,8 @@ but are used for transmission of values from producers to consumers.
 
 A queue can have multiple producers and multiple consumers; these can be objects, or threads, or processes.
 
-### Implementations of Queue in the Collections Framework
-<img src="../../docs/images/Implementations_of_Queue.png" alt="Implementations of Queue in the Collections Framework" width="800"/>
+### Hierarchy of `Queue` in the Collections Framework
+<img src="../../docs/images/Implementations_of_Queue.png" alt="Implementations of Queue in the Collections Framework" width="600"/>
 
 ### `Queue` vs `List`
 
@@ -85,7 +85,8 @@ a load-balancing technique in which idle threads “steal” tasks from busier t
 Deques can also be used to store the state of an object, if updates to the state require operations at either end.
 
 `Deque` extends both `Queue` and `SequencedCollection` interfaces:
-<img src="../../docs/images/Sequenced_Collections.png" alt="Implementations of Queue in the Collections Framework" width="800"/>
+
+<img src="../../docs/images/Sequenced_Collections_Hierarchy.png" alt="Implementations of Queue in the Collections Framework" width="600"/>
 
 ### Queue orders examples
 
