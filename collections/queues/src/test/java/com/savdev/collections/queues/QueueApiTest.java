@@ -3,7 +3,6 @@ package com.savdev.collections.queues;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayDeque;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Queue;

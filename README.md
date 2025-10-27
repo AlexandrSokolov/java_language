@@ -7,6 +7,8 @@
 
 FAQs:
 - [FAQ on Collections](collections/faq.collections.md)
+- [FAQ on Sets](collections/sets/faq.sets.md)
 - [FAQ on Queues](collections/queues/faq.queues.md)
+- [FAQ on Lists](collections/lists/faq.lists.md)
 - [FAQ on Maps](collections/maps/faq.maps.md)
 - [FAQ on Numeric Data Types](numeric_data_types/faq.numeric.data.types.md)
