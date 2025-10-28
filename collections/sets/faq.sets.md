@@ -7,6 +7,11 @@
 - [`HashSet`](#hashset)
 - [Elements position in a hash table](#elements-position-in-a-hash-table)
 - [Which operations and what complexity do hash tables have?](#elements-position-in-a-hash-table)
+- [The probability of a collision](#the-probability-of-a-collision)
+- [How it works if a collision does take place](#how-it-works-if-a-collision-takes-place)
+- [Iterating over a hash table](#iterating-over-a-hash-table)
+- [`HashSet` advantages and disadvantages](#hashset-advantages-and-disadvantages)
+- [`HashSet` constructors, when should you use them and why?](#hashset-constructors-when-should-you-use-them-and-why)
 - [SequencedSet and NavigableSet](#sequencedset-and-navigableset)
 
 ### Sets
@@ -68,6 +73,7 @@ It is possible for `NavigableSet` that uses _ordering relation_ to check equalit
 
 - [`HashSet`](#hashset)
 - [`CopyOnWriteArraySet`](#copyonwritearrayset)
+- [`EnumSet`](#enumset)
 
 ### `HashSet`
 
@@ -101,7 +107,7 @@ As the hash table fills, collisions become more likely;
 assuming a good hash function, the probability of a collision in a lightly loaded table is proportional to its load, 
 defined as the number of elements in the table divided by its capacity (the number of _buckets_). 
 
-### How it works if a collision does take place
+### How it works if a collision takes place
 
 If a collision does take place, an overflow structure - a linked list or tree - has to be created 
 and subsequently traversed, adding an extra cost to insertion.
@@ -162,8 +168,112 @@ The factory method for `HashSet` is `newHashSet`:
 static <T> HashSet<T> newHashSet(int numElements);
 ```
 
-### `CopyOnWriteArraySet`
+### `CopyOnWriteArraySet`, its operations, compare with `HashSet`
 
+The functional specification of `CopyOnWriteArraySet` is again straightforwardly derived from the `Set` contract, 
+but with quite different performance characteristics from `HashSet`.
+
+This class is implemented as a thin wrapper around an instance of `CopyOnWriteArrayList`, 
+which in turn is backed by an array. 
+The array is treated as immutable; 
+any modification of the set results in the creation of an entirely new array.
+
+- `add` has complexity O(N), as does `contains`, which has to be implemented by a linear search.
+- iteration costs O(1) per element
+
+### In which context `CopyOnWriteArraySet` can be used?
+
+Clearly, you wouldn’t use `CopyOnWriteArraySet` in a context where you were expecting many searches or insertions. 
+But the array implementation means that iteration costs O(1) per element - faster than HashSet - 
+and it has one advantage that is really compelling in some applications: 
+it provides thread safety without adding to the cost of read operations (using `copy-on-write` algorithm).
+
+
+One common situation is managing shared configuration in a multithreaded environment. 
+For example, a server application might maintain a global configuration set of allowed IP addresses 
+that multiple threads frequently read but that is only rarely updated. 
+The process of updating can’t be allowed to interfere with read operations; 
+with a locking set implementation, read and write operations share the overhead necessary to ensure this, 
+whereas with `CopyOnWriteArraySet` the overhead is carried entirely by write operations. 
+
+This makes sense in a scenario in which **read operations occur much more frequently than changes** 
+to the server configuration.
+
+### `copy-on-write` thread safety vs locking-based thread safety
+
+Implementation of `CopyOnWriteArraySet` provides thread safety without adding to the cost of read operations.
+This is in contrast to those collections that use locking to achieve thread safety for all operations
+(for example, the synchronized collections).
+
+Locking operations are always a potential bottleneck in multithreaded applications.
+By contrast, read operations on copy-on-write collections are implemented on the backing array,
+and thanks to its immutability they can be used by any thread without danger of interference
+from a concurrent write operation.
+
+### `EnumSet`
+
+`EnumSet` should always be preferred over any other Set implementation when we are storing enum values.
+
+This class exists to take advantage of the efficient implementations that are possible when:
+- the maximum number of possible elements is fixed and 
+- a unique index can be assigned to each
+
+These two conditions hold for a set of elements of the same Enum class; 
+the number of keys is fixed by the constants of the enumerated type, 
+and the `ordinal` method returns values that are guaranteed to be unique to each constant. 
+In addition, the values that `ordinal` returns form a compact range, starting from zero - 
+ideal, in fact, for use as array indices or, in the standard implementation, indices of a bit vector.
+
+### `EnumSet` operations complexity
+
+`add`, `remove`, and `contains` are implemented as bit manipulations, with constant-time performance. 
+Bit manipulation on a single word is extremely fast, and a long value can be used to represent 
+EnumSets over enum types with up to 64 values
+
+### `UnmodifiableSet`
+
+You won’t find any reference to the name `UnmodifiableSet<E>` in the Javadoc or 
+in the code of the Collections Framework. 
+It’s a name invented for a family of package-private classes that client programmers can never access by name, 
+but that are important because they provide the implementation of the unmodifiable sets obtained 
+from the various overloads of the factory methods `Set.of` and `Set.copyOf`. 
+
+The properties of the members of this family are described in the Javadoc for Set:
+- They are unmodifiable: elements cannot be added or removed. 
+  Calling any mutator method will always cause UnsupportedOperationException to be thrown.
+- They are null-hostile. Attempts to create them with null elements result in `NullPointerException`.
+- They reject duplicate elements at creation time. 
+  Duplicate elements passed to a factory method result in an `IllegalArgumentException`.
+
+Advantages:
+- The classes that make up `UnmodifiableSet` use fixed-length arrays as the backing structures.
+  Without the overhead of empty table buckets or linked overflow structures, 
+  these implementations _require much less space_ than a hashed structure.
+- Iteration is also correspondingly more efficient, with the added benefit of improved spatial locality
+
+Disadvantage:
+The trade-off for faster iteration is that containment can only be determined by a linear search, O(N) in complexity.
+
+### Set Views of Maps
+
+In the Collections Framework, many sets are implemented as wrappers around a corresponding map, 
+although the maps are encapsulated and invisible to the client.
+However, the converse does not hold: some maps do not have a corresponding set:
+`WeakHashMap`, `IdentityHashMap`, and `ConcurrentHashMap`. 
+
+To obtain a set for one of these (weak references, identity-equality based, concurrency) with the same 
+ordering, concurrency, and performance characteristics as the backing map, 
+you can call the method `Collections::newSetFromMap` on an empty map with a type `Map<E,Boolean>`, 
+where `E` is the element type of the set that you want to create. 
+
+For example, to create a concurrent set of `Integer`, you could write:
+
+```java
+Set<Integer> concurrentIntegerSet = Collections.newSetFromMap(new ConcurrentHashMap<Integer,Boolean>())
+```
+
+This idiom guarantees that no direct access to the backing map can take place after the set view is created, 
+as required by the specification of `newSetFromMap`.
 
 
 ### SequencedSet and NavigableSet
