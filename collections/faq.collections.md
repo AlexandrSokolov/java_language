@@ -71,7 +71,7 @@ These sequenced collections differ from:
 
 The ordering of sequenced collections can be derived in two different ways: 
 1. for some, like `List`, elements retain the order in which they were added (sometimes called externally ordered types), 
-2. whereas for others, like `NavigableSet` (see [`SequencedSet` and `NavigableSet`](sets/faq.sets.md#sequencedset-and-navigableset)), 
+2. whereas for others, like [`NavigableSet`](sets/faq.sets.md#navigableset)), 
    the ordering is dictated by the values of the elements (also known as internally ordered types).  
 
 Externally ordered and internally ordered terms reflect the difference between 
@@ -81,7 +81,8 @@ and an order that is an inherent property of the elements themselves, such as al
 ### Hierarchy for Sequenced Collections
 
 - [`SequencedCollection`](#sequenced-collections)
-- [`SequencedSet` and `NavigableSet`](sets/faq.sets.md#sequencedset-and-navigableset)
+- [`SequencedSet`](sets/faq.sets.md#sequencedset)
+- [`NavigableSet`](sets/faq.sets.md#navigableset)
 - [`Deque`](queues/faq.queues.md#deque)
 - [`SequencedMap`](maps/faq.maps.md#sequencedmap)
 - [`NavigableMap`](maps/faq.maps.md#navigablemap)

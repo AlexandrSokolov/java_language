@@ -269,14 +269,188 @@ where `E` is the element type of the set that you want to create.
 For example, to create a concurrent set of `Integer`, you could write:
 
 ```java
-Set<Integer> concurrentIntegerSet = Collections.newSetFromMap(new ConcurrentHashMap<Integer,Boolean>())
+Set<Integer> concurrentIntegerSet = Collections.newSetFromMap(new ConcurrentHashMap<Integer,Boolean>());
 ```
 
 This idiom guarantees that no direct access to the backing map can take place after the set view is created, 
 as required by the specification of `newSetFromMap`.
 
+### How to create a set of items with identity relation?
+```java
+Set<Integer> concurrentIntegerSet = Collections.newSetFromMap(new IdentityHashMap<Integer,Boolean>());
+```
 
-### SequencedSet and NavigableSet
+### How to create a concurrent set?
+
+#### To get the 
+```java
+Set<Integer> concurrentIntegerSet = Collections.newSetFromMap(new ConcurrentHashMap<Integer,Boolean>());
+```
+
+### `SequencedSet`
+
+A SequencedSet is an externally or internally ordered Set that also exposes the methods of SequencedCollection. 
+It combines the methods of these two interfaces, adding to them in only one respect: 
+it provides a covariant override of the method `reversed` of `SequencedCollection` 
+in order to return a value of type `SequencedSet`
+
+<img src="../../docs/images/SequencedSet_Hierarchy.png" alt="SequencedSet and related types" width="600">
+
+### `LinkedHashSet` idea, compare with `HashSet` 
+
+`LinkedHashSet` implements `SequencedSet` by maintaining a linked list of its elements.
+The iterators of a `LinkedHashSet` return their elements in insertion order.
+
+
+The linked structure also has a useful consequence in terms of improved performance for iteration: 
+next executes in constant time, as the linked list can be used to visit each element in turn. 
+This is in contrast to `HashSet`, for which every bucket in the hash table must be visited, 
+whether it is occupied or not.
+
+This class is unsychronized and not thread-safe; its iterators are fail-fast.
+
+### Calling `addFirst` or `addLast` on an element that is already present in `LinkedHashSet`
+
+Calling these methods will reposition an element as the first or last one.
+
+### `NavigableSet`
+
+The interface `NavigableSet` adds to the `SequencedSet` contract a guarantee that its iterator will 
+traverse the set in ascending element order, and adds further methods to find the elements adjacent to a target value. 
+Unlike `LinkedHashSet`, its elements are ordered internally by 
+the comparison method of its natural order or of its comparator.
+
+### What other `Set` interface does guarantee iteration order? Recommendations on using it.
+
+Prior to the introduction of `NavigableSet`, the only subinterface of `Set` was an interface called `SortedSet`, 
+which guarantees iteration order but does not expose the closest-match methods. 
+`SortedSet` is still in the JDK - it extends `SequencedSet` and is in turn extended by `NavigableSet` - 
+but it is no longer of any great interest, since it has no direct implementations in the platform.
+
+### Calling `addFirst` or `addLast` on an element that is already present in `NavigableSet`
+
+`addFirst` and `addLast` cannot fulfill their contract, and accordingly throw `UnsupportedOperationException`.
+
+### The Methods of NavigableSet
+
+#### Retrieving the comparator
+
+`Comparator<? super E> comparator()` - This is the method to retrieve the set’s comparator, 
+if it has been given one at construction time. 
+If the set uses the natural ordering of its elements, this method returns null.
+
+#### Inspecting the first and last elements
+- `E first()`
+- `E last()`
+If the set is empty, these operations throw `NoSuchElementException`.
+
+#### Removing the first and last elements
+- `E pollFirst()` - retrieve and remove the first (lowest) element, or return null if this set is empty
+- `E pollLast()` - retrieve and remove the last (highest) element, or return null if this set is empty
+
+#### Getting range views
+- `subSet`
+- `headSet`
+- `tailSet`
+
+#### Getting closest matches
+- `E ceiling(E e)` 
+  return the least element x in this set such that x≥e, or null if there is no such element
+- `E floor(E e)` 
+  return the greatest element x in this set such that x≤e, or null if there is no such element
+- `E higher(E e)` 
+  return the least element x in this set such that x>e, or null if there is no such element
+- `E lower(E e)` 
+  return the greatest element x in this set such that x<e, or null if there is no such element
+
+These methods are useful for short-distance navigation.
+
+### Using `NavigableSet` as a queue, compare them
+
+`E pollFirst()` and `E pollLast()` - are analogous to the methods of the same names in `Deque` 
+and help to support the use of NavigableSet in applications that require queue functionality.
+
+`PriorityQueue` vs `NavigableSet`
+- if it needs to examine and manipulate the set of waiting tasks, use `NavigableSet` 
+  (and uniqueness via `equal` - todo, not sure if it is a right statement);
+- if its main requirement is efficient access to the next task to be performed, 
+  use `PriorityQueue` (accommodates duplicates).
+
+### `NavigableSet`, how could its elements viewed?
+
+When you have to work with an ordered set of values, a useful way to view them is as a range.
+For example, given a set of timestamped events, you might like to inspect all those
+that happened within a certain time period.
+In the case of PriorityTasks, we might want to process all those that fall within a range of priorities -
+high and medium, say.
+
+Changes in the view - including structural changes - are reflected in the underlying set.
+
+### `NavigableSet` API methods to work with range views
+
+Each of the methods in this group appears in two overloads, 
+one inherited from `SortedSet` that returns a _half-open_ `SortedSet` view, 
+and one defined in `NavigableSet` returning a `NavigableSet` view that can be _open_, _half-open_, or _closed_ 
+according to the user’s choice:
+
+- `SortedSet<E> subSet(E fromValue, E toValue)` 
+  return a view of the portion of this set ranging from fromValue, inclusive, to toValue, exclusive 
+- `SortedSet<E> headSet(E toValue)` 
+  return a view of the portion of this set up to but excluding toValue 
+- `SortedSet<E> tailSet(E fromValue)` 
+  return a view of the portion of this set whose elements are greater than or equal to fromValue
+- `NavigableSet<E> subSet(E fromValue, boolean fromInclusive, E toValue, boolean toInclusive)`	
+  return a view of the portion of this set ranging from fromValue to toValue
+- `NavigableSet<E> headSet(E toValue, boolean inclusive)` - return a view of the portion of this set up to toValue
+- `NavigableSet<E> tailSet(E fromValue, boolean inclusive)` - return a view of the portion of this set from fromValue
+
+### Types of intervals in a range
+
+An interval such as a range view can be open, half-open, or closed, 
+depending on how many of its limit points it contains. 
+
+For example, the range of numbers x for which `0 ≤ x ≤ 1` is closed, because it contains both limit points 0 and 1. 
+The ranges `0 ≤ x <` 1 and `0 < x ≤ 1` are half-open because they contain only one of the limit points, 
+and the range `0 < x < 1` is open because it contains neither.
+
+
+### Navigating the set in reverse order
+- `NavigableSet<E> descendingSet()` 
+  return a reverse-order view of the elements in this set
+- `Iterator<E> descendingIterator()` 
+  return a reverse-order iterator
+
+Methods of this group make traversing a NavigableSet equally easy in the descending (that is, reverse) ordering.
+
+### `SequencedSet` methods compared with their `NavigableSet` equivalents
+
+Although NavigableSet has been retrofitted to extend SequencedSet, 
+none of the new methods provide any different functionality; 
+they are just renamed versions of existing methods.
+
+| SequencedSet |                     NavigableSet                      |
+|:------------:|:-----------------------------------------------------:|
+|   getFirst   |           first (inherited from SortedSet)            |
+|   getLast    |            last (inherited from SortedSet)            |
+| removeFirst  |                       pollFirst                       |
+|  removeLast  |                       pollLast                        |
+|   addFirst   | Unsupported method for internally ordered collections |
+|   addLast    | Unsupported method for internally ordered collections |
+|   reversed   |                     descendingSet                     |
+
+The reason for the duplication between methods of `SequencedSet` and `NavigableSet` is that 
+the first six `SequencedSet` methods were copied from Deque.
+
+Prior to the introduction of SequencedSet in Java 21, 
+`SortedSet` and `NavigableSet` had several methods that were similar to the `Deque` methods, 
+but with different names and somewhat different behavior:
+- `NavigableSet::first` and `NavigableSet::last`, inherited from `SortedSet`, are the same as 
+  `SequencedSet::getFirst` and `SequencedSet::getLast`, throwing `NoSuchElementException` if the collection is empty.
+- `NavigableSet::pollFirst` and `NavigableSet::pollLast` remove and return the respective element. 
+  However, they differ from `SequencedSet::removeFirst` and `SequencedSet::removeLast` in that the poll methods 
+  return null on an empty collection instead of throwing `NoSuchElementException`.
+
+### SequencedSet vs NavigableSet
 
 A SequencedSet is an externally or internally ordered Set that also exposes the methods of SequencedCollection. 
 A NavigableSet is an internally ordered SequencedSet that therefore also automatically sorts its elements, 
