@@ -455,3 +455,138 @@ but with different names and somewhat different behavior:
 A SequencedSet is an externally or internally ordered Set that also exposes the methods of SequencedCollection. 
 A NavigableSet is an internally ordered SequencedSet that therefore also automatically sorts its elements, 
 and provides additional methods to find elements adjacent to a target value.
+
+### Implementation of `NavigableSet`
+
+`java.util.TreeSet`
+
+### `TreeSet`
+
+Trees are the data structure you would choose for an application that needs 
+fast insertion and retrieval of individual elements, 
+but which also requires that elements can be retrieved in sorted order.
+
+TreeSet is unsychronized and not thread-safe; its iterators are fail-fast.
+
+### What data structure is backed by `TreeSet`? Its properties.
+
+It is backed by a tree. 
+
+A tree is a branching structure that represents hierarchy.
+An important class of tree often used in computing is a binary tree - 
+one in which each node can have at most two children.
+
+TODO binary tree property
+
+### A tree vs. a hash table vs. a list
+
+- A hash table can’t return its elements in sorted order.
+- A list can’t retrieve its elements quickly by their content.
+- A tree can do both.
+
+### Cost of insertion into a binary tree
+
+The cost of retrieving or inserting an element is proportional to the depth of the tree.
+
+### How deep is a tree that contains N elements?
+
+The complete binary tree with two levels has three elements (that’s `2^2 – 1`), 
+and the one with three levels has seven elements (`2^3 – 1`). 
+In general, a binary tree with N complete levels will have 2^N – 1 elements, 
+and the depth of a tree with N elements will be bounded by `log N` (since 2^(log N) = N). 
+
+### Checking if an element is contained, a tree vs a hash table vs a list
+
+The cost of retrieving or inserting an element is proportional to the depth of the tree.
+The depth of a tree with N elements will be bounded by `log N`.
+Just as `N` grows much more slowly than `2^N`, `log N` grows much more slowly than `N`, 
+so `contains` on a large tree is much faster than on a list containing the same elements. 
+
+
+It’s still not as fast as a hash table - whose operations can ideally work in constant time - 
+but a tree has the big advantage over a hash table in that its iterator can return its elements in sorted order.
+
+### Trees performance, what might affect it, how it could be solved?
+
+Not all binary trees will have this nice performance, though.
+A balanced binary tree—one in which each node has an equal number of descendants (or as near as possible) on each side. 
+An unbalanced tree can give much worse performance—in the worst case, as bad as a linked list. 
+TreeSet uses a data type called a red-black tree, 
+which has the advantage that if it becomes unbalanced through insertion or removal of an element, 
+it can always be rebalanced in O(log N) time.
+
+### Concurrent set implementation.
+
+- [ConcurrentSkipListSet](#concurrentskiplistset)
+
+### `ConcurrentSkipListSet`
+
+It is backed by a skip list, a modern alternative to the binary trees of the previous section. 
+A skip list for a set is a series of linked lists, each of which is a chain of cells consisting of two fields: 
+one to hold a value, and one to hold a reference to the next cell. 
+Elements are inserted into and removed from a linked list in constant time by pointer rearrangement.
+
+The iterators of ConcurrentSkipListSet are weakly consistent.
+
+### Searching a skip list
+
+a skip list consisting of three linked lists, labeled levels 0, 1, and 2. 
+The first linked list of the collection (level 0 in the figure) contains the elements of the set, 
+sorted according to their natural order or by the comparator of the set. 
+Each list above level 0 contains a subset of the list below, chosen randomly according to a fixed probability. 
+For this example, let’s suppose that the probability is 0.5; 
+on average, each list will contain half the elements of the list below it. 
+Navigating between links takes a fixed time, 
+so the quickest way to find an element is to start at the beginning (the lefthand end) 
+of the top list and to go as far as possible in each list before dropping to the one below it.
+
+<img src="../../docs/images/SkipListSearching.png" alt="Searching a skip list" width="600">
+
+### Inserting an element into a skip list
+
+Inserting an element into a skip list always involves at least inserting it at level 0. 
+When that has been done, should it also be inserted at level 1? 
+If level 1 contains, on average, half of the elements at level 0, then we should toss a coin 
+(that is, randomly choose with probability 0.5) to decide whether it should be inserted at level 1 as well. 
+If the coin toss does result in it being inserted at level 1, then the process is repeated for level 2, and so on. 
+When we remove an element from a skip list, it is removed from each level in which it occurs.
+
+If the coin tossing goes badly, we could end up with every list above level 0 empty—or full, which would be just as bad. 
+These outcomes have very low probability, however, and analysis shows that, in fact, 
+the probability is very high that skip lists will give performance comparable to binary trees: 
+search, insertion, and removal all have complexity of O(log N). 
+Their compelling advantage for concurrent use is that they have efficient lock-free insertion and deletion algorithms, 
+whereas there are none known for binary trees.
+
+### Comparing Set Implementations
+
+|                         | `add`    | `contains` | `next`   | Notes                   |
+|:------------------------|:---------|:-----------|:---------|:------------------------|
+| `HashSet`               | O(1)     | O(1)       | O(h/N)   | h is the table capacity |
+| `LinkedHashSet`         | O(1)     | O(1)       | O(1)     |                         |
+| `CopyOnWriteArraySet`   | O(N)     | O(N)       | O(1)     |                         |
+| `EnumSet`               | O(1)     | O(1)       | O(1)     |                         |
+| `TreeSet`               | O(log N) | O(log N)   | O(log N) |                         |
+| `ConcurrentSkipListSet` | O(log N) | O(log N)   | O(1)     |                         |
+
+
+In the EnumSet implementation for enum types with more than 64 values, 
+next has worst-case complexity of O(log m), where m is the number of elements in the enumeration.
+
+### Sets implementation choice
+
+That leaves the general-purpose implementations: 
+HashSet, LinkedHashSet, TreeSet, ConcurrentSkipListSet, and the set view of ConcurrentHashMap obtained by newSetFromMap.
+
+The first three are mainly for use in single-threaded applications. 
+They are not thread-safe, so they can only be used in multithreaded code either in conjunction with client-side locking 
+or wrapped in Collection.synchronizedSet. 
+When there is no requirement for the set to be sorted, your choice is between HashSet and LinkedHashSet. 
+If your application will be frequently iterating over the set, 
+LinkedHashSet is the implementation of choice. 
+If the set needs to support the methods of NavigableSet, use TreeSet.
+
+In a multithreaded environment, the choice is between 
+the set view provided by ConcurrentHashMap::newSetFromMap, 
+and ConcurrentSkipListSet. 
+The first of these is the default choice, on efficiency grounds, but the second supports the methods of NavigableSet.
