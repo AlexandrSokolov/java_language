@@ -261,7 +261,7 @@ It also exposes two helper methods that provide a rough metric of the waiting co
 The JDK offers one implementation of `TransferQueue`, `LinkedTransferQueue`. This is an unbounded FIFO queue, 
 with some interesting properties: it is lock-free, like `ConcurrentLinkedQueue` but with 
 the blocking methods that that class lacks; it supports the transfer methods of its interface via a `dual queue` 
-whose nodes can represent either enqueued data or outstanding dequeue requests; 
+whose nodes can represent either enqueued data or outstanding deque requests; 
 and, unusually among concurrent classes, it provides fairness without degrading performance. 
 In fact, it outperforms `SynchronousQueue` even in the latter’s `nonfair` mode.
 

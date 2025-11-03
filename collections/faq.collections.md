@@ -5,25 +5,31 @@
 - [Hierarchy for Sequenced Collections](#hierarchy-for-sequenced-collections)
 - [Externally ordered collections](#externally-ordered-collections)
 - [Internally ordered collections](#internally-ordered-collections)
+- [Ordered collections that do not implement `SequencedCollection`](#ordered-collections-that-do-not-implement-sequencedcollection)
 - [Iteration via collection of elements, API methods](#iteration-via-collection-of-elements-api-methods)
 - [Iterate over a collection and consume its elements one-by-one](#iterate-over-a-collection-and-consume-its-elements-one-by-one)
 - [What is used in `for` loops?](#what-is-used-in-for-loops)
 - [When `for` loop via explicit use of an iterator is necessary?](#when-for-loop-via-explicit-use-of-an-iterator-is-necessary-)
 - [What structural changes you could apply when iterate via `for`](#what-structural-changes-you-could-apply-when-iterate-via-for)
 - [Applying structural changes without iterators using, requirement](#applying-structural-changes-without-iterators-using-requirement)
-- [`java.util.Collection`](#javautilcollection)
-- [`java.util.SequencedCollection`](#javautilsequencedcollection)
+- [`java.util.Collection`, its API](#javautilcollection-its-api)
+- [`java.util.SequencedCollection`, its API](#javautilsequencedcollection-its-api)
 - [How does it work if you apply changes on the collection, returned by `SequencedCollection.reversed()`?](#how-does-it-work-if-you-apply-changes-on-the-collection-returned-by-sequencedcollectionreversed)
 - [There are several ways of implementing each of collection interfaces. Why doesn’t the framework just use the best implementation for each interface?](#there-are-several-ways-of-implementing-each-of-collection-interfaces-why-doesnt-the-framework-just-use-the-best-implementation-for-each-interface)
 - [What is used to choose the right implementation?](#what-is-used-to-choose-the-right-implementation)
 - [The main kinds of operations that most collection interfaces require](#the-main-kinds-of-operations-that-most-collection-interfaces-require)
 - [Data structures used as the basis of the implementations](#data-structures-used-as-the-basis-of-the-implementations)
+- [Implementations that use arrays](#implementations-that-use-arrays)
+- [Implementations that use linear linked lists](#implementations-that-use-linear-linked-lists)
+- [Implementations that use nonlinear linked data structures](#implementations-that-use-nonlinear-linked-data-structures)
+- [Implementations that use hash tables](#implementations-that-use-hash-tables)
 - [Arrays vs Linked Lists](#arrays-vs-linked-lists)
 - [Arrays/Linked Lists vs Hash tables](#arrayslinked-lists-vs-hash-tables)
 - [Hash tables, what must you care about?](#hash-tables-what-must-you-care-about)
 - [Working with native arrays](#working-with-native-arrays)
 - [What can and cannot be done with a list, created from an array `Arrays.asList(arr)`](#what-can-and-cannot-be-done-with-a-list-created-from-an-array-arraysaslistarr)
-- [Views in the Collection Framework](#views-in-the-collection-framework)
+- [Views in the Collection Framework, its purpose](#views-in-the-collection-framework-its-purpose)
+- [Example of views in the Collection Framework](#example-of-views-in-the-collection-framework)
 - [Performance of the collections](#performance-of-the-collections)
 - [Operation complexity](#operation-complexity)
 - [Preventing collections changing, benefits, challenges](#preventing-collections-changing-benefits-challenges)
@@ -92,7 +98,7 @@ and an order that is an inherent property of the elements themselves, such as al
 ### Externally ordered collections
 
 - implementations of `java.util.List`
-- implementations of `Dequeue`
+- implementations of `Deque`
 - `LinkedHashSet`
 - `LinkedHashMap`
 
@@ -100,10 +106,16 @@ All of them extend or implement `SequencedSet`/`SequencedMap`
 
 ### Internally ordered collections
 
-- Implementations of `SortedSet`, `NavigableSet`
-- Implementations of `SortedMap`, `NavigableMap`
+- Implementations of `NavigableSet`
+- Implementations of `NavigableMap`
 
-All of them extend or implement `SequencedSet`/`SequencedMap`
+### Ordered collections that do not implement `SequencedCollection`
+
+The following `Queue` implementations do not extend `SequencedCollection`, 
+but they yield elements up in the order according to the values of the elements.
+- `PriorityQueue`
+- `PriorityBlockingQueue`
+- `DelayQueue`
 
 ### Iteration via collection of elements, API methods
 
@@ -163,7 +175,7 @@ List<String> modifiedStrings = strings.stream()
 assert modifiedStrings.equals(List.of("bravo", "charlie"));
 ```
 
-### `java.util.Collection`
+### `java.util.Collection`, its API
 
 Collection, which exposes the core functionality required of any collection other than a Map. 
 Its methods support managing elements by:
@@ -173,7 +185,7 @@ Its methods support managing elements by:
 - exporting elements - making elements available for further processing - 
   `iterator()`, `spliterator()`, `stream()`, `parallelStream()`, `toArray()` 
 
-### `java.util.SequencedCollection`
+### `java.util.SequencedCollection`, its API
 
 The SequencedCollection interface provides:
 - versions of these that can be applied to the first and last element of the collection: 
@@ -221,13 +233,6 @@ very fast for accessing elements by position and for iterating over them,
 but slower for inserting and removing elements at arbitrary positions 
 (because that may require adjusting the position of other elements). 
 
-Arrays are used in the Collections Framework as the backing structure for:
-- ArrayList
-- CopyOnWriteArrayList
-- EnumSet
-- EnumMap and 
-- for many of the Queue and Deque implementations. 
-
 They also form an important part of the mechanism for implementing hash tables.
 
 #### Linear linked lists
@@ -240,11 +245,6 @@ accessing elements by position is slow,
 because you have to follow the reference chain from the start of the list, 
 but insertion and removal operations can be performed in constant time by rearranging the cell references. 
 
-Linked lists are the primary backing structure used for the classes:
-- ConcurrentLinkedQueue
-- LinkedBlockingQueue
-- LinkedList
-
 #### Other (nonlinear) linked data structures
 
 Linked structures are particularly suitable for representing nonlinear types like trees and skip lists 
@@ -252,14 +252,34 @@ Linked structures are particularly suitable for representing nonlinear types lik
 Such structures provide an inexpensive way of maintaining sorted order in their data, 
 allowing fast searching by content. 
 
-- Trees are the backing structures for `TreeSet` and `TreeMap`. 
-- Skip lists are used in `ConcurrentSkipListSet` and `ConcurrentSkipListMap`.
-
 #### Hash tables
 
 These provide a way of storing elements indexed on their content rather than on an integer-valued index, as with lists. 
 In contrast to arrays and linked lists, hash tables provide no support for accessing elements by position, 
 but access by content is usually very fast, as are insertion and removal. 
+
+### Implementations that use arrays
+
+Arrays are used in the Collections Framework as the backing structure for:
+- ArrayList
+- CopyOnWriteArrayList
+- EnumSet
+- EnumMap and
+- for many of the Queue and Deque implementations.
+
+### Implementations that use linear linked lists
+
+Linked lists are the primary backing structure used for the classes:
+- ConcurrentLinkedQueue
+- LinkedBlockingQueue
+- LinkedList
+
+### Implementations that use nonlinear linked data structures
+
+- Trees are the backing structures for `TreeSet` and `TreeMap`.
+- Skip lists are used in `ConcurrentSkipListSet` and `ConcurrentSkipListMap`.
+
+### Implementations that use hash tables
 
 Hash tables are the backing structure for many Set and Map implementations, including:
 - `HashSet`
@@ -346,14 +366,10 @@ and methods like get and set that access or replace the array elements,
 but it won’t allow you to make structural modifications, 
 like adding or removing elements, which aren’t supported by the underlying array.
 
-### Views in the Collection Framework
+### Views in the Collection Framework, its purpose
 
 Views allows to avoid the overhead of creating an object copy,
 physically copying all the elements of one collection into a new collection.
-
-The Collections API exposes many methods returning views. 
-For example, the keys of a `Map` can be viewed as a `Set`, as can its entries; 
-collections can be viewed as unmodifiable, and so on. 
 
 Each of these views has different rules 
 dictating which modifications they will accept and reflect into the backing collection. 
@@ -365,6 +381,12 @@ In descending order of permissiveness, they may allow:
 - No modifications at all (fully unmodifiable)
 
 So the interfaces that these views implement have some of their operations labeled `optional`.
+
+### Example of views in the Collection Framework
+
+The Collections API exposes many methods returning views.
+For example, the keys of a `Map` can be viewed as a `Set`, as can its entries;
+collections can be viewed as unmodifiable, and so on.
 
 Views can generally be composed for read operations and are often commutative - that is, can be applied in any order. 
 For example:
