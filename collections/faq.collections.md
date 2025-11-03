@@ -444,7 +444,7 @@ Big-O notation:
 |  O(log N)  |   Logarithmic   |             Increased by a constant amount              |                  Insertion into a tree                   |
 |    O(N)    |     Linear      |                         Doubled                         |                      Linear search                       |
 | O(N log N) |                 |        Doubled plus an amount proportional to N         |                        Merge sort                        |
-|   O(N2)    |    Quadratic    |                   Increased fourfold                    | Insertion sort worst case <br/> (input in reverse order) |
+|   O(N^2)   |    Quadratic    |                   Increased fourfold                    | Insertion sort worst case <br/> (input in reverse order) |
 
 ### Preventing collections changing, benefits, challenges
 
