@@ -1,38 +1,43 @@
-- [Sets](#sets)
+## Sets
+- [Sets, its purpose](#sets-its-purpose)
 - [todo Hierarchy of Sets](todo)
-- [When two sets are equal?](#when-two-sets-are-equal)
 - [What does define a duplicate in sets?](#what-does-define-a-duplicate-in-sets)
 - [What are consequences of using different equivalence relations?](#what-are-consequences-of-using-different-equivalence-relations)
 - [Containing by set multiple objects, that return true when compared to each other by `equals`?](#containing-by-set-multiple-objects-that-return-true-when-compared-to-each-other-by-equals)
+- [How to determine that 2 sets with _equivalence relation_ are equal?](#how-to-determine-that-2-sets-with-_equivalence-relation_-are-equal)
 - [`Set` direct implementations](#set-direct-implementations)
 - [`HashSet`](#hashset)
-- [Elements position in a hash table](#elements-position-in-a-hash-table)
+- [Hash table data structure](#hash-table-data-structure)
 - [Which operations and what complexity do hash tables have?](#which-operations-and-what-complexity-do-hash-tables-have)
-- [Which operations and what complexity do hash tables have?](#elements-position-in-a-hash-table)
 - [The probability of a collision](#the-probability-of-a-collision)
 - [How it works if a collision does take place](#how-it-works-if-a-collision-takes-place)
 - [Iterating over a hash table](#iterating-over-a-hash-table)
 - [`HashSet` advantages and disadvantages](#hashset-advantages-and-disadvantages)
-- [`HashSet` constructors, when should you use them and why?](#hashset-constructors-when-should-you-use-them-and-why)
+- [Creation of `HashSet`](#creation-of-hashset)
+- [`EnumSet`](#enumset)
+- [`EnumSet` operations complexity](#enumset-operations-complexity)
+- [`UnmodifiableSet`, how to create? Its properties, pros and cons](#unmodifiableset-how-to-create-its-properties-pros-and-cons)
+- [Set Views of Maps, main purpose](#set-views-of-maps-main-purpose)
+- [How to create a set of items with identity relation?](#how-to-create-a-set-of-items-with-identity-relation)
+
+## Sets for multithreaded context
+- [Sets creation for multithreaded context](#sets-creation-for-multithreaded-context)
 - [`CopyOnWriteArraySet`, its operations, compare with `HashSet`](#copyonwritearrayset-its-operations-compare-with-hashset)
 - [In which context `CopyOnWriteArraySet` can be used?](#in-which-context-copyonwritearrayset-can-be-used)
 - [`copy-on-write` thread safety vs locking-based thread safety](#copy-on-write-thread-safety-vs-locking-based-thread-safety)
-- [`EnumSet`](#enumset)
-- [`EnumSet` operations complexity](#enumset-operations-complexity)
-- [`UnmodifiableSet`](#unmodifiableset)
-- [Set Views of Maps](#set-views-of-maps)
-- [How to create a set of items with identity relation?](#how-to-create-a-set-of-items-with-identity-relation)
-- [How to create a concurrent set?](#how-to-create-a-concurrent-set)
-- [`Collections.newSetFromMap` vs. `CopyOnWriteArraySet`](#collectionsnewsetfrommap-vs-copyonwritearrayset)
+- [Concurrent set from a concurrent map](#concurrent-set-from-a-concurrent-map)
+- [`Collections.newSetFromMap` vs. `CopyOnWriteArraySet` vs. `ConcurrentSkipListSet`](#collectionsnewsetfrommap-vs-copyonwritearrayset-vs-concurrentskiplistset)
+
+## Sequenced and navigable
 - [`SequencedSet`](#sequencedset)
 - [`SequencedSet` direct implementation](#sequencedset-direct-implementation)
 - [`LinkedHashSet` idea, compare with `HashSet`](#linkedhashset-idea-compare-with-hashset)
 - [Calling `addFirst` or `addLast` on an element that is already present in `LinkedHashSet`](#calling-addfirst-or-addlast-on-an-element-that-is-already-present-in-linkedhashset)
 - [`NavigableSet`](#navigableset)
-- [What other `Set` interface does guarantee iteration order? Recommendations on using it.](#what-other-set-interface-does-guarantee-iteration-order-recommendations-on-using-it)
+- [What set interface was before `NavigableSet` has been introduced? Recommendations](#what-set-interface-was-before-navigableset-has-been-introduced-recommendations)
 - [Calling `addFirst` or `addLast` on an element that is already present in `NavigableSet`](#calling-addfirst-or-addlast-on-an-element-that-is-already-present-in-navigableset)
 - [The Methods of `NavigableSet`](#the-methods-of-navigableset)
-- [Using `NavigableSet` as a queue, compare them](#using-navigableset-as-a-queue-compare-them)
+- [Using `NavigableSet` as a queue, available approaches, compare them](#using-navigableset-as-a-queue-available-approaches-compare-them)
 - [`NavigableSet`, how could its elements viewed?](#navigableset-how-could-its-elements-viewed)
 - [`NavigableSet` API methods to work with range views](#navigableset-api-methods-to-work-with-range-views)
 - [Types of intervals in a range](#types-of-intervals-in-a-range)
@@ -41,33 +46,24 @@
 - [`SequencedSet` vs `NavigableSet`](#sequencedset-vs-navigableset)
 - [Implementation of `NavigableSet`](#implementation-of-navigableset)
 - [`TreeSet`](#treeset)
-- [What data structure is backed by `TreeSet`? Its properties.](#what-data-structure-is-backed-by-treeset-its-properties)
-- [A tree vs. a hash table vs. a list](#a-tree-vs-a-hash-table-vs-a-list)
+- [What data structure is backed by `TreeSet`? Its properties](#what-data-structure-is-backed-by-treeset-its-properties)
 - [Cost of insertion into a binary tree](#cost-of-insertion-into-a-binary-tree)
 - [How deep is a tree that contains N elements?](#how-deep-is-a-tree-that-contains-n-elements)
-- [Checking if an element is contained, a tree vs a hash table vs a list](#checking-if-an-element-is-contained-a-tree-vs-a-hash-table-vs-a-list)
 - [Trees performance, what might affect it, how it could be solved?](#trees-performance-what-might-affect-it-how-it-could-be-solved)
+- [A tree vs. a hash table vs. a list regarding elements retrieval functionality](#a-tree-vs-a-hash-table-vs-a-list-regarding-elements-retrieval-functionality)
+- [A tree vs. a hash table vs. a list regarding performance](#a-tree-vs-a-hash-table-vs-a-list-regarding-performance)
+
+
 - [`ConcurrentSkipListSet`](#concurrentskiplistset)
 - [Searching a skip list](#searching-a-skip-list)
 - [Inserting an element into a skip list](#inserting-an-element-into-a-skip-list)
 - [Comparing Set Implementations](#comparing-set-implementations)
 - [Sets implementation choice](#sets-implementation-choice)
 
-### Sets
+### Sets, its purpose
 
 A _set_ is a collection of items that cannot contain duplicates; 
 adding an item that is already present in the set has no effect.
-
-### When two sets are equal?
-
-The `equals` method is overridden: 
-the `Set` contract states that a `Set` can only ever be equal to another `Set`, 
-and then only if:
-- they are the same size and 
-- contain equal elements. 
-
-The `hashCode` method is also overridden, as should always be the case when equals is overridden. 
-The hash code of a Set is the sum of the hash codes of its elements.
 
 ### What does define a duplicate in sets?
 
@@ -112,6 +108,17 @@ that is, if the comparison method returns 0 - regardless of whether they satisfy
 
 It is possible for `NavigableSet` that uses _ordering relation_ to check equality.
 
+### How to determine that 2 sets with _equivalence relation_ are equal?
+
+The `equals` method is overridden:
+the `Set` contract states that a `Set` can only ever be equal to another `Set`,
+and then only if:
+- they are the same size and
+- contain equal elements.
+
+The `hashCode` method is also overridden, as should always be the case when equals is overridden.
+The hash code of a Set is the sum of the hash codes of its elements.
+
 ### `Set` direct implementations
 
 - [`HashSet`](#hashset)
@@ -125,7 +132,7 @@ an array in which elements are stored at a position derived from their contents
 
 `HashSet` is unsychronized and not thread-safe; its iterators are fail-fast.
 
-### Elements position in a hash table
+### Hash table data structure
 
 An element’s position in a hash table is calculated by a hash function of its contents. 
 Hash functions are designed to give, as far as possible, an even spread of results (hash codes) 
@@ -185,9 +192,9 @@ Its main performance disadvantages are:
 - the iteration performance: iterating through the table involves examining every bucket, 
   so the cost includes a factor attributable to the table length, regardless of the size of the set it contains.
 
-### `HashSet` constructors, when should you use them and why?
+### Creation of `HashSet`
 
-Additional `HashSet` constructors: 
+Additional `HashSet` constructors to no-arguments constructors: 
 - `HashSet(int initialCapacity)`
 - `HashSet(int initialCapacity, float loadFactor)`
 
@@ -215,48 +222,6 @@ public class HashSet<E> implements Set<E> {
 }
 ```
 
-### `CopyOnWriteArraySet`, its operations, compare with `HashSet`
-
-The functional specification of `CopyOnWriteArraySet` is again straightforwardly derived from the `Set` contract, 
-but with quite different performance characteristics from `HashSet`.
-
-This class is implemented as a thin wrapper around an instance of `CopyOnWriteArrayList`, 
-which in turn is backed by an array. 
-The array is treated as immutable; 
-any modification of the set results in the creation of an entirely new array.
-
-- `add` has complexity O(N), as does `contains`, which has to be implemented by a linear search.
-- iteration costs O(1) per element
-
-### In which context `CopyOnWriteArraySet` can be used?
-
-Clearly, you wouldn’t use `CopyOnWriteArraySet` in a context where you were expecting many searches or insertions. 
-But the array implementation means that iteration costs O(1) per element - faster than HashSet - 
-and it has one advantage that is really compelling in some applications: 
-it provides thread safety without adding to the cost of read operations (using `copy-on-write` algorithm).
-
-
-One common situation is managing shared configuration in a multithreaded environment. 
-For example, a server application might maintain a global configuration set of allowed IP addresses 
-that multiple threads frequently read but that is only rarely updated. 
-The process of updating can’t be allowed to interfere with read operations; 
-with a locking set implementation, read and write operations share the overhead necessary to ensure this, 
-whereas with `CopyOnWriteArraySet` the overhead is carried entirely by write operations. 
-
-This makes sense in a scenario in which **read operations occur much more frequently than changes** 
-to the server configuration.
-
-### `copy-on-write` thread safety vs locking-based thread safety
-
-Implementation of `CopyOnWriteArraySet` provides thread safety without adding to the cost of read operations.
-This is in contrast to those collections that use locking to achieve thread safety for all operations
-(for example, the synchronized collections).
-
-Locking operations are always a potential bottleneck in multithreaded applications.
-By contrast, read operations on copy-on-write collections are implemented on the backing array,
-and thanks to its immutability they can be used by any thread without danger of interference
-from a concurrent write operation.
-
 ### `EnumSet`
 
 `EnumSet` should always be preferred over any other Set implementation when we are storing enum values.
@@ -277,7 +242,7 @@ ideal, in fact, for use as array indices or, in the standard implementation, ind
 Bit manipulation on a single word is extremely fast, and a long value can be used to represent 
 EnumSets over enum types with up to 64 values
 
-### `UnmodifiableSet`
+### `UnmodifiableSet`, how to create? Its properties, pros and cons
 
 You won’t find any reference to the name `UnmodifiableSet<E>` in the Javadoc or 
 in the code of the Collections Framework. 
@@ -301,7 +266,7 @@ Advantages:
 Disadvantage:
 The trade-off for faster iteration is that containment can only be determined by a linear search, O(N) in complexity.
 
-### Set Views of Maps
+### Set Views of Maps, main purpose
 
 In the Collections Framework, many sets are implemented as wrappers around a corresponding map, 
 although the maps are encapsulated and invisible to the client.
@@ -327,24 +292,68 @@ as required by the specification of `newSetFromMap`.
 Set<Integer> concurrentIntegerSet = Collections.newSetFromMap(new IdentityHashMap<Integer,Boolean>());
 ```
 
-### How to create a concurrent set?
+### Sets creation for multithreaded context
 
-#### using `CopyOnWriteArraySet`
+- [`CopyOnWriteArraySet`](#copyonwritearrayset-its-operations-compare-with-hashset)
+- [`ConcurrentSkipListSet`](#concurrentskiplistset)
+- [Concurrent set from a concurrent map](#concurrent-set-from-a-concurrent-map)
 
-todo example
+### `CopyOnWriteArraySet`, its operations, compare with `HashSet`
 
-#### using `ConcurrentSkipListSet`
+The functional specification of `CopyOnWriteArraySet` is again straightforwardly derived from the `Set` contract,
+but with quite different performance characteristics from `HashSet`.
 
-[See `ConcurrentSkipListSet`](#concurrentskiplistset)
+This class is implemented as a thin wrapper around an instance of `CopyOnWriteArrayList`,
+which in turn is backed by an array.
+The array is treated as immutable;
+any modification of the set results in the creation of an entirely new array.
 
-#### To get the 
+- `add` has complexity O(N), as does `contains`, which has to be implemented by a linear search.
+- iteration costs O(1) per element
+
+### In which context `CopyOnWriteArraySet` can be used?
+
+Clearly, you wouldn’t use `CopyOnWriteArraySet` in a context where you were expecting many searches or insertions.
+But the array implementation means that iteration costs O(1) per element - faster than HashSet -
+and it has one advantage that is really compelling in some applications:
+it provides thread safety without adding to the cost of read operations (using `copy-on-write` algorithm).
+
+
+One common situation is managing shared configuration in a multithreaded environment.
+For example, a server application might maintain a global configuration set of allowed IP addresses
+that multiple threads frequently read but that is only rarely updated.
+The process of updating can’t be allowed to interfere with read operations;
+with a locking set implementation, read and write operations share the overhead necessary to ensure this,
+whereas with `CopyOnWriteArraySet` the overhead is carried entirely by write operations.
+
+This makes sense in a scenario in which **read operations occur much more frequently than changes**
+to the server configuration.
+
+### `copy-on-write` thread safety vs locking-based thread safety
+
+Implementation of `CopyOnWriteArraySet` provides thread safety without adding to the cost of read operations.
+This is in contrast to those collections that use locking to achieve thread safety for all operations
+(for example, the synchronized collections).
+
+Locking operations are always a potential bottleneck in multithreaded applications.
+By contrast, read operations on copy-on-write collections are implemented on the backing array,
+and thanks to its immutability they can be used by any thread without danger of interference
+from a concurrent write operation.
+
+### Concurrent set from a concurrent map
+
 ```java
 Set<Integer> concurrentIntegerSet = Collections.newSetFromMap(new ConcurrentHashMap<Integer,Boolean>());
 ```
 
 ### `Collections.newSetFromMap` vs. `CopyOnWriteArraySet` vs. `ConcurrentSkipListSet`
 
-todo
+- `ConcurrentSkipListSet` - the second supports the methods of NavigableSet
+- `CopyOnWriteArraySet` don’t use it in a context where you were expecting many searches or insertions.
+  But iteration costs O(1) per element, and it provides thread safety without adding to the cost of read operations
+  (using `copy-on-write` algorithm)
+- the set view provided by `Collections::newSetFromMap` with `ConcurrentHashMap` - the default choice,
+  on efficiency grounds
 
 ### `SequencedSet`
 
@@ -383,7 +392,7 @@ traverse the set in ascending element order, and adds further methods to find th
 Unlike `LinkedHashSet`, its elements are ordered internally by 
 the comparison method of its natural order or of its comparator.
 
-### What other `Set` interface does guarantee iteration order? Recommendations on using it.
+### What set interface was before `NavigableSet` has been introduced? Recommendations
 
 Prior to the introduction of `NavigableSet`, the only subinterface of `Set` was an interface called `SortedSet`, 
 which guarantees iteration order but does not expose the closest-match methods. 
@@ -428,12 +437,13 @@ If the set is empty, these operations throw `NoSuchElementException`.
 
 These methods are useful for short-distance navigation.
 
-### Using `NavigableSet` as a queue, compare them
+### Using `NavigableSet` as a queue, available approaches, compare them
 
+#### `NavigableSet` vs `Deque`
 `E pollFirst()` and `E pollLast()` - are analogous to the methods of the same names in `Deque` 
 and help to support the use of NavigableSet in applications that require queue functionality.
 
-`PriorityQueue` vs `NavigableSet`
+#### `NavigableSet` vs `PriorityQueue`
 - if it needs to examine and manipulate the set of waiting tasks, use `NavigableSet` 
   (and uniqueness via `equal` - todo, not sure if it is a right statement);
 - if its main requirement is efficient access to the next task to be performed, 
@@ -477,12 +487,11 @@ The ranges `0 ≤ x <` 1 and `0 < x ≤ 1` are half-open because they contain on
 and the range `0 < x < 1` is open because it contains neither.
 
 ### Navigating the set in reverse order
-- `NavigableSet<E> descendingSet()` 
-  return a reverse-order view of the elements in this set
-- `Iterator<E> descendingIterator()` 
-  return a reverse-order iterator
 
-Methods of this group make traversing a NavigableSet equally easy in the descending (that is, reverse) ordering.
+- `NavigableSet<E> descendingSet()` return a reverse-order view of the elements in this set
+- `Iterator<E> descendingIterator()` return a reverse-order iterator
+
+Methods of this group make traversing a `NavigableSet` equally easy in the descending (that is, reverse) ordering.
 
 ### `SequencedSet` methods compared with their `NavigableSet` equivalents
 
@@ -518,9 +527,10 @@ A SequencedSet is an externally or internally ordered Set that also exposes the 
 A NavigableSet is an internally ordered SequencedSet that therefore also automatically sorts its elements, 
 and provides additional methods to find elements adjacent to a target value.
 
-### Implementation of `NavigableSet`
+### Implementations of `NavigableSet`
 
-`java.util.TreeSet`
+- [`java.util.TreeSet`](#treeset)
+- [`ConcurrentSkipListSet`](#concurrentskiplistset)
 
 ### `TreeSet`
 
@@ -530,7 +540,7 @@ but which also requires that elements can be retrieved in sorted order.
 
 TreeSet is unsychronized and not thread-safe; its iterators are fail-fast.
 
-### What data structure is backed by `TreeSet`? Its properties.
+### What data structure is backed by `TreeSet`? Its properties
 
 It is backed by a tree. 
 
@@ -539,12 +549,6 @@ An important class of tree often used in computing is a binary tree -
 one in which each node can have at most two children.
 
 TODO binary tree property
-
-### A tree vs. a hash table vs. a list
-
-- A hash table can’t return its elements in sorted order.
-- A list can’t retrieve its elements quickly by their content.
-- A tree can do both.
 
 ### Cost of insertion into a binary tree
 
@@ -557,25 +561,33 @@ and the one with three levels has seven elements (`2^3 – 1`).
 In general, a binary tree with N complete levels will have 2^N – 1 elements, 
 and the depth of a tree with N elements will be bounded by `log N` (since 2^(log N) = N). 
 
-### Checking if an element is contained, a tree vs a hash table vs a list
+### Trees performance, what might affect it, how it could be solved?
 
+Not all binary trees will have this nice performance, though.
+A balanced binary tree—one in which each node has an equal number of descendants (or as near as possible) on each side.
+An unbalanced tree can give much worse performance—in the worst case, as bad as a linked list.
+TreeSet uses a data type called a red-black tree,
+which has the advantage that if it becomes unbalanced through insertion or removal of an element,
+it can always be rebalanced in O(log N) time.
+
+### A tree vs. a hash table vs. a list regarding elements retrieval functionality
+
+- A hash table can’t return its elements in sorted order.
+- A list can’t retrieve its elements quickly by their content.
+- A tree can do both.
+
+### A tree vs. a hash table vs. a list regarding performance
 The cost of retrieving or inserting an element is proportional to the depth of the tree.
 The depth of a tree with N elements will be bounded by `log N`.
 Just as `N` grows much more slowly than `2^N`, `log N` grows much more slowly than `N`, 
 so `contains` on a large tree is much faster than on a list containing the same elements. 
 
-
 It’s still not as fast as a hash table - whose operations can ideally work in constant time - 
 but a tree has the big advantage over a hash table in that its iterator can return its elements in sorted order.
 
-### Trees performance, what might affect it, how it could be solved?
+### Concurrent implementation of NavigableSet
 
-Not all binary trees will have this nice performance, though.
-A balanced binary tree—one in which each node has an equal number of descendants (or as near as possible) on each side. 
-An unbalanced tree can give much worse performance—in the worst case, as bad as a linked list. 
-TreeSet uses a data type called a red-black tree, 
-which has the advantage that if it becomes unbalanced through insertion or removal of an element, 
-it can always be rebalanced in O(log N) time.
+[`ConcurrentSkipListSet`](#concurrentskiplistset)
 
 ### `ConcurrentSkipListSet`
 
@@ -633,18 +645,21 @@ next has worst-case complexity of O(log m), where m is the number of elements in
 
 ### Sets implementation choice
 
-That leaves the general-purpose implementations: 
-HashSet, LinkedHashSet, TreeSet, ConcurrentSkipListSet, and the set view of ConcurrentHashMap obtained by newSetFromMap.
+#### For use in single-threaded applications:
+- `HashSet`
+- `LinkedHashSet`
+- `TreeSet`
 
-The first three are mainly for use in single-threaded applications. 
-They are not thread-safe, so they can only be used in multithreaded code either in conjunction with client-side locking 
-or wrapped in Collection.synchronizedSet. 
-When there is no requirement for the set to be sorted, your choice is between HashSet and LinkedHashSet. 
-If your application will be frequently iterating over the set, 
-LinkedHashSet is the implementation of choice. 
+They are not thread-safe, so they can only be used in multithreaded code either in conjunction with client-side locking
+or wrapped in Collection.synchronizedSet.
+When there is no requirement for the set to be sorted, your choice is between HashSet and LinkedHashSet.
+If your application will be frequently iterating over the set,
+LinkedHashSet is the implementation of choice.
 If the set needs to support the methods of NavigableSet, use TreeSet.
 
-In a multithreaded environment, the choice is between 
-the set view provided by ConcurrentHashMap::newSetFromMap, 
-and ConcurrentSkipListSet. 
-The first of these is the default choice, on efficiency grounds, but the second supports the methods of NavigableSet.
+#### In a multithreaded environment the choice is between:
+- the set view provided by `Collections::newSetFromMap` with `ConcurrentHashMap` - the default choice, on efficiency grounds
+- `ConcurrentSkipListSet` - the second supports the methods of NavigableSet
+- `CopyOnWriteArraySet` don’t use it in a context where you were expecting many searches or insertions.
+  But iteration costs O(1) per element, and it provides thread safety without adding to the cost of read operations 
+  (using `copy-on-write` algorithm).

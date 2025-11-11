@@ -628,7 +628,18 @@ The iterators are weakly consistent.
 
 ### Comparative performance of different Queue and Deque implementations
 
-todo big table
+|                       | offer    | peek | poll     | size |
+|:----------------------|:---------|:-----|:---------|:-----|
+| PriorityQueue         | O(log N) | O(1) | O(log N) | O(1) |
+| ConcurrentLinkedQueue | O(1)     | O(1) | O(1)     | O(N) |
+| ArrayBlockingQueue    | O(1)     | O(1) | O(1)     | O(1) |
+| LinkedBlockingQueue   | O(1)     | O(1) | O(1)     | O(1) |
+| PriorityBlockingQueue | O(log N) | O(1) | O(log N) | O(1) |
+| DelayQueue            | O(log N) | O(1) | O(log N) | O(1) |
+| LinkedTransferQueue   | O(1)     | O(1) | O(1)     | O(N) |
+| LinkedList            | O(1)     | O(1) | O(1)     | O(1) |
+| ArrayDeque            | O(1)     | O(1) | O(1)     | O(1) |
+| LinkedBlockingDeque   | O(1)     | O(1) | O(1)     | O(1) |
 
 ### First question to ask to choose the right implementation
 
