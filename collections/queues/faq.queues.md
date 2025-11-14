@@ -531,7 +531,6 @@ acquire a synonym that makes their behavior explicit for `Deque`.
 
 - `void addFirst(E e)` insert e at the head if there is enough space 
 - `void addLast(E e)` insert e at the tail if there is enough space
-- `void push(E e)` insert e at the head if there is enough space
 - `boolean removeFirstOccurrence(Object o)` remove the first occurrence of o
 - `boolean removeLastOccurrence(Object o)` remove the last occurrence of o
 - `Iterator<E> descendingIterator()` get an iterator, returning deque elements in reverse order
@@ -549,6 +548,9 @@ throw an exception for an empty deque:
 - `E getLast()` retrieve but do not remove the last element
 - `E removeFirst()` retrieve and remove the first element (a synonym for `Queue.remove`)
 - `E removeLast()` retrieve and remove the last element
+
+#### Stack-like methods
+- `void push(E e)` insert e at the head if there is enough space (a synonym for `Deque.addFirst` provided for stack use)
 - `E pop()` retrieve and remove the first element (a synonym for `Deque.removeFirst` provided for stack use)
 
 #### Methods inherited from `SequencedCollection`

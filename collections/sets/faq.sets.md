@@ -4,7 +4,7 @@
 - [What does define a duplicate in sets?](#what-does-define-a-duplicate-in-sets)
 - [What are consequences of using different equivalence relations?](#what-are-consequences-of-using-different-equivalence-relations)
 - [Containing by set multiple objects, that return true when compared to each other by `equals`?](#containing-by-set-multiple-objects-that-return-true-when-compared-to-each-other-by-equals)
-- [How to determine that 2 sets with _equivalence relation_ are equal?](#how-to-determine-that-2-sets-with-_equivalence-relation_-are-equal)
+- [How to determine that 2 sets with _equivalence relation_ are equal?](#how-to-determine-that-2-sets-with-equivalence-relation-are-equal)
 - [`Set` direct implementations](#set-direct-implementations)
 - [`HashSet`](#hashset)
 - [Hash table data structure](#hash-table-data-structure)
@@ -19,14 +19,6 @@
 - [`UnmodifiableSet`, how to create? Its properties, pros and cons](#unmodifiableset-how-to-create-its-properties-pros-and-cons)
 - [Set Views of Maps, main purpose](#set-views-of-maps-main-purpose)
 - [How to create a set of items with identity relation?](#how-to-create-a-set-of-items-with-identity-relation)
-
-## Sets for multithreaded context
-- [Sets creation for multithreaded context](#sets-creation-for-multithreaded-context)
-- [`CopyOnWriteArraySet`, its operations, compare with `HashSet`](#copyonwritearrayset-its-operations-compare-with-hashset)
-- [In which context `CopyOnWriteArraySet` can be used?](#in-which-context-copyonwritearrayset-can-be-used)
-- [`copy-on-write` thread safety vs locking-based thread safety](#copy-on-write-thread-safety-vs-locking-based-thread-safety)
-- [Concurrent set from a concurrent map](#concurrent-set-from-a-concurrent-map)
-- [`Collections.newSetFromMap` vs. `CopyOnWriteArraySet` vs. `ConcurrentSkipListSet`](#collectionsnewsetfrommap-vs-copyonwritearrayset-vs-concurrentskiplistset)
 
 ## Sequenced and navigable
 - [`SequencedSet`](#sequencedset)
@@ -53,10 +45,18 @@
 - [A tree vs. a hash table vs. a list regarding elements retrieval functionality](#a-tree-vs-a-hash-table-vs-a-list-regarding-elements-retrieval-functionality)
 - [A tree vs. a hash table vs. a list regarding performance](#a-tree-vs-a-hash-table-vs-a-list-regarding-performance)
 
-
+## Sets for multithreaded context
+- [Sets creation for multithreaded context](#sets-creation-for-multithreaded-context)
+- [`CopyOnWriteArraySet`, its operations, compare with `HashSet`](#copyonwritearrayset-its-operations-compare-with-hashset)
+- [In which context `CopyOnWriteArraySet` can be used?](#in-which-context-copyonwritearrayset-can-be-used)
+- [`copy-on-write` thread safety vs locking-based thread safety](#copy-on-write-thread-safety-vs-locking-based-thread-safety)
+- [Concurrent set from a concurrent map](#concurrent-set-from-a-concurrent-map)
 - [`ConcurrentSkipListSet`](#concurrentskiplistset)
 - [Searching a skip list](#searching-a-skip-list)
 - [Inserting an element into a skip list](#inserting-an-element-into-a-skip-list)
+- [`Collections.newSetFromMap` vs. `CopyOnWriteArraySet` vs. `ConcurrentSkipListSet`](#collectionsnewsetfrommap-vs-copyonwritearrayset-vs-concurrentskiplistset)
+
+## Sets choice
 - [Comparing Set Implementations](#comparing-set-implementations)
 - [Sets implementation choice](#sets-implementation-choice)
 
@@ -108,7 +108,7 @@ that is, if the comparison method returns 0 - regardless of whether they satisfy
 
 It is possible for `NavigableSet` that uses _ordering relation_ to check equality.
 
-### How to determine that 2 sets with _equivalence relation_ are equal?
+### How to determine that 2 sets with equivalence relation are equal?
 
 The `equals` method is overridden:
 the `Set` contract states that a `Set` can only ever be equal to another `Set`,
@@ -291,69 +291,6 @@ as required by the specification of `newSetFromMap`.
 ```java
 Set<Integer> concurrentIntegerSet = Collections.newSetFromMap(new IdentityHashMap<Integer,Boolean>());
 ```
-
-### Sets creation for multithreaded context
-
-- [`CopyOnWriteArraySet`](#copyonwritearrayset-its-operations-compare-with-hashset)
-- [`ConcurrentSkipListSet`](#concurrentskiplistset)
-- [Concurrent set from a concurrent map](#concurrent-set-from-a-concurrent-map)
-
-### `CopyOnWriteArraySet`, its operations, compare with `HashSet`
-
-The functional specification of `CopyOnWriteArraySet` is again straightforwardly derived from the `Set` contract,
-but with quite different performance characteristics from `HashSet`.
-
-This class is implemented as a thin wrapper around an instance of `CopyOnWriteArrayList`,
-which in turn is backed by an array.
-The array is treated as immutable;
-any modification of the set results in the creation of an entirely new array.
-
-- `add` has complexity O(N), as does `contains`, which has to be implemented by a linear search.
-- iteration costs O(1) per element
-
-### In which context `CopyOnWriteArraySet` can be used?
-
-Clearly, you wouldn’t use `CopyOnWriteArraySet` in a context where you were expecting many searches or insertions.
-But the array implementation means that iteration costs O(1) per element - faster than HashSet -
-and it has one advantage that is really compelling in some applications:
-it provides thread safety without adding to the cost of read operations (using `copy-on-write` algorithm).
-
-
-One common situation is managing shared configuration in a multithreaded environment.
-For example, a server application might maintain a global configuration set of allowed IP addresses
-that multiple threads frequently read but that is only rarely updated.
-The process of updating can’t be allowed to interfere with read operations;
-with a locking set implementation, read and write operations share the overhead necessary to ensure this,
-whereas with `CopyOnWriteArraySet` the overhead is carried entirely by write operations.
-
-This makes sense in a scenario in which **read operations occur much more frequently than changes**
-to the server configuration.
-
-### `copy-on-write` thread safety vs locking-based thread safety
-
-Implementation of `CopyOnWriteArraySet` provides thread safety without adding to the cost of read operations.
-This is in contrast to those collections that use locking to achieve thread safety for all operations
-(for example, the synchronized collections).
-
-Locking operations are always a potential bottleneck in multithreaded applications.
-By contrast, read operations on copy-on-write collections are implemented on the backing array,
-and thanks to its immutability they can be used by any thread without danger of interference
-from a concurrent write operation.
-
-### Concurrent set from a concurrent map
-
-```java
-Set<Integer> concurrentIntegerSet = Collections.newSetFromMap(new ConcurrentHashMap<Integer,Boolean>());
-```
-
-### `Collections.newSetFromMap` vs. `CopyOnWriteArraySet` vs. `ConcurrentSkipListSet`
-
-- `ConcurrentSkipListSet` - the second supports the methods of NavigableSet
-- `CopyOnWriteArraySet` don’t use it in a context where you were expecting many searches or insertions.
-  But iteration costs O(1) per element, and it provides thread safety without adding to the cost of read operations
-  (using `copy-on-write` algorithm)
-- the set view provided by `Collections::newSetFromMap` with `ConcurrentHashMap` - the default choice,
-  on efficiency grounds
 
 ### `SequencedSet`
 
@@ -585,6 +522,60 @@ so `contains` on a large tree is much faster than on a list containing the same 
 It’s still not as fast as a hash table - whose operations can ideally work in constant time - 
 but a tree has the big advantage over a hash table in that its iterator can return its elements in sorted order.
 
+### Sets creation for multithreaded context
+
+- [`CopyOnWriteArraySet`](#copyonwritearrayset-its-operations-compare-with-hashset)
+- [`ConcurrentSkipListSet`](#concurrentskiplistset)
+- [Concurrent set from a concurrent map](#concurrent-set-from-a-concurrent-map)
+
+### `CopyOnWriteArraySet`, its operations, compare with `HashSet`
+
+The functional specification of `CopyOnWriteArraySet` is again straightforwardly derived from the `Set` contract,
+but with quite different performance characteristics from `HashSet`.
+
+This class is implemented as a thin wrapper around an instance of `CopyOnWriteArrayList`,
+which in turn is backed by an array.
+The array is treated as immutable;
+any modification of the set results in the creation of an entirely new array.
+
+- `add` has complexity O(N), as does `contains`, which has to be implemented by a linear search.
+- iteration costs O(1) per element
+
+### In which context `CopyOnWriteArraySet` can be used?
+
+Clearly, you wouldn’t use `CopyOnWriteArraySet` in a context where you were expecting many searches or insertions.
+But the array implementation means that iteration costs O(1) per element - faster than HashSet -
+and it has one advantage that is really compelling in some applications:
+it provides thread safety without adding to the cost of read operations (using `copy-on-write` algorithm).
+
+
+One common situation is managing shared configuration in a multithreaded environment.
+For example, a server application might maintain a global configuration set of allowed IP addresses
+that multiple threads frequently read but that is only rarely updated.
+The process of updating can’t be allowed to interfere with read operations;
+with a locking set implementation, read and write operations share the overhead necessary to ensure this,
+whereas with `CopyOnWriteArraySet` the overhead is carried entirely by write operations.
+
+This makes sense in a scenario in which **read operations occur much more frequently than changes**
+to the server configuration.
+
+### `copy-on-write` thread safety vs locking-based thread safety
+
+Implementation of `CopyOnWriteArraySet` provides thread safety without adding to the cost of read operations.
+This is in contrast to those collections that use locking to achieve thread safety for all operations
+(for example, the synchronized collections).
+
+Locking operations are always a potential bottleneck in multithreaded applications.
+By contrast, read operations on copy-on-write collections are implemented on the backing array,
+and thanks to its immutability they can be used by any thread without danger of interference
+from a concurrent write operation.
+
+### Concurrent set from a concurrent map
+
+```java
+Set<Integer> concurrentIntegerSet = Collections.newSetFromMap(new ConcurrentHashMap<Integer,Boolean>());
+```
+
 ### Concurrent implementation of NavigableSet
 
 [`ConcurrentSkipListSet`](#concurrentskiplistset)
@@ -627,6 +618,15 @@ the probability is very high that skip lists will give performance comparable to
 search, insertion, and removal all have complexity of O(log N). 
 Their compelling advantage for concurrent use is that they have efficient lock-free insertion and deletion algorithms, 
 whereas there are none known for binary trees.
+
+### `Collections.newSetFromMap` vs. `CopyOnWriteArraySet` vs. `ConcurrentSkipListSet`
+
+- `ConcurrentSkipListSet` - the second supports the methods of NavigableSet
+- `CopyOnWriteArraySet` don’t use it in a context where you were expecting many searches or insertions.
+  But iteration costs O(1) per element, and it provides thread safety without adding to the cost of read operations
+  (using `copy-on-write` algorithm)
+- the set view provided by `Collections::newSetFromMap` with `ConcurrentHashMap` - the default choice,
+  on efficiency grounds
 
 ### Comparing Set Implementations
 
