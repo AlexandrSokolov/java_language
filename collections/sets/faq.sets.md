@@ -36,7 +36,7 @@
 - [Navigating the set in reverse order](#navigating-the-set-in-reverse-order)
 - [`SequencedSet` methods compared with their `NavigableSet` equivalents](#sequencedset-methods-compared-with-their-navigableset-equivalents)
 - [`SequencedSet` vs `NavigableSet`](#sequencedset-vs-navigableset)
-- [Implementation of `NavigableSet`](#implementation-of-navigableset)
+- [Implementations of `NavigableSet`](#implementations-of-navigableset)
 - [`TreeSet`](#treeset)
 - [What data structure is backed by `TreeSet`? Its properties](#what-data-structure-is-backed-by-treeset-its-properties)
 - [Cost of insertion into a binary tree](#cost-of-insertion-into-a-binary-tree)
@@ -652,9 +652,9 @@ next has worst-case complexity of O(log m), where m is the number of elements in
 
 They are not thread-safe, so they can only be used in multithreaded code either in conjunction with client-side locking
 or wrapped in Collection.synchronizedSet.
-When there is no requirement for the set to be sorted, your choice is between HashSet and LinkedHashSet.
+When there is no requirement for the set to be sorted, your choice is between `HashSet` and `LinkedHashSet`.
 If your application will be frequently iterating over the set,
-LinkedHashSet is the implementation of choice.
+`LinkedHashSet` is the implementation of choice.
 If the set needs to support the methods of NavigableSet, use TreeSet.
 
 #### In a multithreaded environment the choice is between:
