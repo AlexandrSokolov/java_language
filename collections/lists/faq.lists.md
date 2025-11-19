@@ -58,31 +58,17 @@ or `-1` if the object is not present.
 - `ListIterator<E> listIterator(int idx)` return a `ListIterator` for this list, initially positioned at index `idx`
 
 #### Methods Inherited from SequencedCollection
-todo table
-SequencedCollection List positional access call
-addFirst(el)
 
-add(0, el)
+SequencedCollection method calls, with their List equivalents:
 
-addLast(el)
-
-add(el)
-
-getFirst()
-
-get(0)
-
-getLast()
-
-get(size() - 1)
-
-removeFirst()
-
-remove(0)
-
-removeLast()
-
-remove(size() - 1)
+| SequencedCollection call | List positional access call |
+|:-------------------------|:----------------------------|
+| addFirst(el)             | add(0, el)                  |
+| addLast(el)              | add(el)                     |
+| getFirst()               | get(0)                      |
+| getLast()                | get(size() - 1)             |
+| removeFirst()            | remove(0)                   |
+| removeLast()             | remove(size() - 1)          |
 
 ### `List.remove`, what must you care about?
 
