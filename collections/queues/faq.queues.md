@@ -529,11 +529,20 @@ acquire a synonym that makes their behavior explicit for `Deque`.
 
 #### Collection-like methods
 
-- `void addFirst(E e)` insert e at the head if there is enough space 
-- `void addLast(E e)` insert e at the tail if there is enough space
 - `boolean removeFirstOccurrence(Object o)` remove the first occurrence of o
 - `boolean removeLastOccurrence(Object o)` remove the last occurrence of o
-- `Iterator<E> descendingIterator()` get an iterator, returning deque elements in reverse order
+These methods similar to `Collection::removeIf`
+
+#### Methods inherited from `SequencedCollection`
+Of the seven methods of `SequencedCollection`, six are in fact promoted from `Deque`:
+throw an exception for a full deque:
+- `void addFirst(E e)` insert e at the head if there is enough space
+- `void addLast(E e)` insert e at the tail if there is enough space
+  throw an exception for an empty deque:
+- `E getFirst()` retrieve but do not remove the first element (a synonym for `Queue.element`)
+- `E getLast()` retrieve but do not remove the last element
+- `E removeFirst()` retrieve and remove the first element (a synonym for `Queue.remove`)
+- `E removeLast()` retrieve and remove the last element
 
 #### Queue-like methods
 - `boolean offerFirst(E e)` insert e at the head if the deque has space
@@ -543,21 +552,15 @@ return null for an empty deque:
 - `E peekLast()` retrieve but do not remove the last element
 - `E pollFirst()` retrieve and remove the first element (a synonym for `Queue.poll`)
 - `E pollLast()` retrieve and remove the last element
-throw an exception for an empty deque:
-- `E getFirst()` retrieve but do not remove the first element (a synonym for `Queue.element`)
-- `E getLast()` retrieve but do not remove the last element
-- `E removeFirst()` retrieve and remove the first element (a synonym for `Queue.remove`)
-- `E removeLast()` retrieve and remove the last element
 
 #### Stack-like methods
 - `void push(E e)` insert e at the head if there is enough space (a synonym for `Deque.addFirst` provided for stack use)
 - `E pop()` retrieve and remove the first element (a synonym for `Deque.removeFirst` provided for stack use)
 
-#### Methods inherited from `SequencedCollection`
-Of the seven methods of `SequencedCollection`, six are in fact promoted from `Deque`. 
-The only new one - which is also the only one providing a view of a `Deque` - 
-is reversed, which is a covariant override of the `SequencedCollection` method, returning a `Deque`:
-- `Deque<E> reversed()` return a reverse-ordered view of this `Deque`
+#### Methods that return elements in revers order:
+- `Iterator<E> descendingIterator()` get an iterator, returning deque elements in reverse order
+- `Deque<E> reversed()` return a reverse-ordered view of this `Deque` - 
+  a covariant override of the `SequencedCollection` method, returning a `Deque`
 
 ### Deque Implementations
 
