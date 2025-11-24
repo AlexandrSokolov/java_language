@@ -356,24 +356,380 @@ to the capacity of the map plus the number of key-value mappings that it contain
 The iterators are fail-fast.
 
 
+### Types of references in Java
+
+- [strong references](#problem-of-strong-references-in-java-give-a-code-example)
+- weak references
+- [soft references]
+
+
+| Feature           | Strong Reference                                        | Weak Reference                                            | Soft Reference                                                  |
+|-------------------|---------------------------------------------------------|-----------------------------------------------------------|-----------------------------------------------------------------|
+| **Definition**    | Default reference type in Java                          | Reference that does not prevent GC                        | Reference that does not prevent GC but is kept longer than weak |
+| **GC Behavior**   | Object is **never collected** while strongly referenced | Object is collected **as soon as no strong refs exist**   | Object is collected **only under memory pressure**              |
+| **Use Case**      | Normal object usage                                     | Caches, maps where entries should disappear automatically | Memory-sensitive caches                                         |
+| **Example Class** | `Object obj = new Object();`                            | `WeakReference<T>` or `WeakHashMap`                       | `SoftReference<T>`                                              |
+| **Survival**      | Survives until all strong refs are gone                 | Very short-lived after strong refs are gone               | Longer-lived than weak, but not guaranteed                      |
+| **Risk**          | Memory leaks if not cleared                             | Possible frequent GC, objects disappear quickly           | May still cause OOM if cache grows too large                    |
+
+
+### Problem of strong references in Java, give a code example
+
+Strong references in Java are the default type of reference,
+and they can lead to memory leaks if objects are unintentionally kept alive because something still holds 
+a strong reference to them. 
+The garbage collector (GC) cannot reclaim memory for an object as long as there 
+is at least one strong reference pointing to it.
+
+Why is this a problem?
+
+If you store objects in collections like `Map` or `List` and forget to remove them when they are no longer needed, 
+they remain strongly referenced.
+This prevents GC from freeing memory, even if the object is logically "unused".
+In long-running applications (e.g., servers), this can cause `OutOfMemoryError`.
+
+### Memory leak example related to strong references usage
+
+```java
+public class StrongReferenceLeak {
+  static Map<String, byte[]> cache = new HashMap<>();
+
+  public static void main(String[] args) {
+    for (int i = 0; i < 100000; i++) {
+      // Each entry holds 1 MB
+      cache.put("key" + i, new byte[1024 * 1024]); // 1 MB per entry
+      System.out.println("Added: " + i);
+    }
+    System.out.println("Cache size after loop: " + cache.size());
+  }
+}
+```
+What happens here?
+- We keep adding large byte arrays to a HashMap.
+- The cache map holds strong references to all arrays.
+- GC cannot reclaim any of them because the map still references them.
+- Eventually, the JVM runs out of heap space - `java.lang.OutOfMemoryError`.
+
+### How to solve the problem with strong references? Give an example
+
+- Use `WeakReference` or [`WeakHashMap`] for caches where objects can be garbage collected 
+  when not strongly referenced elsewhere.
+- Or implement proper eviction strategies (e.g., LRU cache).
+
+```java
+public class WeakReferenceExample {
+  public static void main(String[] args) {
+    Map<String, byte[]> cache = new WeakHashMap<>();
+
+    for (int i = 0; i < 100000; i++) {
+      String key = new String("key" + i); // Important: new String ensures no interned strong reference
+      cache.put(key, new byte[1024 * 1024]); // 1 MB per entry
+      System.out.println("Added: " + i);
+      // Suggest GC occasionally
+      if (i % 1000 == 0) {
+        System.gc();
+      }
+    }
+    System.out.println("Cache size after loop: " + cache.size());
+  }
+}
+```
+Key Points:
+- WeakHashMap uses weak references for keys. 
+- When a key is no longer strongly referenced elsewhere, the entry is eligible for GC.
+- The `byte[]` values will also be collected because the map entry disappears when the key is collected.
+- If you use interned strings (like `"key" + i` without `new String()`),
+  they stay strongly referenced in the string pool - entries won’t be cleared.
+
+
 ### `WeakHashMap`, its purpose
 
-Most maps keep ordinary (“strong”) references to all the objects they contain. That means that even when a key has become unreachable by any means other than through the map itself, its mapping cannot be garbage collected. In the example at the beginning of this chapter, that is the situation of task–client mappings: they reference both task and client objects, both of which occupy memory, so preserving them unnecessarily has the potential to degrade garbage collection performance and create memory leaks. The idea behind WeakHashMap is to avoid this situation by allowing a mapping and its referenced objects to be reclaimed once the key is no longer reachable in the application.
+Most maps keep ordinary (“strong”) references to all the objects they contain. 
+That means that even when a key has become unreachable by any means other than through the map itself, 
+its mapping cannot be garbage collected.
+So preserving entries unnecessarily has the potential to degrade garbage collection performance and create memory leaks. 
+The idea behind `WeakHashMap` is to avoid this situation by allowing a mapping and its referenced objects 
+to be reclaimed once the key is no longer reachable in the application.
 
-Internally, WeakHashMap holds references to its key objects through objects of the class java.lang.ref.WeakReference. A WeakReference introduces an extra level of indirection in reaching an object. Figure 15-2(b) shows the situation. A weak reference does not protect an object from garbage collection; in this case, if the task object “code ui” is not reachable with a normal reference from anywhere else in the application, then it is eligible for garbage collection. The map detects this and removes the entry, with the effect that the entire map entry will seem to have spontaneously disappeared.
+### `WeakHashMap` implementation details
+
+Internally, `WeakHashMap` holds references to its key objects through objects of the class `java.lang.ref.WeakReference`. 
+A WeakReference introduces an extra level of indirection in reaching an object. 
+
+A weak reference does not protect an object from garbage collection; then it is eligible for garbage collection. 
+If an object in map is not reachable with a normal reference from anywhere else in the application, 
+then it is eligible for garbage collection.
+The map detects this and removes the entry, 
+with the effect that the entire map entry will seem to have spontaneously disappeared.
 
 The iterators over collections of keys and values returned by WeakHashMap are fail-fast.
 
 ### What is a `WeakHashMap` good for?
 
-Imagine you have a program that allocates some transient system resource—a buffer, for example—on request from a client. Besides passing a reference to the resource back to the client, your program might also need to store information about it locally—for example, associating the buffer with the client that requested it. That could be implemented by means of a map from resource to client objects. But with a strong reference, then even after the client has disposed of the resource, the map will still hold a reference that will prevent the resource object from being garbage collected. Memory will gradually be used up by resources that are no longer in use. On the other hand, if the reference is weak, held by a WeakHashMap, the garbage collector will be able to reclaim the objects once they are no longer strongly referenced, so the memory leak is prevented.
+Imagine you have a program that allocates some transient system resource - a buffer, 
+for example - on request from a client. 
+Besides passing a reference to the resource back to the client, 
+your program might also need to store information about it locally - for example, 
+associating the buffer with the client that requested it. 
+That could be implemented by means of a map from resource to client objects. 
+But with a strong reference, then even after the client has disposed of the resource, 
+the map will still hold a reference that will prevent the resource object from being garbage collected. 
+Memory will gradually be used up by resources that are no longer in use. 
+On the other hand, if the reference is weak, held by a `WeakHashMap`, 
+the garbage collector will be able to reclaim the objects once they are no longer strongly referenced, 
+so the memory leak is prevented.
 
-A more general use is in those applications—for example, caches—where you don’t mind information disappearing if memory is low. WeakHashMap isn’t perfect for this purpose. One of its drawbacks is that it weakly references the map’s keys rather than its values, which usually occupy much more memory; so even after the garbage collector has reclaimed a key, the real benefit in terms of available memory will not be experienced until the map has removed the stale entry. A second drawback is that weak references are too weak: the garbage collector is liable to reclaim a weakly reachable object at any time, and the programmer cannot influence this in any way. (A sister class of WeakReference, java.lang.ref.SoftReference, is treated differently: the garbage collector postpones reclaiming these until it is under severe memory pressure. Heinz Kabutz (2004) has written a SoftReference-based map that will work better as a cache.
+### What a `WeakHashMap` might be not the best choice for?
+
+A more general use is in those applications - for example, caches - where you don’t mind information disappearing 
+if memory is low. `WeakHashMap` isn’t perfect for this purpose. 
+1. One of its drawbacks is that it weakly references the map’s keys rather than its values, 
+    which usually occupy much more memory; so even after the garbage collector has reclaimed a key, 
+    the real benefit in terms of available memory will not be experienced until the map has removed the stale entry. 
+2. A second drawback is that weak references are too weak: 
+   the garbage collector is liable to reclaim a weakly reachable object at any time, 
+   and the programmer cannot influence this in any way. 
+
+A sister class of `WeakReference`, `java.lang.ref.SoftReference`, is treated differently: 
+the garbage collector postpones reclaiming these until it is under severe memory pressure. 
+A `SoftReference`-based map that will work better as a cache.
+
+### `SoftReference`-based map as a cache example
+
+```java
+public class SoftReferenceCache {
+  private final Map<String, SoftReference<byte[]>> cache = new HashMap<>();
+
+  public void put(String key, byte[] data) {
+    cache.put(key, new SoftReference<>(data));
+  }
+
+  public byte[] get(String key) {
+    SoftReference<byte[]> ref = cache.get(key);
+    return (ref != null) ? ref.get() : null;
+  }
+
+  public static void main(String[] args) {
+    SoftReferenceCache softCache = new SoftReferenceCache();
+
+    for (int i = 0; i < 100000; i++) {
+      softCache.put("key" + i, new byte[1024 * 1024]); // 1 MB per entry
+      if (i % 1000 == 0) {
+        System.out.println("Added: " + i + ", Cache size: " + softCache.cache.size());
+        System.gc(); // Suggest GC
+      }
+    }
+    // Try to retrieve some data
+    byte[] data = softCache.get("key500");
+  }
+}
+```
+- `SoftReference` objects allow the GC to reclaim memory only under memory pressure.
+  This means cached objects stay longer than weak references, but they are not guaranteed to persist forever.
+  Ideal for memory-sensitive caches where you prefer to keep data if possible, but avoid OutOfMemoryError.
+- If the JVM has enough memory, the cache entries remain.
+  When memory is low, GC clears `SoftReference` objects first before throwing `OutOfMemoryError`.
+
+### What problem exists with `Map<String, SoftReference<byte[]>>` cache? Solution
+
+The map key is a strong reference, which means the entry itself will remain in the `HashMap` even if the value
+(wrapped in `SoftReference`) is cleared by the GC.
+This does not prevent the value from being garbage collected, 
+because the GC only cares about strong references to the actual object (`the byte[]`), not the wrapper (`SoftReference`). 
+However, the map will still hold the key and the empty `SoftReference` object, 
+which can lead to a _"stale entry" problem_ - the cache grows with dead references.
+
+Why this happens:
+- `SoftReference<byte[]>` can be cleared by GC under memory pressure.
+- But the HashMap still holds the key and the SoftReference instance.
+- So the map size doesn’t shrink automatically - potential memory overhead.
+
+How to fix it:
+You need a cleanup mechanism to remove entries whose `SoftReference.get()` returns null. For example:
+```java
+public class SoftReferenceCache {
+  private final Map<String, SoftReference<byte[]>> cache = new HashMap<>();
+
+  public void put(String key, byte[] data) {
+    cache.put(key, new SoftReference<>(data));
+  }
+
+  public byte[] get(String key) {
+    SoftReference<byte[]> ref = cache.get(key);
+    return (ref != null) ? ref.get() : null;
+  }
+
+  public void cleanup() {
+    Iterator<Map.Entry<String, SoftReference<byte[]>>> it = cache.entrySet().iterator();
+    while (it.hasNext()) {
+      Map.Entry<String, SoftReference<byte[]>> entry = it.next();
+      if (entry.getValue().get() == null) {
+        it.remove(); // Remove stale entry
+      }
+    }
+  }
+
+  public static void main(String[] args) {
+    SoftReferenceCache softCache = new SoftReferenceCache();
+
+    for (int i = 0; i < 100000; i++) {
+      softCache.put("key" + i, new byte[1024 * 1024]); // 1 MB per entry
+      if (i % 1000 == 0) {
+        System.out.println("Added: " + i + ", Cache size: " + softCache.cache.size());
+        System.gc();
+        softCache.cleanup(); // Remove cleared references
+      }
+    }
+    System.out.println("Final cache size: " + softCache.cache.size());
+  }
+}
+```
+Now the cache stays clean because we remove entries whose values have been cleared by GC.
+
+###
+
+```java
+public class SoftReferenceCache {
+  private final Map<String, SoftValue> cache = new HashMap<>();
+  private final ReferenceQueue<byte[]> refQueue = new ReferenceQueue<>();
+
+  // Custom SoftReference that remembers its key
+  private static class SoftValue extends SoftReference<byte[]> {
+    private final String key;
+
+    SoftValue(String key, byte[] value, ReferenceQueue<byte[]> queue) {
+      super(value, queue);
+      this.key = key;
+    }
+  }
+
+  public void put(String key, byte[] data) {
+    cleanUp(); // Remove cleared references before adding new ones
+    cache.put(key, new SoftValue(key, data, refQueue));
+  }
+
+  public byte[] get(String key) {
+    SoftValue ref = cache.get(key);
+    return (ref != null) ? ref.get() : null;
+  }
+
+  private void cleanUp() {
+    SoftValue ref;
+    while ((ref = (SoftValue) refQueue.poll()) != null) {
+      cache.remove(ref.key);
+      System.out.println("Cleaned up key: " + ref.key);
+    }
+  }
+
+  public static void main(String[] args) {
+    SoftReferenceCache softCache = new SoftReferenceCache();
+
+    for (int i = 0; i < 100000; i++) {
+      softCache.put("key" + i, new byte[1024 * 1024]); // 1 MB per entry
+      if (i % 1000 == 0) {
+        System.out.println("Added: " + i + ", Cache size: " + softCache.cache.size());
+        System.gc(); // Suggest GC
+      }
+    }
+
+    System.out.println("Final cache size: " + softCache.cache.size());
+  }
+}
+```
+
+### What issues exist with SoftReference?
+
+Why libraries often avoid SoftReference?
+- **Unpredictable GC behavior**: JVM decides when to clear soft references, 
+  which can lead to inconsistent cache performance.
+- Libraries like `Caffeine` and `Guava` prefer explicit eviction policies (LRU, size-based) for better control.
 
 ### `WeakHashMap` performance
 
-WeakHashMap performs similarly to HashMap, though more slowly because of the overheads of the extra level of indirection for keys. The cost of clearing out unwanted key-value associations before each operation is proportional to the number of associations that need to be removed because the garbage collector has reclaimed the key. 
+`WeakHashMap` performs similarly to `HashMap`, 
+though more slowly because of the overheads of the extra level of indirection for keys. 
+The cost of clearing out unwanted key-value associations before each operation is proportional 
+to the number of associations that need to be removed because the garbage collector has reclaimed the key. 
 
+### Solutions you can use for cache?
+
+- Guava `Cache` (by Google).
+  Provides `CacheBuilder` with options for automatic eviction and memory-sensitive behavior.
+  While it doesn’t use `SoftReference` by default, you can configure it with `weakKeys()` or `softValues()`
+  for GC-friendly caches.
+- `Ehcache` - caching library for Java applications. 
+  Supports various eviction policies and can be tuned for memory-sensitive caching.
+- `Caffeine` - 
+  A high-performance caching library that uses size-based eviction and adaptive strategies.
+  Does not rely on SoftReference but provides better predictability and performance than GC-based approaches.
+- [Java’s Built-in SoftReference](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/ref/SoftReference.html)
+  You can implement your own cache using SoftReference and ReferenceQueue (as shown in our example).
+  This is the simplest approach but requires manual cleanup logic.
+
+### `IdentityHashMap`, its purpose
+
+`IdentityHashMap` for the equivalence relation on its keys, it uses the identity relation. 
+In other words, every physically distinct object is a distinct key.
+
+An `IdentityHashMap` differs from an ordinary `HashMap` in that two keys are considered `equal` 
+only if they are physically the same object: `identity`, rather than `equals`, is used for key comparison. 
+That sets the contract for `IdentityHashMap` at odds with the contract for the interface it implements, namely `Map`, 
+which specifies that equality should be used for key comparison. 
+
+The Javadoc for `Map` assumes that the equivalence relation for maps is always defined by the `equals` method, 
+whereas in fact `IdentityHashMap` uses a different relation, 
+as do all implementations of `NavigableMap`
+
+The main purpose of `IdentityHashMap` is to support operations in which a graph 
+has to be traversed and information stored about each node. 
+Serialization is one such operation. 
+The algorithm used for traversing the graph must be able to check, for each node it encounters, 
+whether that node has already been seen; 
+otherwise, graph cycles could be followed indefinitely. 
+For cyclic graphs, we must use identity rather than equality to check whether nodes are the same. 
+Calculating equality between two graph node objects requires calculating the equality of their fields, 
+which in turn means computing all their successors—and we are back to the original problem. 
+An `IdentityHashMap`, by contrast, will report a node as being present only 
+if that same node has previously been put into the map.
+
+Use Case: 
+- Object Graph Serialization
+- Detect Cycles in Object Graph
+
+### EnumMap
+
+Implementing a mapping from an enumerated type is straightforward and very efficient.
+In an array implementation, the `ordinal` value of each enumerated type constant can serve 
+as the index of the corresponding value. 
+The basic operations of `get` and `put` can be implemented as array accesses, in constant time. 
+An iterator over the key set takes time proportional to the number of constants 
+in the enumerated type and returns the keys in their natural order (the order in which the enum constants are declared). 
+
+Iterators over the collection views of this class are weakly consistent.
+
+### UnmodifiableMap, idea, creation, performance
+
+The properties of the members of this family are described in the Javadoc for Map:
+- They are unmodifiable; keys and values cannot be added or removed.
+  Calling any mutator method will always cause `UnsupportedOperationException` to be thrown.
+- They are null-hostile. Attempts to create them with null keys or values will result in a `NullPointerException`.
+- They reject duplicate keys at creation time.
+  Duplicate keys passed to a factory method result in an `IllegalArgumentException`.
+
+Creating unmodifiable maps:
+- `Map.of` - limited number of entries
+- `Map.ofEntries` and `Map.entry` - unlimited number of entries
+- `Map.copyOf`
+
+Like the other unmodifiable collections, unmodifiable maps are backed by fixed-length arrays. 
+They have the advantages over hashed collections of:
+- reduced memory footprint
+- faster iteration  
+- better spatial locality. 
+
+With a `hashCode` function that provides good distribution, lookup is `O(1)`. 
+As with `UnmodifiableSet`, and for the same reason, 
+the order of iteration over the entry or key set is randomly determined for each virtual machine instance.
 
 ### SequencedMap
 
