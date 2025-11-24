@@ -332,6 +332,49 @@ this is most commonly useful for creating [unmodifiable Maps](todo).
 
 <img src="../../docs/images/Map_Implementations_Hierarchy.png" alt="Map implementations" width="600">
 
+### Constructors for Map implementations
+
+`HashMap`, `LinkedHashMap`, and `WeakHashMap` have other constructors for configuration purposes, 
+but these have been replaced in practice by factory methods, 
+for the reasons described in ["creation of `HashSet`"](../sets/faq.sets.md#creation-of-hashset).
+
+`static <K,V> HashMap<K,V> HashMap::newHashMap(int numElements)`
+static <K,V> WeakHashMap<K,V> newWeakHashMap(int numMappings)
+
+### `HashMap`, its performance
+
+`HashMap` implemented based on hash tables with the related performance.
+
+In particular, `HashMap` provides constant-time performance for `put` and `get`. 
+Although in principle constant-time performance is only attainable with no collisions, 
+it can be closely approached by the use of rehashing to control the load and 
+thereby to minimize the number of collisions.
+
+Iteration over a collection of keys or values requires time proportional 
+to the capacity of the map plus the number of key-value mappings that it contains. 
+
+The iterators are fail-fast.
+
+
+### `WeakHashMap`, its purpose
+
+Most maps keep ordinary (“strong”) references to all the objects they contain. That means that even when a key has become unreachable by any means other than through the map itself, its mapping cannot be garbage collected. In the example at the beginning of this chapter, that is the situation of task–client mappings: they reference both task and client objects, both of which occupy memory, so preserving them unnecessarily has the potential to degrade garbage collection performance and create memory leaks. The idea behind WeakHashMap is to avoid this situation by allowing a mapping and its referenced objects to be reclaimed once the key is no longer reachable in the application.
+
+Internally, WeakHashMap holds references to its key objects through objects of the class java.lang.ref.WeakReference. A WeakReference introduces an extra level of indirection in reaching an object. Figure 15-2(b) shows the situation. A weak reference does not protect an object from garbage collection; in this case, if the task object “code ui” is not reachable with a normal reference from anywhere else in the application, then it is eligible for garbage collection. The map detects this and removes the entry, with the effect that the entire map entry will seem to have spontaneously disappeared.
+
+The iterators over collections of keys and values returned by WeakHashMap are fail-fast.
+
+### What is a `WeakHashMap` good for?
+
+Imagine you have a program that allocates some transient system resource—a buffer, for example—on request from a client. Besides passing a reference to the resource back to the client, your program might also need to store information about it locally—for example, associating the buffer with the client that requested it. That could be implemented by means of a map from resource to client objects. But with a strong reference, then even after the client has disposed of the resource, the map will still hold a reference that will prevent the resource object from being garbage collected. Memory will gradually be used up by resources that are no longer in use. On the other hand, if the reference is weak, held by a WeakHashMap, the garbage collector will be able to reclaim the objects once they are no longer strongly referenced, so the memory leak is prevented.
+
+A more general use is in those applications—for example, caches—where you don’t mind information disappearing if memory is low. WeakHashMap isn’t perfect for this purpose. One of its drawbacks is that it weakly references the map’s keys rather than its values, which usually occupy much more memory; so even after the garbage collector has reclaimed a key, the real benefit in terms of available memory will not be experienced until the map has removed the stale entry. A second drawback is that weak references are too weak: the garbage collector is liable to reclaim a weakly reachable object at any time, and the programmer cannot influence this in any way. (A sister class of WeakReference, java.lang.ref.SoftReference, is treated differently: the garbage collector postpones reclaiming these until it is under severe memory pressure. Heinz Kabutz (2004) has written a SoftReference-based map that will work better as a cache.
+
+### `WeakHashMap` performance
+
+WeakHashMap performs similarly to HashMap, though more slowly because of the overheads of the extra level of indirection for keys. The cost of clearing out unwanted key-value associations before each operation is proportional to the number of associations that need to be removed because the garbage collector has reclaimed the key. 
+
+
 ### SequencedMap
 
 A `SequencedMap` is a Map that maintains its entries in a defined order.

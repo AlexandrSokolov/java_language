@@ -13,6 +13,7 @@
 - [What structural changes you could apply when iterate via `for`](#what-structural-changes-you-could-apply-when-iterate-via-for)
 - [Applying structural changes without iterators using, requirement](#applying-structural-changes-without-iterators-using-requirement)
 - [`java.util.Collection`, its API](#javautilcollection-its-api)
+- [Methods of `java.util.Collection` that make elements available for further processing](#methods-of-javautilcollection-that-make-elements-available-for-further-processing)
 - [`java.util.SequencedCollection`, its API](#javautilsequencedcollection-its-api)
 - [How does it work if you apply changes on the collection, returned by `SequencedCollection.reversed()`?](#how-does-it-work-if-you-apply-changes-on-the-collection-returned-by-sequencedcollectionreversed)
 - [There are several ways of implementing each of collection interfaces. Why doesn’t the framework just use the best implementation for each interface?](#there-are-several-ways-of-implementing-each-of-collection-interfaces-why-doesnt-the-framework-just-use-the-best-implementation-for-each-interface)
@@ -33,9 +34,10 @@
 - [Performance of the collections](#performance-of-the-collections)
 - [Operation complexity](#operation-complexity)
 - [Preventing collections changing, benefits, challenges](#preventing-collections-changing-benefits-challenges)
+- [Terminologies for describing immutability of collections](#terminologies-for-describing-immutability-of-collections)
 - [Advantages of Unmodifiability](#advantages-of-unmodifiability)
 - [What you must think about when you are storing objects in a Set, a Map, or an internally ordered Queue?](#what-you-must-think-about-when-you-are-storing-objects-in-a-set-a-map-or-an-internally-ordered-queue)
-- [Collection modifying](#collection-modifying)
+- [How to modify collections? Options](#how-to-modify-collections-options)
 - [Distributed workloads](#distributed-workloads)
 - [Collections and Thread Safety, options](#collections-and-thread-safety-options)
 - [Mechanisms of concurrent collections](#mechanisms-of-concurrent-collections)
@@ -184,6 +186,15 @@ Its methods support managing elements by:
 - inspecting - `isEmpty()`, `size()` 
 - exporting elements - making elements available for further processing - 
   `iterator()`, `spliterator()`, `stream()`, `parallelStream()`, `toArray()` 
+
+### Methods of `java.util.Collection` that make elements available for further processing
+
+exporting elements - making elements available for further processing -
+- `iterator()`
+- `spliterator()`
+- `stream()`
+- `parallelStream()`
+- `toArray()`
 
 ### `java.util.SequencedCollection`, its API
 
@@ -460,7 +471,9 @@ Realizing these advantages in a Java program is difficult.
 For mutable components the often difficult requirement is that the entire object graph must 
 have guaranteed exclusive access to them.
 
-This has led to alternative conflicting terminologies for describing immutability of collections:
+### Terminologies for describing immutability of collections
+
+The complexity of the issue has led to alternative conflicting terminologies for describing immutability of collections:
 - Frameworks like Guava and Eclipse Collections refer to immutability of an entire object graph as _deep immutability_. 
   They refer to a collection that refuses modification **at the first level** - that is, 
   an attempt to add, remove, or replace an element - as _shallow immutability_, or often just _immutability_.
@@ -487,7 +500,7 @@ Its advantages:
 Whenever you are storing objects in a Set, a Map, or an internally ordered Queue, 
 ensure that the fields used by the collection to organize its contents are immutable.
 
-### Collection modifying
+### How to modify collections? Options
 
 You should use streams to modify collection and its elements.
 Streams are a mechanism for transporting a sequence of values from a source to a destination 
