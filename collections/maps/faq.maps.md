@@ -128,7 +128,9 @@ possibly discarding work that it might have performed based on the original valu
 
 ### Factory Methods
 
+TODO add factory methods for all maps classes
 These methods create unmodifiable Map objects. See [`UnmodifiableMap`](todo)
+static <K,V> LinkedHashMap<K,V> newLinkedHashMap(int numMappings)
 
 
 ### How to get the old value and put the new one into the map?
@@ -731,16 +733,359 @@ With a `hashCode` function that provides good distribution, lookup is `O(1)`.
 As with `UnmodifiableSet`, and for the same reason, 
 the order of iteration over the entry or key set is randomly determined for each virtual machine instance.
 
+### Hierarchy of `SequencedMap` and related types 
+
+- [`SequencedMap`](#sequencedmap)
+- [`NavigableMap`](#navigablemap)
+
+<img src="../../docs/images/SequencedMap_Hierarchy.png" alt="SequencedMap and related types" width="600">
+
 ### SequencedMap
 
 A `SequencedMap` is a Map that maintains its entries in a defined order.
-Its keys form a `SequencedSet`.
-Some implementations of `SequencedMap` (like `TreeMap`) sort their entries automatically according to a key ordering.
+
+### `SequencedMap` API
+
+#### Adding or updating entries
+- `V  putFirst(K k, V v)` - insert the given mapping, or updates it if it is already present
+- `V  putLast(K k, V v)` - insert the given mapping, or updates it if it is already present
+
+#### Inspecting entries
+- `Map.Entry<K,V> firstEntry()`
+- `Map.Entry<K,V> lastEntry()`
+
+#### Removing entries
+- `Map.Entry<K,V> pollFirstEntry()` remove and return the first entry, or null if the map is empty
+- `Map.Entry<K,V> pollLastEntry()` remove and return the last entry, or null if the map is empty
+
+#### View-generating methods
+- `SequencedMap<K,V> reversed()` return a reverse-ordered view of the map
+- `SequencedSet<Map.Entry<K,V>> sequencedEntrySet()` return a `SequencedSet` view of the map’s entrySet
+- `SequencedSet<K> sequencedkeySet()` return a `SequencedSet` view of the map’s keySet
+- `SequencedCollection<V> sequencedValues()` return a `SequencedCollection` view of the map’s values collection
+
+### `SequencedMap` view-generating methods
+[See view-generated methods](#view-generating-methods) 
+
+### Direct `SequencedMap` implementations
+- [`LinkedHashMap`](#linkedhashmap)
+
+### `LinkedHashMap`
+
+Like `LinkedHashSet`, the class `LinkedHashMap` refines the contract of its parent class, `HashMap`, 
+by guaranteeing the order in which iterators return its elements. 
+Also like `LinkedHashSet`, it implements the sequenced subinterface (`SequencedMap`) of its main interface.
+
+### `LinkedHashMap` iteration, compare with `LinkedHashSet`
+
+Unlike `LinkedHashSet`, however, `LinkedHashMap` offers a choice of iteration orders; 
+elements can be returned either:
+- in the order in which they were inserted in the map—the default or
+- in the order in which they were accessed (from least recently to most recently accessed). 
+
+ 
+An access-ordered `LinkedHashMap` is created by supplying an argument of true for the last parameter of the constructor:
+```java
+public LinkedHashMap(int initialCapacity, float loadFactor, boolean accessOrder)
+```
+Supplying false will give an insertion-ordered map. 
+The other constructors, which are just like those of `HashMap`, also produce insertion-ordered maps. 
+As with `LinkedHashSet`, iteration over a `LinkedHashMap` takes time proportional 
+only to the number of elements in the map, not its capacity.
+
+### Iteration over a collection of keys or values
+
+Iteration over a collection of keys or values returned by a `LinkedHashMap` is linear in the number of elements. 
+The iterators over such collections are fail-fast.
+
+### An access-ordered `LinkedHashMap`, its purpose
+
+Access-ordered maps are especially useful for constructing least recently used (LRU) caches. 
+A cache is an area of memory that stores frequently accessed data for fast access. 
+In designing a cache, the key issue is
+the choice of algorithm that will be used to decide what data to remove in order to conserve memory. 
+When an item from a cached data set needs to be found, the cache will be searched first. 
+Typically, if the item is not found in the cache, it will be retrieved from the main store and added to the cache. 
+But the cache cannot be allowed to continue growing indefinitely, 
+so a strategy must be chosen for removing the least useful item from the cache when a new one is added. 
+If the strategy chosen is LRU, the entry removed will be the one least recently used. 
+This simple strategy is suitable for situations in which access of an element 
+increases the probability of further access in the near future of the same element. 
+**Its simplicity and speed have made it the most popular caching strategy**.
+
+
+`LinkedHashMap` exposes a method specifically designed to make it easy to use as an LRU cache:
+```java
+protected boolean removeEldestEntry(Map.Entry<K,V> eldest);
+```
+The name of this method is misleading. It is not usually used to itself modify the map: 
+instead, it is called from within the code of `put` or `putAll` each time an element is added. 
+The value it returns is an indication to the calling method of whether it should remove the first entry in the map - 
+that is, the one least recently accessed 
+(or, if some entries have never been accessed, the one amongst these that was least recently added).
+
+The implementation in `LinkedHashMap` simply returns `false` - an indication to the calling method 
+that no action is needed. 
+But you can subclass `LinkedHashMap` and override `removeEldestEntry` to return `true` under specific circumstances.
+
+### Caches strategies
+- [FIFO](#fifo-cache-example)
+- [LRU - ](#lru-cache-example)
+- [MRU - discards the most recently used entry](#mru-cache-example)
+
+### FIFO cache example
+
+### LRU Cache example
+
+### LRU vs FIFO caches, give an example
+
+_LRU_ cache example:
+```java
+class BoundedSizeMap<K,V> extends LinkedHashMap<K,V> {
+  private final int maxEntries;
+  public BoundedSizeMap(int maxEntries) {
+    //create access-ordered map:
+    super(16, 0.75f, true);
+    this.maxEntries = maxEntries;
+  }
+  protected boolean removeEldestEntry(Map.Entry<K,V> eldest) {
+    return size() > maxEntries;
+  }
+}
+```
+
+Because in an insertion-ordered `LinkedHashMap` the eldest entry will be the one 
+that was least recently added to the map, overriding `removeEldestEntry` as shown here will implement a FIFO strategy. 
+_FIFO_ caching has often been used in preference to _LRU_ because it is much simpler to
+implement in maps that do not offer access ordering. 
+
+However, _LRU_ is usually more effective than _FIFO_, 
+because the reduced cost of cache refreshes outweighs the overhead of maintaining access ordering.
+
+### MRU cache example
+
+In some applications recent access to an entry reduces rather than increases the likelihood 
+of it being accessed again soon. In that case, the best strategy is _most recently used_ (MRU), 
+which discards the most recently used entry. 
+This is straightforward to implement in a `SequencedMap`, 
+which exposes a method `pollLastEntry` analogous to `SequencedSet.removeLast`:
+
+```java
+protected boolean removeEldestEntry(Map.Entry<K,V> eldest) {
+  if (size() > maxEntries) {
+    pollLastEntry();
+  }
+  return false;
+}
+```
 
 ### NavigableMap
 
 A `NavigableMap` is a `SequencedMap` whose keys form a `NavigableSet` so that its entries are automatically sorted 
 by the key ordering and its methods can find keys and key-value pairs adjacent to a target key value.
+
+The interface NavigableMap adds to SequencedMap a guarantee that its iterator will traverse the 
+map in ascending key order and, like NavigableSet, adds further methods to 
+find the entries adjacent to a target key value. 
+Also like NavigableSet, NavigableMap extends and in effect replaces an older interface, 
+SortedMap, which imposes an ordering on its keys: either their natural ordering or that of a Comparator. 
+The equivalence relation on the keys of a NavigableMap is again defined by the ordering relation; 
+two keys that compare as equal—​that is, 
+for which the comparison method returns 0—will be regarded as duplicates by a NavigableMap
+
+### `SequencedMap::putFirst` for `TreeMap`
+
+In the case of an internally ordered implementation like `TreeMap`, 
+both `SequencedMap::putFirst` and `SequencedMap::putLast` methods will throw `UnsupportedOperationException`.
+
+### `NavigableMap` methods API
+
+#### Retrieving the Comparator
+- `Comparator<? super K> comparator()` return the map’s key comparator if it has been given one, 
+  instead of relying on the natural ordering of the keys; otherwise, return null
+
+#### Getting Range Views
+- `SortedMap<K,V> subMap(K fromKey, K toKey)`
+  return a view of the portion of this map whose keys range from fromKey, inclusive, to toKey, exclusive 
+- `SortedMap<K,V> headMap(K toKey)`	return a view of the portion of this map whose keys are strictly less than toKey
+- `SortedMap<K,V> tailMap(K fromKey)` 
+  return a view of the portion of this map whose keys are greater than or equal to fromKey
+- `NavigableMap<K,V> subMap(K fromKey, boolean fromInclusive, K toKey, boolean toInclusive)`
+  return a view of the portion of this map whose keys range from fromKey to toKey
+- `NavigableMap<K,V> headMap(K toKey, boolean inclusive)`
+  return a view of the portion of this map whose keys are less than (or equal to, if inclusive is true) toKey
+- `NavigableMap<K,V> tailMap(K fromKey, boolean inclusive)`	
+  return a view of the portion of this map whose keys are greater than (or equal to, if inclusive is true) fromKey
+
+#### Getting Closest Matches
+- `Map.Entry<K,V> ceilingEntry(K Key)` return a key-value mapping associated with 
+  the least key greater than or equal to the given key, or null if there is no such key
+- `K ceilingKey(K Key)`	return the least key greater than or equal to the given key, or null if there is no such key
+- `Map.Entry<K,V> floorEntry(K Key)` return a key-value mapping associated with
+  the greatest key less than or equal to the given key, or null if there is no such key 
+- `K floorKey(K Key)` return the greatest key less than or equal to the given key, or null if there is no such key
+- `Map.Entry<K,V> higherEntry(K Key)` return a key-value mapping associated with 
+  the least key strictly greater than the given key, or null if there is no such key
+- `K higherKey(K Key)` return the least key strictly greater than the given key, or null if there is no such key
+- `Map.Entry<K,V> lowerEntry(K Key)` return a key-value mapping associated with 
+  the greatest key strictly less than the given key, or null if there is no such key
+- `K lowerKey(K Key)` return the greatest key strictly less than the given key, or null if there is no such key
+
+#### Other views:
+- `NavigableMap<K,V> descendingMap()` return a reverse-order view of the map
+- `NavigableSet<K> descendingKeySet()` return a reverse-order key set
+- `NavigableSet<K> navigableKeySet()` return a forward-order key set
+
+### NavigableMap methods that return range views
+
+Each of the methods in this group appears in two overloads:
+- one inherited from `SortedMap` and returning a half-open SortedMap view, and 
+- one defined in `NavigableMap` and returning a `NavigableSet` view that can be open, half-open, or closed 
+  according to the user’s choice - provide more flexibility. 
+
+### NavigableMap methods that return entries and key views in different orders
+- `NavigableMap<K,V> descendingMap()` return a reverse-order view of the map
+- `NavigableSet<K> descendingKeySet()` return a reverse-order key set
+- `NavigableSet<K> navigableKeySet()` return a forward-order key set
+
+### Why `keySet` method, inherited from `Map`, could not simply be overridden using a covariant return type to return a `NavigableSet`?
+
+Indeed, the platform implementations of `NavigableMap::keySet` do return a `NavigableSet`. 
+But there is a compatibility concern: 
+if `TreeMap::keySet` were to have its return type changed from `Set` to `NavigableSet`, 
+any existing `TreeMap` subclasses that override that method would fail to compile 
+unless they too changed their return type.
+[See _Maintain Binary Compatibility_](todo)
+
+### NavigableMap implementations
+- [`TreeMap`](#treemap)
+
+### `TreeMap`
+
+In fact, the internal representation of a `TreeSet` is just a `TreeMap` in which every key 
+is associated with the same standard value, 
+so the explanation of the mechanism and performance of red-black trees 
+[given there](../sets/faq.sets.md#what-data-structure-is-backed-by-treeset-its-properties)
+applies equally here.
+
+### `TreeMap` construction
+
+The constructors for `TreeMap` include, besides the standard ones, 
+one that allows you to supply a `Comparator` and one that allows you to create a `TreeMap` from another `NavigableMap` 
+(strictly speaking, from a `SortedMap`), using both the same comparator and the same mappings:
+- `public TreeMap(Comparator<? super K> comparator)`
+- `public TreeMap(SortedMap<K, ? extends V> m)`
+
+
+Notice that the second of these constructors, 
+which is defined so as to allow the new map to accept the ordering of the one supplied, 
+suffers from a similar problem to the corresponding constructor of `TreeSet`: 
+the standard conversion constructor - the one that takes a `Map` as its argument - 
+always uses the natural ordering of the keys, 
+so if you supply a reference to a `SortedMap` to the conversion constructor of `TreeMap`, 
+the ordering of the constructed map will depend on the static type of that reference.
+
+### `TreeMap` performance and its iterators.
+
+`TreeMap` has similar performance characteristics to `TreeSet`: 
+the basic operations (get, put, and remove) perform in O(log N) time. 
+
+The collection view iterators are fail-fast.
+
+### Map interfaces for concurrent environment
+
+- [`ConcurrentMap`](#concurrentmap)
+- [`ConcurrentNavigableMap`](#concurrentnavigablemap)
+
+
+### ConcurrentMap
+`ConcurrentMap` - It provided declarations for four methods:
+`putIfAbsent`, `remove`, and two overloads of `replace` - that perform compound operations atomically. 
+At Java 8, new [compound operations](#compound-operations) were introduced, 
+and `ConcurrentMap` was provided with default implementations for these. 
+However, the existing four compound methods were promoted to the `Map` interface, 
+so `ConcurrentMap` no longer exposes any new functionality
+
+### Concurrent map implementations
+- [`ConcurrentHashMap`](#concurrenthashmap) - implementation of `ConcurrentMap`
+- [`ConcurrentSkipListMap`](#concurrentskiplistmap-idea-performance-iterators) - implementation of `ConcurrentNavigableMap`
+
+
+### `ConcurrentHashMap`
+
+The class `ConcurrentHashMap` provides an implementation of `ConcurrentMap` and offers an effective solution 
+to the problem of reconciling throughput with thread safety. 
+It is optimized for reading, so retrievals do not block even while the table is being updated. 
+To allow for this, the contract states that the results of retrievals will reflect the latest update operations 
+completed before the start of the retrieval. 
+Concurrent updates can proceed safely, even while the table is being resized.
+
+### `ConcurrentHashMap` creation issue
+
+The constructors for `ConcurrentHashMap` are similar to those of `HashMap`, 
+but with an extra one that provides the programmer 
+with the ability to hint to the implementation the expected number of concurrently updating threads 
+(its concurrency level):
+- `ConcurrentHashMap(int initialCapacity, float loadFactor, int concurrencyLevel)`
+
+### When `ConcurrentHashMap` should be used? What must you care about?
+
+`ConcurrentHashMap` is a useful implementation of `Map` in any concurrent application 
+where it is unnecessary to lock the entire table; 
+this is the one capability of synchronized maps that it does not support. 
+This affects the results of aggregate status methods such as `size`, `isEmpty`, and `containsValue`. 
+A map cannot be locked as a whole, so if it is undergoing concurrent updates it will be changing 
+while these methods are working. 
+In that case, their results will not reflect any consistent state and **should be treated as approximations**.
+
+### `ConcurrentHashMap` performance and its iterators
+
+Disregarding locking overheads, the cost of the operations of `ConcurrentHashMap` are similar to those of `HashMap`. 
+The collection views return weakly consistent iterators.
+
+### `ConcurrentNavigableMap`, purpose
+
+`ConcurrentNavigableMap` inherits from both `ConcurrentMap` and `NavigableMap`. 
+It contains just the methods of these two interfaces, with a few changes to make the return types more precise.
+The range-view methods inherited from `SortedMap` and `NavigableMap` now return views of type `ConcurrentNavigableMap`.
+
+### Range-view methods of `ConcurrentNavigableMap` vs `NavigableMap`
+
+The compatibility concerns that prevented `NavigableMap` from overriding the methods of `SortedMap` 
+don’t apply to overriding the range-view methods of `NavigableMap` or `SortedMap`; 
+because neither of these has any implementations that have been retrofitted to the new interface, 
+the danger of breaking implementation subclasses does not arise. 
+For the same reason, it is now possible to override `keySet` to return `NavigableSet`.
+
+### `ConcurrentNavigableMap` implementations
+- [`ConcurrentSkipListMap`](#concurrentskiplistmap-idea-performance-iterators)
+
+### `ConcurrentSkipListMap`, idea, performance, iterators
+
+The relationship between `ConcurrentSkipListMap` and `ConcurrentSkipListSet` is like that 
+between `TreeMap` and `TreeSet`. 
+A `ConcurrentSkipListSet` is implemented by a `ConcurrentSkipListMap` 
+in which every key is associated with the same standard value, 
+so the mechanism and performance of the skip list implementation applies equally here: 
+the basic operations (get, put, and remove) have O(log N) complexity, 
+and iterators over the collection views execute next in constant time. 
+
+These iterators are weakly consistent.
+
+### Comparing Map Implementations
+
+
+| Map Type              | get      | containsKey | next     | Notes                     |
+|-----------------------|----------|-------------|----------|---------------------------|
+| HashMap               | O(1)     | O(1)        | O(h/N)   | *h* is the table capacity |
+| WeakHashMap           | O(1)     | O(1)        | O(h/N)   | *h* is the table capacity |
+| LinkedHashMap         | O(1)     | O(1)        | O(h/N)   | *h* is the table capacity |
+| IdentityHashMap       | O(1)     | O(1)        | O(h/N)   | *h* is the table capacity |
+| EnumMap               | O(1)     | O(1)        | O(1)     |                           |
+| TreeMap               | O(log N) | O(log N)    | O(log N) |                           |
+| ConcurrentHashMap     | O(1)     | O(1)        | O(h/N)   | *h* is the table capacity |
+| ConcurrentSkipListMap | O(log N) | O(log N)    | O(1)     |                           |
+
 
 ### Collecting streams of elements into the Map
 
