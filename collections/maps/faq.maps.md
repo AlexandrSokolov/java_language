@@ -1,4 +1,41 @@
-### A Map, its purpose
+## Java Maps, its API
+- [A Map, its purpose and performance characteristics](#a-map-its-purpose-and-performance-characteristics)
+- [How to determine whether two Java maps are equal?](#how-to-determine-whether-two-java-maps-are-equal)
+- [The hash code of a Map](#the-hash-code-of-a-map)
+- [Groups of `Map` Interface Methods](#groups-of-map-interface-methods)
+- [Iterable-like operations of `Map` interface](#iterable-like-operations-of-map-interface)
+- [Collection-like operations of `Map` interface](#collection-like-operations-of-map-interface)
+- [Compound operations of `Map` interface](#compound-operations-of-map-interface)
+- [Pessimistic-style atomic operations](#pessimistic-style-atomic-operations)
+- [Optimistic-style atomic operations, idea](#optimistic-style-atomic-operations-idea)
+- [Optimistic-style atomic operations](#optimistic-style-atomic-operations)
+- [Rule of Thumb on optimistic-style atomic operations](#rule-of-thumb-on-optimistic-style-atomic-operations)
+- [Views methods of `Map` interface](#views-methods-of-map-interface)
+- [Factory Methods of `Map` interface](#factory-methods-of-map-interface)
+- [How to get the old value and put the new one into the map?](#how-to-get-the-old-value-and-put-the-new-one-into-the-map)
+- [Using null values in a Map](#using-null-values-in-a-map)
+- [Views, what must you remember about when apply changes?](#views-what-must-you-remember-about-when-apply-changes)
+- [Removing a key from the set returned by `keySet`](#removing-a-key-from-the-set-returned-by-keyset)
+- [Removing a value from the collection returned by `values`](#removing-a-value-from-the-collection-returned-by-values)
+- [Using an iterator over the view](#using-an-iterator-over-the-view)
+- [Compound Operations, history](#compound-operations-history)
+- [You want to use a default value for all the keys without storing that value in the map](#you-want-to-use-a-default-value-for-all-the-keys-without-storing-that-value-in-the-map)
+- [You want to write something the first time you see it but not thereafter](#you-want-to-write-something-the-first-time-you-see-it-but-not-thereafter)
+- [What issue exist with `putIfAbsent`?](#what-issue-exist-with-putifabsent)
+- [Create a map from a key to a list of multiple values and put a value into that list associated with the key](#create-a-map-from-a-key-to-a-list-of-multiple-values-and-put-a-value-into-that-list-associated-with-the-key)
+- [How to apply some logic and remove entry? Give an example](#how-to-apply-some-logic-and-remove-entry-give-an-example)
+- [How to either initialize an entry value to a given string `msg` or append a new value to an existing one?](#how-to-either-initialize-an-entry-value-to-a-given-string-msg-or-append-a-new-value-to-an-existing-one)
+- [What used for accumulating values based on the key’s properties and any previous value?](#what-used-for-accumulating-values-based-on-the-keys-properties-and-any-previous-value)
+- [`Map.merge` vs `Map.compute`](#mapmerge-vs-mapcompute)
+- [`Map.compute` vs `Map.computeIfPresent` vs `Map.computeIfAbsent`](#mapcompute-vs-mapcomputeifpresent-vs-mapcomputeifabsent)
+- [`Map.Entry` interface, its methods](#mapentry-interface-its-methods)
+- [Iteration over entries, returned by `entrySet`, recommendations](#iteration-over-entries-returned-by-entryset-recommendations)
+- [How to create `Map.Entry`?](#how-to-create-mapentry)
+
+## Java Maps interfaces and implementations
+- 
+
+### A Map, its purpose and performance characteristics
 
 A Map stores key-to-value associations, or entries, in which the keys are unique. 
 Its implementations provide very fast - ideally, constant-time - operations 
@@ -15,24 +52,23 @@ A `Map` can only ever be equal to another Map, and then only if they are the sam
 
 The hash code of a Map is the sum of the hash codes of its entries.
 
-### Map Interface Methods, groups
+### Groups of `Map` Interface Methods
+- [Iterable-like operations](#iterable-like-operations-of-map-interface)
+- [Collection-like operations of `Map` interface](#collection-like-operations-of-map-interface)
+- [Compound operations of `Map` interface](#compound-operations-of-map-interface)
+- [Views methods of `Map` interface](#views-methods-of-map-interface)
+- [Factory Methods of `Map` interface](#factory-methods-of-map-interface)
 
-The methods of `Map` can be divided according to the two ways in which a map can be seen: 
-- [as a set of entries](#-map-interface-methods-group-in-which-a-map-can-be-seen-as-a-set-of-entries) - 
-  the operations to consider correspond broadly to the operations of `Iterable` and `Collection`.
-- [as a lookup mechanism](#map-interface-methods-group-in-which-a-map-can-be-seen-as-a-lookup-mechanism) - 
-  view-creating operations, compound operations, and factory methods.
+Mnemonic by first letters:
+`I-C-C-V-F` -> _I Collect Cool View Factories._
+(Imagine a collector who loves cool views and factories.)
 
-### Map Interface Methods group, in which a map can be seen as a set of entries
-- [Iterable-like Operations](#iterable-like-operations)
-- [Collection-like Operations](#collection-like-operations)
-
-### Iterable-like Operations
+### Iterable-like operations of `Map` interface
 - `void forEach(BiConsumer<K,V> action)` - perform action on each entry in the map, 
   in the iteration order of the entry set if that is specified.
   In the same way that `Iterable::forEach`
 
-### Collection-like Operations
+### Collection-like operations of `Map` interface
 
 #### Adding or replacing associations:
 - `V put(K key, V value)` - add or replace a key-value association; 
@@ -50,17 +86,7 @@ The methods of `Map` can be divided according to the two ways in which a map can
 - `int size()` return the number of associations
 - `boolean isEmpty()` return true if there are no associations
 
-### Map Interface Methods group, in which a map can be seen as a lookup mechanism
-- [Providing Collection Views of the Keys, Values, or Entries](#providing-collection-views-of-the-keys-values-or-entries)
-- [Compound Operations](#compound-operations)
-- [Factory Methods](#factory-methods)
-
-### Providing Collection Views of the Keys, Values, or Entries
-- `Set<Map.Entry<K,V>> entrySet()` - return a Set view of the associations
-- `Set<K> keySet()` - return a Set view of the keys
-- `Collection<V> values()` - return a Collection view of the values
-
-### Compound Operations
+### Compound operations of `Map` interface
 
 They fall into two groups, corresponding to the two different styles of locking, pessimistic and optimistic:
 - [Pessimistic-style atomic operations](#pessimistic-style-atomic-operations)
@@ -126,12 +152,19 @@ possibly discarding work that it might have performed based on the original valu
    Its complement is `putIfAbsent`, which will not modify an existing mapping but only create a new one.
 - `remove(K,V)` - effects a conditional state change to a terminal state in which the mapping is removed
 
-### Factory Methods
+### Views methods of `Map` interface
+- `Set<Map.Entry<K,V>> entrySet()` - return a Set view of the associations
+- `Set<K> keySet()` - return a Set view of the keys
+- `Collection<V> values()` - return a Collection view of the values
+
+### Factory Methods of `Map` interface
 
 TODO add factory methods for all maps classes
 These methods create unmodifiable Map objects. See [`UnmodifiableMap`](todo)
 static <K,V> LinkedHashMap<K,V> newLinkedHashMap(int numMappings)
-
+Map.of(...)
+Map.ofEntries(...)
+Map.copyOf(Map<? extends K, ? extends V> map)
 
 ### How to get the old value and put the new one into the map?
 `V put(K key, V value)` add or replace a key-value association; 
@@ -157,7 +190,7 @@ This is [the _TOCTOU_ problem](todo).
 
 The design decision to allow null values in maps is evaluated in [nulls](todo).
 
-### Views of the Keys, Values, or Entries, what must you remember about when apply changes?
+### Views, what must you remember about when apply changes?
 
 The view collections returned by `entrySet`, `keySet`, `values` methods are backed by the map, 
 so they reflect changes to the map. 
@@ -166,10 +199,11 @@ The connection in the opposite direction is more limited:
 you can remove elements from the view collections, 
 but attempting to add elements will result in an `UnsupportedOperationException`. 
 
-### Removing a key from the `keyset` and a value from the collection returned by `values`
+### Removing a key from the set returned by `keySet`
 
 Removing a key from the `keyset` removes the single corresponding key-value association.
 
+### Removing a value from the collection returned by `values`
 Removing a value from the collection returned by values, on the other hand,
 removes only one of the associations mapping to it;
 the value may still be present as part of an association with a different key.
@@ -236,7 +270,7 @@ map.computeIfAbsent(key, k -> new ArrayList<V>()).add(newValue);
 - The result of `computeIfAbsent` is the list associated with the key. 
   Then `.add(newValue)` adds the new element to that list.
 
-### How to apply some logic and remove entry? Give an example.
+### How to apply some logic and remove entry? Give an example
 
 In the same way that `computeIfAbsent` is most useful where it may be necessary to add a new key, 
 `computeIfPresent` can be used to remove an existing one. 
@@ -302,7 +336,7 @@ map.compute(word, (s,i) -> s.length() + (i == null ? 0 : i));
 - `computeIfPresent` - Use when you want to update an existing value only if it’s present.
 - `compute` - Use when you want full control over the value regardless of presence.
 
-### The Interface `Map.Entry`, its methods
+### `Map.Entry` interface, its methods
 
 The members of the set returned by `entrySet` implement the interface `Map.Entry`, representing a key-value association. 
 This interface exposes:
@@ -329,6 +363,8 @@ the instance methods of `Map` provide a variety of ways to remove mappings or al
 
 You can create `Map.Entry` objects using the `Map.entry` factory method; 
 this is most commonly useful for creating [unmodifiable Maps](todo).
+
+
 
 ### Hierarchy of Map Implementations
 
