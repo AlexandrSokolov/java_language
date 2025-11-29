@@ -12,3 +12,4 @@ FAQs:
 - [FAQ on Lists](collections/lists/faq.lists.md)
 - [FAQ on Maps](collections/maps/faq.maps.md)
 - [FAQ on Numeric Data Types](numeric_data_types/faq.numeric.data.types.md)
+- [FAQ on Java References and Caches](references_caches/faq.references_caches.md)

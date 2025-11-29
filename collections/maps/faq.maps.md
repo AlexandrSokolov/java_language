@@ -22,7 +22,7 @@
 - [You want to use a default value for all the keys without storing that value in the map](#you-want-to-use-a-default-value-for-all-the-keys-without-storing-that-value-in-the-map)
 - [You want to write something the first time you see it but not thereafter](#you-want-to-write-something-the-first-time-you-see-it-but-not-thereafter)
 - [What issue exist with `putIfAbsent`?](#what-issue-exist-with-putifabsent)
-- [Create a map from a key to a list of multiple values and put a value into that list associated with the key](#create-a-map-from-a-key-to-a-list-of-multiple-values-and-put-a-value-into-that-list-associated-with-the-key)
+- [Into a map of a key to a list mappings add a new list and then add a value into that list](#into-a-map-of-a-key-to-a-list-mappings-add-a-new-list-and-then-add-a-value-into-that-list)
 - [How to apply some logic and remove entry? Give an example](#how-to-apply-some-logic-and-remove-entry-give-an-example)
 - [How to either initialize an entry value to a given string `msg` or append a new value to an existing one?](#how-to-either-initialize-an-entry-value-to-a-given-string-msg-or-append-a-new-value-to-an-existing-one)
 - [What used for accumulating values based on the key’s properties and any previous value?](#what-used-for-accumulating-values-based-on-the-keys-properties-and-any-previous-value)
@@ -33,7 +33,53 @@
 - [How to create `Map.Entry`?](#how-to-create-mapentry)
 
 ## Java Maps interfaces and implementations
-- 
+- [Hierarchy of Map Implementations](#hierarchy-of-map-implementations)
+- [Constructors for Map implementations](#constructors-for-map-implementations)
+- [`HashMap`, its performance and its iterators](#hashmap-its-performance-and-its-iterators)
+- [`WeakHashMap`, its purpose](#weakhashmap-its-purpose)
+- [`WeakHashMap` implementation details](#weakhashmap-implementation-details)
+- [`WeakHashMap` performance](#weakhashmap-performance)
+- [`IdentityHashMap`, idea, its purpose, use-cases](#identityhashmap-idea-its-purpose-use-cases)
+- [`EnumMap`](#enummap)
+- [UnmodifiableMap, idea, creation, performance](#unmodifiablemap-idea-creation-performance)
+- [Hierarchy of `SequencedMap` and related types](#hierarchy-of-sequencedmap-and-related-types)
+- [`SequencedMap`](#sequencedmap)
+- [`SequencedMap` API](#sequencedmap-api)
+- [`SequencedMap` view-generating methods](#sequencedmap-view-generating-methods)
+- [Direct `SequencedMap` implementations](#direct-sequencedmap-implementations)
+- [`LinkedHashMap`](#linkedhashmap)
+- [`LinkedHashMap` iteration, compare with `LinkedHashSet`](#linkedhashmap-iteration-compare-with-linkedhashset)
+- [Iteration over a collection of keys or values returned by a `LinkedHashMap`](#iteration-over-a-collection-of-keys-or-values-returned-by-a-linkedhashmap)
+- [An access-ordered `LinkedHashMap`, its purpose](#an-access-ordered-linkedhashmap-its-purpose)
+- [`NavigableMap`](#navigablemap)
+- [`SequencedMap::putFirst` for `TreeMap`](#sequencedmapputfirst-for-treemap)
+- [`NavigableMap` methods API](#navigablemap-methods-api)
+- [`NavigableMap` methods that return range views](#navigablemap-methods-that-return-range-views)
+- [NavigableMap methods that return entries and key views in different orders](#navigablemap-methods-that-return-entries-and-key-views-in-different-orders)
+- [Why `keySet` method, inherited from `Map`, could not simply be overridden using a covariant return type to return a `NavigableSet`?](#why-keyset-method-inherited-from-map-could-not-simply-be-overridden-using-a-covariant-return-type-to-return-a-navigableset)
+- [`NavigableMap` implementations](#navigablemap-implementations)
+- [`TreeMap`](#treemap)
+- [`TreeMap` construction](#treemap-construction)
+- [`TreeMap` performance and its iterators](#treemap-performance-and-its-iterators)
+
+## Map for multithreaded context
+- [Map interfaces for concurrent environment](#map-interfaces-for-concurrent-environment)
+- [`ConcurrentMap`](#concurrentmap)
+- [Concurrent map implementations](#concurrent-map-implementations)
+- [`ConcurrentHashMap`](#concurrenthashmap)
+- [`ConcurrentHashMap` creation issue](#concurrenthashmap-creation-issue)
+- [When `ConcurrentHashMap` should be used? What must you care about?](#when-concurrenthashmap-should-be-used-what-must-you-care-about)
+- [`ConcurrentHashMap` performance and its iterators](#concurrenthashmap-performance-and-its-iterators)
+- [`ConcurrentNavigableMap`, purpose](#concurrentnavigablemap-purpose)
+- [Range-view methods of `ConcurrentNavigableMap` vs `NavigableMap`](#range-view-methods-of-concurrentnavigablemap-vs-navigablemap)
+- [`ConcurrentNavigableMap` implementations](#concurrentnavigablemap-implementations)
+- [`ConcurrentSkipListMap`, idea, performance, iterators](#concurrentskiplistmap-idea-performance-iterators)
+
+## Maps choice and practice questions
+- [Comparing Map Implementations](#comparing-map-implementations)
+- [Collecting streams of elements into the Map](#collecting-streams-of-elements-into-the-map)
+
+## Java Maps, its API, answers
 
 ### A Map, its purpose and performance characteristics
 
@@ -204,7 +250,7 @@ but attempting to add elements will result in an `UnsupportedOperationException`
 Removing a key from the `keyset` removes the single corresponding key-value association.
 
 ### Removing a value from the collection returned by `values`
-Removing a value from the collection returned by values, on the other hand,
+Removing a value from the collection returned by `values`, on the other hand,
 removes only one of the associations mapping to it;
 the value may still be present as part of an association with a different key.
 
@@ -260,7 +306,7 @@ firstOccurrenceMap.computeIfAbsent(event.getKind(),
   key -> System.currentTimeMillis());
 ```
 
-### Create a map from a key to a list of multiple values and put a value into that list associated with the key
+### Into a map of a key to a list mappings add a new list and then add a value into that list
 
 ```java
 map.computeIfAbsent(key, k -> new ArrayList<V>()).add(newValue);
@@ -364,7 +410,7 @@ the instance methods of `Map` provide a variety of ways to remove mappings or al
 You can create `Map.Entry` objects using the `Map.entry` factory method; 
 this is most commonly useful for creating [unmodifiable Maps](todo).
 
-
+## Java Maps interfaces and implementations, answers
 
 ### Hierarchy of Map Implementations
 
@@ -379,7 +425,7 @@ for the reasons described in ["creation of `HashSet`"](../sets/faq.sets.md#creat
 `static <K,V> HashMap<K,V> HashMap::newHashMap(int numElements)`
 static <K,V> WeakHashMap<K,V> newWeakHashMap(int numMappings)
 
-### `HashMap`, its performance
+### `HashMap`, its performance and its iterators
 
 `HashMap` implemented based on hash tables with the related performance.
 
@@ -393,93 +439,6 @@ to the capacity of the map plus the number of key-value mappings that it contain
 
 The iterators are fail-fast.
 
-
-### Types of references in Java
-
-- [strong references](#problem-of-strong-references-in-java-give-a-code-example)
-- weak references
-- [soft references]
-
-
-| Feature           | Strong Reference                                        | Weak Reference                                            | Soft Reference                                                  |
-|-------------------|---------------------------------------------------------|-----------------------------------------------------------|-----------------------------------------------------------------|
-| **Definition**    | Default reference type in Java                          | Reference that does not prevent GC                        | Reference that does not prevent GC but is kept longer than weak |
-| **GC Behavior**   | Object is **never collected** while strongly referenced | Object is collected **as soon as no strong refs exist**   | Object is collected **only under memory pressure**              |
-| **Use Case**      | Normal object usage                                     | Caches, maps where entries should disappear automatically | Memory-sensitive caches                                         |
-| **Example Class** | `Object obj = new Object();`                            | `WeakReference<T>` or `WeakHashMap`                       | `SoftReference<T>`                                              |
-| **Survival**      | Survives until all strong refs are gone                 | Very short-lived after strong refs are gone               | Longer-lived than weak, but not guaranteed                      |
-| **Risk**          | Memory leaks if not cleared                             | Possible frequent GC, objects disappear quickly           | May still cause OOM if cache grows too large                    |
-
-
-### Problem of strong references in Java, give a code example
-
-Strong references in Java are the default type of reference,
-and they can lead to memory leaks if objects are unintentionally kept alive because something still holds 
-a strong reference to them. 
-The garbage collector (GC) cannot reclaim memory for an object as long as there 
-is at least one strong reference pointing to it.
-
-Why is this a problem?
-
-If you store objects in collections like `Map` or `List` and forget to remove them when they are no longer needed, 
-they remain strongly referenced.
-This prevents GC from freeing memory, even if the object is logically "unused".
-In long-running applications (e.g., servers), this can cause `OutOfMemoryError`.
-
-### Memory leak example related to strong references usage
-
-```java
-public class StrongReferenceLeak {
-  static Map<String, byte[]> cache = new HashMap<>();
-
-  public static void main(String[] args) {
-    for (int i = 0; i < 100000; i++) {
-      // Each entry holds 1 MB
-      cache.put("key" + i, new byte[1024 * 1024]); // 1 MB per entry
-      System.out.println("Added: " + i);
-    }
-    System.out.println("Cache size after loop: " + cache.size());
-  }
-}
-```
-What happens here?
-- We keep adding large byte arrays to a HashMap.
-- The cache map holds strong references to all arrays.
-- GC cannot reclaim any of them because the map still references them.
-- Eventually, the JVM runs out of heap space - `java.lang.OutOfMemoryError`.
-
-### How to solve the problem with strong references? Give an example
-
-- Use `WeakReference` or [`WeakHashMap`] for caches where objects can be garbage collected 
-  when not strongly referenced elsewhere.
-- Or implement proper eviction strategies (e.g., LRU cache).
-
-```java
-public class WeakReferenceExample {
-  public static void main(String[] args) {
-    Map<String, byte[]> cache = new WeakHashMap<>();
-
-    for (int i = 0; i < 100000; i++) {
-      String key = new String("key" + i); // Important: new String ensures no interned strong reference
-      cache.put(key, new byte[1024 * 1024]); // 1 MB per entry
-      System.out.println("Added: " + i);
-      // Suggest GC occasionally
-      if (i % 1000 == 0) {
-        System.gc();
-      }
-    }
-    System.out.println("Cache size after loop: " + cache.size());
-  }
-}
-```
-Key Points:
-- WeakHashMap uses weak references for keys. 
-- When a key is no longer strongly referenced elsewhere, the entry is eligible for GC.
-- The `byte[]` values will also be collected because the map entry disappears when the key is collected.
-- If you use interned strings (like `"key" + i` without `new String()`),
-  they stay strongly referenced in the string pool - entries won’t be cleared.
-
-
 ### `WeakHashMap`, its purpose
 
 Most maps keep ordinary (“strong”) references to all the objects they contain. 
@@ -492,195 +451,8 @@ to be reclaimed once the key is no longer reachable in the application.
 ### `WeakHashMap` implementation details
 
 Internally, `WeakHashMap` holds references to its key objects through objects of the class `java.lang.ref.WeakReference`. 
-A WeakReference introduces an extra level of indirection in reaching an object. 
-
-A weak reference does not protect an object from garbage collection; then it is eligible for garbage collection. 
-If an object in map is not reachable with a normal reference from anywhere else in the application, 
-then it is eligible for garbage collection.
-The map detects this and removes the entry, 
-with the effect that the entire map entry will seem to have spontaneously disappeared.
-
-The iterators over collections of keys and values returned by WeakHashMap are fail-fast.
-
-### What is a `WeakHashMap` good for?
-
-Imagine you have a program that allocates some transient system resource - a buffer, 
-for example - on request from a client. 
-Besides passing a reference to the resource back to the client, 
-your program might also need to store information about it locally - for example, 
-associating the buffer with the client that requested it. 
-That could be implemented by means of a map from resource to client objects. 
-But with a strong reference, then even after the client has disposed of the resource, 
-the map will still hold a reference that will prevent the resource object from being garbage collected. 
-Memory will gradually be used up by resources that are no longer in use. 
-On the other hand, if the reference is weak, held by a `WeakHashMap`, 
-the garbage collector will be able to reclaim the objects once they are no longer strongly referenced, 
-so the memory leak is prevented.
-
-### What a `WeakHashMap` might be not the best choice for?
-
-A more general use is in those applications - for example, caches - where you don’t mind information disappearing 
-if memory is low. `WeakHashMap` isn’t perfect for this purpose. 
-1. One of its drawbacks is that it weakly references the map’s keys rather than its values, 
-    which usually occupy much more memory; so even after the garbage collector has reclaimed a key, 
-    the real benefit in terms of available memory will not be experienced until the map has removed the stale entry. 
-2. A second drawback is that weak references are too weak: 
-   the garbage collector is liable to reclaim a weakly reachable object at any time, 
-   and the programmer cannot influence this in any way. 
-
-A sister class of `WeakReference`, `java.lang.ref.SoftReference`, is treated differently: 
-the garbage collector postpones reclaiming these until it is under severe memory pressure. 
-A `SoftReference`-based map that will work better as a cache.
-
-### `SoftReference`-based map as a cache example
-
-```java
-public class SoftReferenceCache {
-  private final Map<String, SoftReference<byte[]>> cache = new HashMap<>();
-
-  public void put(String key, byte[] data) {
-    cache.put(key, new SoftReference<>(data));
-  }
-
-  public byte[] get(String key) {
-    SoftReference<byte[]> ref = cache.get(key);
-    return (ref != null) ? ref.get() : null;
-  }
-
-  public static void main(String[] args) {
-    SoftReferenceCache softCache = new SoftReferenceCache();
-
-    for (int i = 0; i < 100000; i++) {
-      softCache.put("key" + i, new byte[1024 * 1024]); // 1 MB per entry
-      if (i % 1000 == 0) {
-        System.out.println("Added: " + i + ", Cache size: " + softCache.cache.size());
-        System.gc(); // Suggest GC
-      }
-    }
-    // Try to retrieve some data
-    byte[] data = softCache.get("key500");
-  }
-}
-```
-- `SoftReference` objects allow the GC to reclaim memory only under memory pressure.
-  This means cached objects stay longer than weak references, but they are not guaranteed to persist forever.
-  Ideal for memory-sensitive caches where you prefer to keep data if possible, but avoid OutOfMemoryError.
-- If the JVM has enough memory, the cache entries remain.
-  When memory is low, GC clears `SoftReference` objects first before throwing `OutOfMemoryError`.
-
-### What problem exists with `Map<String, SoftReference<byte[]>>` cache? Solution
-
-The map key is a strong reference, which means the entry itself will remain in the `HashMap` even if the value
-(wrapped in `SoftReference`) is cleared by the GC.
-This does not prevent the value from being garbage collected, 
-because the GC only cares about strong references to the actual object (`the byte[]`), not the wrapper (`SoftReference`). 
-However, the map will still hold the key and the empty `SoftReference` object, 
-which can lead to a _"stale entry" problem_ - the cache grows with dead references.
-
-Why this happens:
-- `SoftReference<byte[]>` can be cleared by GC under memory pressure.
-- But the HashMap still holds the key and the SoftReference instance.
-- So the map size doesn’t shrink automatically - potential memory overhead.
-
-How to fix it:
-You need a cleanup mechanism to remove entries whose `SoftReference.get()` returns null. For example:
-```java
-public class SoftReferenceCache {
-  private final Map<String, SoftReference<byte[]>> cache = new HashMap<>();
-
-  public void put(String key, byte[] data) {
-    cache.put(key, new SoftReference<>(data));
-  }
-
-  public byte[] get(String key) {
-    SoftReference<byte[]> ref = cache.get(key);
-    return (ref != null) ? ref.get() : null;
-  }
-
-  public void cleanup() {
-    Iterator<Map.Entry<String, SoftReference<byte[]>>> it = cache.entrySet().iterator();
-    while (it.hasNext()) {
-      Map.Entry<String, SoftReference<byte[]>> entry = it.next();
-      if (entry.getValue().get() == null) {
-        it.remove(); // Remove stale entry
-      }
-    }
-  }
-
-  public static void main(String[] args) {
-    SoftReferenceCache softCache = new SoftReferenceCache();
-
-    for (int i = 0; i < 100000; i++) {
-      softCache.put("key" + i, new byte[1024 * 1024]); // 1 MB per entry
-      if (i % 1000 == 0) {
-        System.out.println("Added: " + i + ", Cache size: " + softCache.cache.size());
-        System.gc();
-        softCache.cleanup(); // Remove cleared references
-      }
-    }
-    System.out.println("Final cache size: " + softCache.cache.size());
-  }
-}
-```
-Now the cache stays clean because we remove entries whose values have been cleared by GC.
-
-###
-
-```java
-public class SoftReferenceCache {
-  private final Map<String, SoftValue> cache = new HashMap<>();
-  private final ReferenceQueue<byte[]> refQueue = new ReferenceQueue<>();
-
-  // Custom SoftReference that remembers its key
-  private static class SoftValue extends SoftReference<byte[]> {
-    private final String key;
-
-    SoftValue(String key, byte[] value, ReferenceQueue<byte[]> queue) {
-      super(value, queue);
-      this.key = key;
-    }
-  }
-
-  public void put(String key, byte[] data) {
-    cleanUp(); // Remove cleared references before adding new ones
-    cache.put(key, new SoftValue(key, data, refQueue));
-  }
-
-  public byte[] get(String key) {
-    SoftValue ref = cache.get(key);
-    return (ref != null) ? ref.get() : null;
-  }
-
-  private void cleanUp() {
-    SoftValue ref;
-    while ((ref = (SoftValue) refQueue.poll()) != null) {
-      cache.remove(ref.key);
-      System.out.println("Cleaned up key: " + ref.key);
-    }
-  }
-
-  public static void main(String[] args) {
-    SoftReferenceCache softCache = new SoftReferenceCache();
-
-    for (int i = 0; i < 100000; i++) {
-      softCache.put("key" + i, new byte[1024 * 1024]); // 1 MB per entry
-      if (i % 1000 == 0) {
-        System.out.println("Added: " + i + ", Cache size: " + softCache.cache.size());
-        System.gc(); // Suggest GC
-      }
-    }
-
-    System.out.println("Final cache size: " + softCache.cache.size());
-  }
-}
-```
-
-### What issues exist with SoftReference?
-
-Why libraries often avoid SoftReference?
-- **Unpredictable GC behavior**: JVM decides when to clear soft references, 
-  which can lead to inconsistent cache performance.
-- Libraries like `Caffeine` and `Guava` prefer explicit eviction policies (LRU, size-based) for better control.
+A [`WeakReference`](../../references_caches/faq.references_caches.md#weakreference) 
+introduces an extra level of indirection in reaching an object. 
 
 ### `WeakHashMap` performance
 
@@ -689,22 +461,7 @@ though more slowly because of the overheads of the extra level of indirection fo
 The cost of clearing out unwanted key-value associations before each operation is proportional 
 to the number of associations that need to be removed because the garbage collector has reclaimed the key. 
 
-### Solutions you can use for cache?
-
-- Guava `Cache` (by Google).
-  Provides `CacheBuilder` with options for automatic eviction and memory-sensitive behavior.
-  While it doesn’t use `SoftReference` by default, you can configure it with `weakKeys()` or `softValues()`
-  for GC-friendly caches.
-- `Ehcache` - caching library for Java applications. 
-  Supports various eviction policies and can be tuned for memory-sensitive caching.
-- `Caffeine` - 
-  A high-performance caching library that uses size-based eviction and adaptive strategies.
-  Does not rely on SoftReference but provides better predictability and performance than GC-based approaches.
-- [Java’s Built-in SoftReference](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/ref/SoftReference.html)
-  You can implement your own cache using SoftReference and ReferenceQueue (as shown in our example).
-  This is the simplest approach but requires manual cleanup logic.
-
-### `IdentityHashMap`, its purpose
+### `IdentityHashMap`, idea, its purpose, use-cases
 
 `IdentityHashMap` for the equivalence relation on its keys, it uses the identity relation. 
 In other words, every physically distinct object is a distinct key.
@@ -734,7 +491,7 @@ Use Case:
 - Object Graph Serialization
 - Detect Cycles in Object Graph
 
-### EnumMap
+### `EnumMap`
 
 Implementing a mapping from an enumerated type is straightforward and very efficient.
 In an array implementation, the `ordinal` value of each enumerated type constant can serve 
@@ -769,14 +526,14 @@ With a `hashCode` function that provides good distribution, lookup is `O(1)`.
 As with `UnmodifiableSet`, and for the same reason, 
 the order of iteration over the entry or key set is randomly determined for each virtual machine instance.
 
-### Hierarchy of `SequencedMap` and related types 
+### Hierarchy of `SequencedMap` and related types
 
 - [`SequencedMap`](#sequencedmap)
 - [`NavigableMap`](#navigablemap)
 
 <img src="../../docs/images/SequencedMap_Hierarchy.png" alt="SequencedMap and related types" width="600">
 
-### SequencedMap
+### `SequencedMap`
 
 A `SequencedMap` is a Map that maintains its entries in a defined order.
 
@@ -829,104 +586,28 @@ The other constructors, which are just like those of `HashMap`, also produce ins
 As with `LinkedHashSet`, iteration over a `LinkedHashMap` takes time proportional 
 only to the number of elements in the map, not its capacity.
 
-### Iteration over a collection of keys or values
+### Iteration over a collection of keys or values returned by a `LinkedHashMap`
 
 Iteration over a collection of keys or values returned by a `LinkedHashMap` is linear in the number of elements. 
 The iterators over such collections are fail-fast.
 
 ### An access-ordered `LinkedHashMap`, its purpose
 
-Access-ordered maps are especially useful for constructing least recently used (LRU) caches. 
-A cache is an area of memory that stores frequently accessed data for fast access. 
-In designing a cache, the key issue is
-the choice of algorithm that will be used to decide what data to remove in order to conserve memory. 
-When an item from a cached data set needs to be found, the cache will be searched first. 
-Typically, if the item is not found in the cache, it will be retrieved from the main store and added to the cache. 
-But the cache cannot be allowed to continue growing indefinitely, 
-so a strategy must be chosen for removing the least useful item from the cache when a new one is added. 
-If the strategy chosen is LRU, the entry removed will be the one least recently used. 
-This simple strategy is suitable for situations in which access of an element 
-increases the probability of further access in the near future of the same element. 
-**Its simplicity and speed have made it the most popular caching strategy**.
+Access-ordered maps are especially useful for constructing 
+[least recently used (LRU) caches](../../references_caches/faq.references_caches.md#an-access-ordered-linkedhashmap-its-purpose).
 
-
-`LinkedHashMap` exposes a method specifically designed to make it easy to use as an LRU cache:
-```java
-protected boolean removeEldestEntry(Map.Entry<K,V> eldest);
-```
-The name of this method is misleading. It is not usually used to itself modify the map: 
-instead, it is called from within the code of `put` or `putAll` each time an element is added. 
-The value it returns is an indication to the calling method of whether it should remove the first entry in the map - 
-that is, the one least recently accessed 
-(or, if some entries have never been accessed, the one amongst these that was least recently added).
-
-The implementation in `LinkedHashMap` simply returns `false` - an indication to the calling method 
-that no action is needed. 
-But you can subclass `LinkedHashMap` and override `removeEldestEntry` to return `true` under specific circumstances.
-
-### Caches strategies
-- [FIFO](#fifo-cache-example)
-- [LRU - ](#lru-cache-example)
-- [MRU - discards the most recently used entry](#mru-cache-example)
-
-### FIFO cache example
-
-### LRU Cache example
-
-### LRU vs FIFO caches, give an example
-
-_LRU_ cache example:
-```java
-class BoundedSizeMap<K,V> extends LinkedHashMap<K,V> {
-  private final int maxEntries;
-  public BoundedSizeMap(int maxEntries) {
-    //create access-ordered map:
-    super(16, 0.75f, true);
-    this.maxEntries = maxEntries;
-  }
-  protected boolean removeEldestEntry(Map.Entry<K,V> eldest) {
-    return size() > maxEntries;
-  }
-}
-```
-
-Because in an insertion-ordered `LinkedHashMap` the eldest entry will be the one 
-that was least recently added to the map, overriding `removeEldestEntry` as shown here will implement a FIFO strategy. 
-_FIFO_ caching has often been used in preference to _LRU_ because it is much simpler to
-implement in maps that do not offer access ordering. 
-
-However, _LRU_ is usually more effective than _FIFO_, 
-because the reduced cost of cache refreshes outweighs the overhead of maintaining access ordering.
-
-### MRU cache example
-
-In some applications recent access to an entry reduces rather than increases the likelihood 
-of it being accessed again soon. In that case, the best strategy is _most recently used_ (MRU), 
-which discards the most recently used entry. 
-This is straightforward to implement in a `SequencedMap`, 
-which exposes a method `pollLastEntry` analogous to `SequencedSet.removeLast`:
-
-```java
-protected boolean removeEldestEntry(Map.Entry<K,V> eldest) {
-  if (size() > maxEntries) {
-    pollLastEntry();
-  }
-  return false;
-}
-```
-
-### NavigableMap
+### `NavigableMap`
 
 A `NavigableMap` is a `SequencedMap` whose keys form a `NavigableSet` so that its entries are automatically sorted 
 by the key ordering and its methods can find keys and key-value pairs adjacent to a target key value.
 
-The interface NavigableMap adds to SequencedMap a guarantee that its iterator will traverse the 
-map in ascending key order and, like NavigableSet, adds further methods to 
+The interface `NavigableMap` adds to `SequencedMap` a guarantee that its iterator will traverse the 
+map in ascending key order and, like `NavigableSet`, adds further methods to 
 find the entries adjacent to a target key value. 
-Also like NavigableSet, NavigableMap extends and in effect replaces an older interface, 
-SortedMap, which imposes an ordering on its keys: either their natural ordering or that of a Comparator. 
+Also like `NavigableSet`, `NavigableMap` extends and in effect replaces an older interface, 
+`SortedMap`, which imposes an ordering on its keys: either their natural ordering or that of a Comparator. 
 The equivalence relation on the keys of a NavigableMap is again defined by the ordering relation; 
-two keys that compare as equal—​that is, 
+two keys that compare as equal—that is, 
 for which the comparison method returns 0—will be regarded as duplicates by a NavigableMap
 
 ### `SequencedMap::putFirst` for `TreeMap`
@@ -993,7 +674,7 @@ any existing `TreeMap` subclasses that override that method would fail to compil
 unless they too changed their return type.
 [See _Maintain Binary Compatibility_](todo)
 
-### NavigableMap implementations
+### `NavigableMap` implementations
 - [`TreeMap`](#treemap)
 
 ### `TreeMap`
@@ -1021,18 +702,19 @@ always uses the natural ordering of the keys,
 so if you supply a reference to a `SortedMap` to the conversion constructor of `TreeMap`, 
 the ordering of the constructed map will depend on the static type of that reference.
 
-### `TreeMap` performance and its iterators.
+### `TreeMap` performance and its iterators
 
 `TreeMap` has similar performance characteristics to `TreeSet`: 
 the basic operations (get, put, and remove) perform in O(log N) time. 
 
 The collection view iterators are fail-fast.
 
+## Map for multithreaded context, answers
+
 ### Map interfaces for concurrent environment
 
 - [`ConcurrentMap`](#concurrentmap)
 - [`ConcurrentNavigableMap`](#concurrentnavigablemap)
-
 
 ### ConcurrentMap
 `ConcurrentMap` - It provided declarations for four methods:
@@ -1045,7 +727,6 @@ so `ConcurrentMap` no longer exposes any new functionality
 ### Concurrent map implementations
 - [`ConcurrentHashMap`](#concurrenthashmap) - implementation of `ConcurrentMap`
 - [`ConcurrentSkipListMap`](#concurrentskiplistmap-idea-performance-iterators) - implementation of `ConcurrentNavigableMap`
-
 
 ### `ConcurrentHashMap`
 
@@ -1108,6 +789,10 @@ and iterators over the collection views execute next in constant time.
 
 These iterators are weakly consistent.
 
+
+
+## Maps choice and practice questions, answers
+
 ### Comparing Map Implementations
 
 
@@ -1121,7 +806,6 @@ These iterators are weakly consistent.
 | TreeMap               | O(log N) | O(log N)    | O(log N) |                           |
 | ConcurrentHashMap     | O(1)     | O(1)        | O(h/N)   | *h* is the table capacity |
 | ConcurrentSkipListMap | O(log N) | O(log N)    | O(1)     |                           |
-
 
 ### Collecting streams of elements into the Map
 
