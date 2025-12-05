@@ -267,24 +267,6 @@ If all the possible enum constants are present in a switch expression,
 the match is total, and it is not necessary to include a default case - 
 the compiler can use the exhaustiveness of the enum constants.
 
-### Switch expression with Sealed Types
-
-```java
-
-sealed interface Expr permits Lit, Add, Neg {}
-record Lit(int value) implements Expr {}
-record Add(Expr left, Expr right) implements Expr {}
-record Neg(Expr inner) implements Expr {}
-
-static int eval(Expr e) {
-    return switch (e) {
-        case Lit(int v) -> v;
-        case Add(Expr l, Expr r) -> eval(l) + eval(r);
-        case Neg(Expr inner) -> -eval(inner);
-    }; // no default needed: sealed hierarchy is exhaustive
-}
-```
-
 ### Switch expression for multiple types
 
 Right name is Pattern matching?
@@ -436,5 +418,152 @@ Add small, focused methods that return a new record with one field changed:
 ```java
 public record Account(String id, String owner, long balance) {
   public Account withBalance(long newBalance) { return new Account(id, owner, newBalance); }
+}
+```
+
+### Sealed classes
+
+```java
+public abstract sealed class Pet {
+  private final String name;
+
+  protected Pet(String name) {
+    this.name = name;
+  }
+
+  public String name() {
+    return name;
+  }
+
+  public static final class Cat extends Pet {
+    public Cat(String name) {
+      super(name);
+    }
+
+    void meow() {
+      System.out.println(name() + " meows");
+    }
+  }
+
+  public static final class Dog extends Pet {
+    public Dog(String name) {
+      super(name);
+    }
+
+    void bark() {
+      System.out.println(name() + " barks");
+    }
+  }
+}
+```
+The class Pet is declared as `sealed`.
+`sealed` means that the class can be extended only inside the current compilation unit.
+Therefore, the subclasses have to be nested within the current class. 
+We also declare Pet to be `abstract` because we don’t want any general `Pet` instances, 
+only `Pet.Cat` and `Pet.Dog` objects.
+
+### Sealed interfaces
+
+```java
+public sealed interface FXOrder permits MarketOrder, LimitOrder {
+  int units();
+  CurrencyPair pair();
+  Side side();
+  LocalDateTime sentAt();
+}
+public record MarketOrder(
+  int units,
+  CurrencyPair pair,
+  Side side,
+  LocalDateTime sentAt,
+  boolean allOrNothing) implements FXOrder {
+  // constructors and factories elided
+}
+public record LimitOrder(
+  int units,
+  CurrencyPair pair,
+  Side side,
+  LocalDateTime sentAt,
+  double price,
+  int ttl) implements FXOrder {
+  // constructors and factories elided
+}
+```
+- First, `FXOrder` is now a `sealed` interface. 
+- Second, we can see the use of a second new keyword, `permits`, 
+  which allows the developer to list the permissible implementations of this sealed interface - 
+  and our implementations are Records.
+
+### Using the implementing classes for sealed interfaces vs sealed classes
+
+- The `sealed` class can be extended only inside the current compilation unit.
+- When you use permits with `sealed` interfaces, 
+  the implementing classes **do not have to live within the same file and can be separate compilation units**.
+
+### Using instanceof
+
+For example, consider an object that has been obtained reflectively about which little or nothing is known.
+In these circumstances, the appropriate thing to do is to use `instanceof` to check that
+the type is as expected and then perform a downcast.
+The `instanceof` test provides a guard condition that ensures that the cast
+will not cause a `ClassCastException` at runtime. The resulting code looks like this example:
+```java
+Object o = // ...
+if (o instanceof String) {
+  String s = (String)o;
+  System.out.println(s.length());
+} else {
+  System.out.println("Not a String");
+}
+```
+To check and avoid the cast:
+```java
+if (o instanceof String s) {
+  //s is in scope on this branch
+  System.out.println(s.length());
+} else {
+  System.out.println("Not a String");
+}
+```
+
+### Pattern Matching for `instanceof`
+
+```java
+var msg = switch (o) {
+  case String s -> "String of length:"+ s.length();
+  case Integer i -> "Integer:"+ i;
+  case null, default -> "Not a String or Integer";
+};
+
+System.out.println(msg);
+```
+
+### Switch expression with Sealed Types
+
+```java
+
+sealed interface Expr permits Lit, Add, Neg {}
+record Lit(int value) implements Expr {}
+record Add(Expr left, Expr right) implements Expr {}
+record Neg(Expr inner) implements Expr {}
+
+static int eval(Expr e) {
+    return switch (e) {
+        case Lit(int v) -> v;
+        case Add(Expr l, Expr r) -> eval(l) + eval(r);
+        case Neg(Expr inner) -> -eval(inner);
+    }; // no default needed: sealed hierarchy is exhaustive
+}
+```
+example with shapes:
+```java
+public sealed interface Shape permits Circle, Rectangle, Square {}
+
+static double area(Shape s) {
+  return switch (s) {
+    case Circle c -> Math.PI * c.radius() * c.radius();
+    case Rectangle r -> r.width() * r.height();
+    case Square sq -> sq.side() * sq.side();
+  };
 }
 ```

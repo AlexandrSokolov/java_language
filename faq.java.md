@@ -129,6 +129,9 @@ JSRs and JEPs - two main mechanisms are used to make changes to the Java platfor
 
 ### Java 8 new features
 
+### Java 9 new features
+- [Java Platform Modules]()
+
 ### Java 11 new features
 - [`var` keyword](faq.java.language.md#java-10---enhanced-type-inference-var-keyword)
 - [Collections factories](faq.java.language.md#how-to-declare-collection-literals)
@@ -332,4 +335,129 @@ Although this feature does not bring the full experience of scripting languages 
 it can be a useful way of writing simple, 
 useful tools in the Unix tradition without introducing another programming language into the mix.
 
+### Restricted hierarchies modeling, motivation
+
+Restricted hierarchies make your type system:
+- closed, 
+- predictable, and 
+- safe, 
+- enabling compiler checks for exhaustiveness, 
+- clear domain modeling, and 
+- better integration with pattern matching
+all while preventing uncontrolled extension.
+
+The need for restricted hierarchies comes from both design clarity and safety guarantees 
+in object-oriented and functional programming.
+- Control Over Extension:
+  In traditional Java, any class could extend your base class or implement your interface.
+  This leads to uncontrolled inheritance, making it hard to reason about the system and maintain invariants.
+  Example: If you design a Shape hierarchy, you might want only Circle, Rectangle, and Square - 
+  not arbitrary user-defined shapes that break assumptions.
+- Exhaustiveness in Pattern Matching:
+  When you use switch or pattern matching, 
+  the compiler cannot guarantee you’ve handled all cases unless it knows the full set of subtypes.
+  With restricted hierarchies (sealed types), the compiler knows all permitted subclasses, 
+  so it can enforce exhaustive handling:
+    ```java
+    return switch (shape) {
+      case Circle c -> ...
+      case Rectangle r -> ...
+      case Square s -> ...
+        // No default needed!
+    };
+    ```
+- Better Domain Modeling:
+  Many domains have closed sets of variants (e.g., payment methods, AST nodes, states in a state machine).
+- Avoid Fragile Base Class Problems:
+  Open inheritance often leads to fragile hierarchies, where changes in the base class break subclasses.
+  Restricted hierarchies reduce this risk by limiting who can extend the base type.
+
+### Restricted hierarchies modeling approaches
+
+Suppose we want to model many different orders. 
+The orders have closed sets of variants, types. 
+Possible approaches:
+- [A single implementing class (or record), with a state field - of enum type - holding the actual type](#using-enums-as-a-state-field-for-restricted-hierarchies)
+- [Declare abstract type and have concrete types, that subclass it](#using-abstract-type-and-its-concrete-types-for-restricted-hierarchies)
+- [Sealed Types](#sealed-types)
+
+
+### Using enums as a state field for restricted hierarchies
+
+This is suboptimal, because it requires the application programmer to keep track of bits that 
+are really the proper concern of the type system.
+
+- No Data or Behavior per Variant:
+  Enums can have fields and methods, but adding variant-specific logic often leads to 
+  big switch statements or if-else chains.
+  Example: If each state needs different validation or transitions, enums become messy.
+- Closed but Not Extensible:
+  You cannot add new enum constants without modifying the enum itself.
+  For libraries or APIs, this means breaking changes when adding new states.
+- Poor Fit for Complex Models:
+  If states need associated data (e.g., error details, timestamps), enums become awkward.
+  You end up adding nullable fields or external maps.
+- No Hierarchical Modeling:
+  Enums are flat; you cannot express relationships like: Shape → Circle, Rectangle, Square
+
+### Using abstract type and its concrete types for restricted hierarchies
+
+If we define a `BaseOrder` class, then nothing prevents a third party from creating a `EvilOrder` 
+class that inherits from `BaseOrder`. Worse still, this unwanted extension can happen years (or decades) 
+after the `BaseOrder` type was compiled, which is hugely undesirable.
+
+### Sealed Types
+
+The concept that sealing expresses is the idea that a type can be extended, 
+but only by a known list of subtypes and no others.
+
+Java’s OO model represents the two most fundamental concepts of the relationship between types.
+Specifically, "Type `X IS-A Y`" and "Type `X HAS-A Y`." 
+Sealed Types represent an object-oriented concept that previously could not be modeled in Java: 
+"Type `X IS-EITHER-A Y OR Z`." Alternatively, they can also be thought of as
+- A halfway house between final and open classes
+- The enum pattern applied to types instead of instances
+
+- [Sealed classes](faq.java.language.md#sealed-classes)
+- [Sealed interfaces](faq.java.language.md#sealed-interfaces)
+
+In terms of OO programming theory, they represent a new kind of formal relationship, 
+because the set of possible types for `o` is the union of `Y` and `Z`. 
+Accordingly, this is known as a _union type_ or _sum type_ in various languages.
+
+### Restriction of sealed types in Java
+
+They must have a base class that all the permitted types extend 
+(or a common interface that all permitted types must implement). 
+
+It is not possible to express a type that is "ISA-String-OR-Integer", 
+because the types `String` and `Integer` have no common inheritance relationship apart from Object.
+
+Some other languages do permit the construction of general union types, but it’s not possible in Java.
+
 ### 
+
+- [Using `isntanceof` operator]
+
+
+### Limitations of instanceof
+
+`instanceof` operator implies a lack of preciseness in the types of objects and 
+possibly in the choice of parameter types. 
+However, in practice, in some scenarios the developer must confront an object that has a type that 
+is not fully known at compile time. 
+
+### Pattern Matching for `instanceof`
+
+It is very important to understand that this is a different usage of pattern matching than that 
+used in text processing and regular expressions.
+
+In this context, a pattern is a combination of the following two things:
+- A predicate (aka test) that will be applied to a value
+- A set of local variables, known as pattern variables, that are to be extracted from the value
+
+The key point is that the pattern variables are extracted only if the predicate is successfully applied to the value.
+In Java 17, the instanceof operator has been extended to take either a type or a type pattern, 
+where a type pattern consists of a predicate that specifies a type, along with a single pattern variable.
+
+[See Pattern Matching for `instanceof` example](faq.java.language.md#pattern-matching-for-instanceof)
