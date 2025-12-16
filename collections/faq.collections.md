@@ -9,7 +9,7 @@
 - [Iteration via collection of elements, API methods](#iteration-via-collection-of-elements-api-methods)
 - [Iterate over a collection and consume its elements one-by-one](#iterate-over-a-collection-and-consume-its-elements-one-by-one)
 - [What is used in `for` loops?](#what-is-used-in-for-loops)
-- [When `for` loop via explicit use of an iterator is necessary?](#when-for-loop-via-explicit-use-of-an-iterator-is-necessary-)
+- [When `for` loop via explicit use of an iterator is necessary?](#when-for-loop-via-explicit-use-of-an-iterator-is-necessary)
 - [What structural changes you could apply when iterate via `for`](#what-structural-changes-you-could-apply-when-iterate-via-for)
 - [Applying structural changes without iterators using, requirement](#applying-structural-changes-without-iterators-using-requirement)
 - [`java.util.Collection`, its API](#javautilcollection-its-api)
@@ -154,7 +154,7 @@ Using `Iterator`:
    The target of a foreach statement can be an array or any class that implements the interface `Iterable`. 
    Since the `Collection` interface extends Iterable, any set, list, or queue can be the target of foreach.
 
-### When `for` loop via explicit use of an iterator is necessary? 
+### When `for` loop via explicit use of an iterator is necessary?
 
 It is necessary when you want to make a structural change to a collection-broadly speaking, 
 adding or removing elements-in the course of iteration.
