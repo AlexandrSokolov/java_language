@@ -2,6 +2,7 @@
 - [What it means to be equal for two lists?](#what-it-means-to-be-equal-for-two-lists)
 - [`List.hashCode`](#listhashcode)
 - [`List` Interface Methods](#list-interface-methods)
+- [Methods Inherited from SequencedCollection and their List equivalents](#methods-inherited-from-sequencedcollection-and-their-list-equivalents)
 - [`List.remove`, what must you care about?](#listremove-what-must-you-care-about)
 - [Changes in list view and its backing list issue](#changes-in-list-view-and-its-backing-list-issue)
 - [`Iterator` vs. `ListIterator`](#iterator-vs-listiterator)
@@ -15,6 +16,9 @@
 - [`CopyOnWriteArrayList`](#copyonwritearraylist)
 - [Comparing List Implementations](#comparing-list-implementations)
 - [List implementation choice](#list-implementation-choice)
+- [ArrayList vs LinkedList](#arraylist-vs-linkedlist)
+- [Using LinkedList instead of ArrayList if the insertions and removals are at the start of the list](#using-linkedlist-instead-of-arraylist-if-the-insertions-and-removals-are-at-the-start-of-the-list)
+- [Using `ArrayDeque` for random access](#using-arraydeque-for-random-access)
 
 ### Lists, its purpose, compare with other collections
 
@@ -57,9 +61,10 @@ or `-1` if the object is not present.
 - `ListIterator<E> listIterator()` return a `ListIterator` for this list, initially positioned at index 0
 - `ListIterator<E> listIterator(int idx)` return a `ListIterator` for this list, initially positioned at index `idx`
 
-#### Methods Inherited from SequencedCollection
+#### [Methods Inherited from SequencedCollection](#methods-inherited-from-sequencedcollection-and-their-list-equivalents)
 
-SequencedCollection method calls, with their List equivalents:
+
+### Methods Inherited from SequencedCollection and their List equivalents
 
 | SequencedCollection call | List positional access call |
 |:-------------------------|:----------------------------|
@@ -174,7 +179,7 @@ This cost may be acceptable if changes to the set of observers occur only rarely
 |                        | get  | add   | add(int,e) | contains | iterator.next | remove(0) | iterator.remove                 |
 |:-----------------------|:-----|:------|:-----------|:---------|:--------------|:----------|:--------------------------------|
 | `ArrayList`            | O(1) | O(1)  | O(N)       | O(N)     | O(1)          | O(N)      | O(N)                            |
-| `LinkedList`           | O(1) | O(1)  | O(1)(a)    | O(N)     | O(1)          | O(1)      | O(1) (a)                        |
+| `LinkedList`           | O(N) | O(1)  | O(1)(a)    | O(N)     | O(1)          | O(1)      | O(1) (a)                        |
 | `CopyOnWriteArrayList` | O(1) | 	O(N) | O(N)       | O(N)     | O(1)          | O(N)      | `UnsupportedOperationException` |
 
 (a) The complexity measures of `O(1)` for the operations `add(int,e)` and `iterator.remove` for `LinkedList` 
@@ -189,16 +194,22 @@ As always, if in doubt, measure your application's performance with each impleme
 If so, you should use `CopyOnWriteArrayList`, if you can - that is, if writes to the list will be relatively infrequent. 
 If not, you will have to use a synchronized wrapper around `ArrayList` or `LinkedList`.
 
-#### ArrayList vs LinkedList
+### ArrayList vs LinkedList
 
-#### to frequently insert and remove elements near the start of the list
-`LinkedList` is the better choice. In practice, however, this is rarely the case.
+- ArrayList is better for random access and scenarios where you mostly read elements.
+- LinkedList is better for frequent insertions/deletions in the middle of the list. 
+  In practice, however, this is rarely the case.
 
-If the insertions and removals are actually at the start of the list, 
-an alternative better worth considering for single-threaded code is to write to the `Deque` interface, 
-taking advantage of its very efficient `ArrayDeque` implementation.
+### Using LinkedList instead of ArrayList if the insertions and removals are at the start of the list
 
-#### for random access
+If you only:
+- need fast insertions/removals at both ends (complexity - O(1) amortized) and 
+- don’t need random access, ArrayDeque is usually better.
+It’s implemented as a resizable array, optimized for queue operations.
+
+Lower memory overhead compared to LinkedList.
+
+### Using `ArrayDeque` for random access
 
 For relatively infrequent random access, use:
 - an iterator, or
