@@ -2,6 +2,7 @@
 - [Java Collections Framework](#java-collections-framework)
 - [The Main Interfaces of the Java Collections Framework](#the-main-interfaces-of-the-java-collections-framework)
 - [Sequenced Collections, the purpose, compare with other types](#sequenced-collections-purpose-compare-with-other-types)
+- [Sequenced collections order types](#sequenced-collections-order-types)
 - [Hierarchy for Sequenced Collections](#hierarchy-for-sequenced-collections)
 - [Externally ordered collections](#externally-ordered-collections)
 - [Internally ordered collections](#internally-ordered-collections)
@@ -76,6 +77,8 @@ specifying and implementing common data structures, following consistent design 
 These sequenced collections differ from:
 - `Collection`, `Set`, or `Map` in that they have a defined _order_, called in the documentation an _encounter order_.
 - `Queue`, which also has a defined _order_, in that they can be iterated in either direction.
+
+### Sequenced collections order types
 
 The ordering of sequenced collections can be derived in two different ways: 
 1. for some, like `List`, elements retain the order in which they were added (sometimes called externally ordered types), 
