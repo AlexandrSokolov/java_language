@@ -9,7 +9,6 @@
 - [Pessimistic-style atomic operations](#pessimistic-style-atomic-operations)
 - [Optimistic-style atomic operations, idea](#optimistic-style-atomic-operations-idea)
 - [Optimistic-style atomic operations](#optimistic-style-atomic-operations)
-- [Rule of Thumb on optimistic-style atomic operations](#rule-of-thumb-on-optimistic-style-atomic-operations)
 - [Views methods of `Map` interface](#views-methods-of-map-interface)
 - [Factory Methods of `Map` interface](#factory-methods-of-map-interface)
 - [How to get the old value and put the new one into the map?](#how-to-get-the-old-value-and-put-the-new-one-into-the-map)
@@ -139,6 +138,8 @@ They fall into two groups, corresponding to the two different styles of locking,
 - [Optimistic-style atomic operations](#optimistic-style-atomic-operations)
 
 ### Pessimistic-style atomic operations
+
+Pessimistic-style operations - assuming conflicts are frequent (safe but less concurrent).
 These are essential in multithreaded environments to avoid unsafe test-then-act operation sequences.
 They are also very useful as convenience methods for non-thread-safe maps.
 - `V getOrDefault(Object k, V defaultValue)` - return the value to which k is mapped, 
@@ -162,6 +163,9 @@ They are also very useful as convenience methods for non-thread-safe maps.
 
 ### Optimistic-style atomic operations, idea
 
+Optimistic-style operations - lets operations proceed without locks and checks for conflicts (like version changes) 
+only at commit time, assuming conflicts are rare (faster but requires retries).
+
 These methods support the optimistic style of concurrent locking. 
 See [“Mechanisms of concurrent collections”](todo). 
 The uses of these conditional update methods are probably fairly narrow in non-concurrent systems,
@@ -173,7 +177,7 @@ However, a second concurrent caller might also fetch value `A` and start working
 and eventually it may want to update the value to value `C`; 
 thus, the callers’ updates are racing.
 
-In order to avoid conflicting updates, the callers can use the replace(K,V,V) method. 
+In order to avoid conflicting updates, the callers can use the `replace(K,V,V)` method. 
 This performs an update and returns true only when the current value in the map matches the first argument. 
 Otherwise, the method does nothing and returns false. 
 Callers are expected to pass the previous expected value as the first argument. 
@@ -183,20 +187,14 @@ and the method will return false. At that point the “losing” caller is expec
 possibly discarding work that it might have performed based on the original value.
 
 ### Optimistic-style atomic operations
-- `V replace(K k, V newValue)` - replace existing value for k, provided k is currently in the map; 
-  return the old value, or null if k was not present
-- `boolean replace(K k, V oldValue, V newValue)` - replace existing value for k, 
-  provided it is currently mapped to oldValue; return true if oldValue was replaced
+- `V replace(K k, V newValue)` - performs an unconditional state change,
+  modifying an existing mapping without the risk of creating a new one.
+  Its complement is `putIfAbsent`, which will not modify an existing mapping but only create a new one.
+- `boolean replace(K k, V oldValue, V newValue)` - performs an update and returns true only when the current value
+  in the map matches the first argument. Otherwise, the method does nothing and returns false.
 - `boolean remove(Object key, Object value)` - remove the entry for this key if it is mapped to this value, 
-  returning true if the operation succeeded
-
-### Rule of Thumb on optimistic-style atomic operations
-- `replace(K,V,V)` - performs an update and returns true only when the current value 
-   in the map matches the first argument. Otherwise, the method does nothing and returns false.
-- `replace(K,V)` - performs an unconditional state change, 
-   modifying an existing mapping without the risk of creating a new one. 
-   Its complement is `putIfAbsent`, which will not modify an existing mapping but only create a new one.
-- `remove(K,V)` - effects a conditional state change to a terminal state in which the mapping is removed
+  returning true if the operation succeeded. 
+  Effects a conditional state change to a terminal state in which the mapping is removed
 
 ### Views methods of `Map` interface
 - `Set<Map.Entry<K,V>> entrySet()` - return a Set view of the associations

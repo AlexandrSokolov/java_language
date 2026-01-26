@@ -65,6 +65,8 @@
 A queue is a collection designed to hold elements for processing, yielding them up in the order in which they are to be processed. 
 ```
 
+"yielding them up" - giving the elements out when someone asks for them.
+
 ### What is specific about queues among other Java collections?
 
 Queue is different in kind from the other collections. 
