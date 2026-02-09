@@ -1,86 +1,11 @@
-## Java Maps, its API
-- [A Map, its purpose and performance characteristics](#a-map-its-purpose-and-performance-characteristics)
-- [How to determine whether two Java maps are equal?](#how-to-determine-whether-two-java-maps-are-equal)
-- [The hash code of a Map](#the-hash-code-of-a-map)
-- [Groups of `Map` Interface Methods](#groups-of-map-interface-methods)
-- [Iterable-like operations of `Map` interface](#iterable-like-operations-of-map-interface)
-- [Collection-like operations of `Map` interface](#collection-like-operations-of-map-interface)
-- [Compound operations of `Map` interface](#compound-operations-of-map-interface)
-- [Pessimistic-style atomic operations](#pessimistic-style-atomic-operations)
-- [Optimistic-style atomic operations, idea](#optimistic-style-atomic-operations-idea)
-- [Optimistic-style atomic operations](#optimistic-style-atomic-operations)
-- [Views methods of `Map` interface](#views-methods-of-map-interface)
-- [Factory Methods of `Map` interface](#factory-methods-of-map-interface)
-- [How to get the old value and put the new one into the map?](#how-to-get-the-old-value-and-put-the-new-one-into-the-map)
-- [Using null values in a Map](#using-null-values-in-a-map)
-- [Views, what must you remember about when apply changes?](#views-what-must-you-remember-about-when-apply-changes)
-- [Removing a key from the set returned by `keySet`](#removing-a-key-from-the-set-returned-by-keyset)
-- [Removing a value from the collection returned by `values`](#removing-a-value-from-the-collection-returned-by-values)
-- [Using an iterator over the view](#using-an-iterator-over-the-view)
-- [Compound Operations, history](#compound-operations-history)
-- [You want to use a default value for all the keys without storing that value in the map](#you-want-to-use-a-default-value-for-all-the-keys-without-storing-that-value-in-the-map)
-- [You want to write something the first time you see it but not thereafter](#you-want-to-write-something-the-first-time-you-see-it-but-not-thereafter)
-- [What issue exist with `putIfAbsent`?](#what-issue-exist-with-putifabsent)
-- [Into a map of a key to a list mappings add a new list and then add a value into that list](#into-a-map-of-a-key-to-a-list-mappings-add-a-new-list-and-then-add-a-value-into-that-list)
-- [How to apply some logic and remove entry? Give an example](#how-to-apply-some-logic-and-remove-entry-give-an-example)
-- [How to either initialize an entry value to a given string `msg` or append a new value to an existing one?](#how-to-either-initialize-an-entry-value-to-a-given-string-msg-or-append-a-new-value-to-an-existing-one)
-- [What used for accumulating values based on the key’s properties and any previous value?](#what-used-for-accumulating-values-based-on-the-keys-properties-and-any-previous-value)
-- [`Map.merge` vs `Map.compute`](#mapmerge-vs-mapcompute)
-- [`Map.compute` vs `Map.computeIfPresent` vs `Map.computeIfAbsent`](#mapcompute-vs-mapcomputeifpresent-vs-mapcomputeifabsent)
-- [`Map.Entry` interface, its methods](#mapentry-interface-its-methods)
-- [Iteration over entries, returned by `entrySet`, recommendations](#iteration-over-entries-returned-by-entryset-recommendations)
-- [How to create `Map.Entry`?](#how-to-create-mapentry)
+## Java Maps, API
 
-## Java Maps interfaces and implementations
-- [Hierarchy of Map Implementations](#hierarchy-of-map-implementations)
-- [Constructors for Map implementations](#constructors-for-map-implementations)
-- [`HashMap`, its performance and its iterators](#hashmap-its-performance-and-its-iterators)
-- [`WeakHashMap`, its purpose](#weakhashmap-its-purpose)
-- [`WeakHashMap` implementation details](#weakhashmap-implementation-details)
-- [`WeakHashMap` performance](#weakhashmap-performance)
-- [`IdentityHashMap`, idea, its purpose, use-cases](#identityhashmap-idea-its-purpose-use-cases)
-- [`EnumMap`](#enummap)
-- [UnmodifiableMap, idea, creation, performance](#unmodifiablemap-idea-creation-performance)
-- [Hierarchy of `SequencedMap` and related types](#hierarchy-of-sequencedmap-and-related-types)
-- [`SequencedMap`](#sequencedmap)
-- [`SequencedMap` API](#sequencedmap-api)
-- [`SequencedMap` view-generating methods](#sequencedmap-view-generating-methods)
-- [Direct `SequencedMap` implementations](#direct-sequencedmap-implementations)
-- [`LinkedHashMap`](#linkedhashmap)
-- [`LinkedHashMap` iteration, compare with `LinkedHashSet`](#linkedhashmap-iteration-compare-with-linkedhashset)
-- [Iteration over a collection of keys or values returned by a `LinkedHashMap`](#iteration-over-a-collection-of-keys-or-values-returned-by-a-linkedhashmap)
-- [An access-ordered `LinkedHashMap`, its purpose](#an-access-ordered-linkedhashmap-its-purpose)
-- [`NavigableMap`](#navigablemap)
-- [`SequencedMap::putFirst` for `TreeMap`](#sequencedmapputfirst-for-treemap)
-- [`NavigableMap` methods API](#navigablemap-methods-api)
-- [`NavigableMap` methods that return range views](#navigablemap-methods-that-return-range-views)
-- [NavigableMap methods that return entries and key views in different orders](#navigablemap-methods-that-return-entries-and-key-views-in-different-orders)
-- [Why `keySet` method, inherited from `Map`, could not simply be overridden using a covariant return type to return a `NavigableSet`?](#why-keyset-method-inherited-from-map-could-not-simply-be-overridden-using-a-covariant-return-type-to-return-a-navigableset)
-- [`NavigableMap` implementations](#navigablemap-implementations)
-- [`TreeMap`](#treemap)
-- [`TreeMap` construction](#treemap-construction)
-- [`TreeMap` performance and its iterators](#treemap-performance-and-its-iterators)
-
-## Map for multithreaded context
-- [Map interfaces for concurrent environment](#map-interfaces-for-concurrent-environment)
-- [`ConcurrentMap`](#concurrentmap)
-- [Concurrent map implementations](#concurrent-map-implementations)
-- [`ConcurrentHashMap`](#concurrenthashmap)
-- [`ConcurrentHashMap` creation issue](#concurrenthashmap-creation-issue)
-- [When `ConcurrentHashMap` should be used? What must you care about?](#when-concurrenthashmap-should-be-used-what-must-you-care-about)
-- [`ConcurrentHashMap` performance and its iterators](#concurrenthashmap-performance-and-its-iterators)
-- [`ConcurrentNavigableMap`, purpose](#concurrentnavigablemap-purpose)
-- [Range-view methods of `ConcurrentNavigableMap` vs `NavigableMap`](#range-view-methods-of-concurrentnavigablemap-vs-navigablemap)
-- [`ConcurrentNavigableMap` implementations](#concurrentnavigablemap-implementations)
-- [`ConcurrentSkipListMap`, idea, performance, iterators](#concurrentskiplistmap-idea-performance-iterators)
-
-## Maps choice and practice questions
-- [Comparing Map Implementations](#comparing-map-implementations)
-- [Collecting streams of elements into the Map](#collecting-streams-of-elements-into-the-map)
-
-## Java Maps, its API, answers
+<details>
+ <summary><strong>Show questions</strong></summary>
 
 ### A Map, its purpose and performance characteristics
+<details>
+ <summary>Show answer</summary>
 
 A Map stores key-to-value associations, or entries, in which the keys are unique. 
 Its implementations provide very fast - ideally, constant-time - operations 
@@ -89,18 +14,31 @@ to look up the value corresponding to a given key.
 A Map is considered as a Set of map entries (key-value pairs).
 A map entry is defined by the `Map.Entry` interface.
 
+</details>
+
 ### How to determine whether two Java maps are equal?
+<details>
+ <summary>Show answer</summary>
 
 A `Map` can only ever be equal to another Map, and then only if they are the same size and contain equal entries.
 
+</details>
+
 ### The hash code of a Map
+<details>
+ <summary>Show answer</summary>
 
 The hash code of a Map is the sum of the hash codes of its entries.
 
+</details>
+
 ### Groups of `Map` Interface Methods
+<details>
+ <summary>Show answer</summary>
+
 - [Iterable-like operations](#iterable-like-operations-of-map-interface)
 - [Collection-like operations of `Map` interface](#collection-like-operations-of-map-interface)
-- [Compound operations of `Map` interface](#compound-operations-of-map-interface)
+- [Compound operations of `Map` interface](#groups-of-compound-operations)
 - [Views methods of `Map` interface](#views-methods-of-map-interface)
 - [Factory Methods of `Map` interface](#factory-methods-of-map-interface)
 
@@ -108,18 +46,27 @@ Mnemonic by first letters:
 `I-C-C-V-F` -> _I Collect Cool View Factories._
 (Imagine a collector who loves cool views and factories.)
 
+</details>
+
 ### Iterable-like operations of `Map` interface
+<details>
+ <summary>Show answer</summary>
+
 - `void forEach(BiConsumer<K,V> action)` - perform action on each entry in the map, 
   in the iteration order of the entry set if that is specified.
   In the same way that `Iterable::forEach`
 
+</details>
+
 ### Collection-like operations of `Map` interface
+<details>
+ <summary>Show answer</summary>
 
 #### Adding or replacing associations:
 - `V put(K key, V value)` - add or replace a key-value association; 
   return the old value if the key was present, otherwise null 
 - `void putAll(Map<K,V> m)` - copy all the mappings in m into the receiver
-- `void replaceAll(BiFunction<K,V,V> remapper)` - replace each value with the result of invoking remapper
+- `void replaceAll(BiFunction<K,V,V>; remapper)` - replace each value with the result of invoking remapper
 #### Removing associations:
 - `void clear()` - remove all associations from this map
 - `V remove(Object key)` - remove the association, if any, with the given key; 
@@ -131,13 +78,21 @@ Mnemonic by first letters:
 - `int size()` return the number of associations
 - `boolean isEmpty()` return true if there are no associations
 
-### Compound operations of `Map` interface
+</details>
+
+### Groups of compound operations
+<details>
+ <summary>Show answer</summary>
 
 They fall into two groups, corresponding to the two different styles of locking, pessimistic and optimistic:
 - [Pessimistic-style atomic operations](#pessimistic-style-atomic-operations)
 - [Optimistic-style atomic operations](#optimistic-style-atomic-operations)
 
+</details>
+
 ### Pessimistic-style atomic operations
+<details>
+ <summary>Show answer</summary>
 
 Pessimistic-style operations - assuming conflicts are frequent (safe but less concurrent).
 These are essential in multithreaded environments to avoid unsafe test-then-act operation sequences.
@@ -161,7 +116,11 @@ They are also very useful as convenience methods for non-thread-safe maps.
    and return the result; 
    if the computed result is `null`, remove the existing entry and return `null`
 
+</details>
+
 ### Optimistic-style atomic operations, idea
+<details>
+ <summary>Show answer</summary>
 
 Optimistic-style operations - lets operations proceed without locks and checks for conflicts (like version changes) 
 only at commit time, assuming conflicts are rare (faster but requires retries).
@@ -186,7 +145,12 @@ The caller that “loses” will see a different value from its original value, 
 and the method will return false. At that point the “losing” caller is expected to retry its operation, 
 possibly discarding work that it might have performed based on the original value.
 
+</details>
+
 ### Optimistic-style atomic operations
+<details>
+ <summary>Show answer</summary>
+
 - `V replace(K k, V newValue)` - performs an unconditional state change,
   modifying an existing mapping without the risk of creating a new one.
   Its complement is `putIfAbsent`, which will not modify an existing mapping but only create a new one.
@@ -196,25 +160,45 @@ possibly discarding work that it might have performed based on the original valu
   returning true if the operation succeeded. 
   Effects a conditional state change to a terminal state in which the mapping is removed
 
+</details>
+
 ### Views methods of `Map` interface
+<details>
+ <summary>Show answer</summary>
+
 - `Set<Map.Entry<K,V>> entrySet()` - return a Set view of the associations
 - `Set<K> keySet()` - return a Set view of the keys
 - `Collection<V> values()` - return a Collection view of the values
 
+</details>
+
 ### Factory Methods of `Map` interface
+<details>
+ <summary>Show answer</summary>
 
 TODO add factory methods for all maps classes
-These methods create unmodifiable Map objects. See [`UnmodifiableMap`](todo)
-static <K,V> LinkedHashMap<K,V> newLinkedHashMap(int numMappings)
-Map.of(...)
-Map.ofEntries(...)
-Map.copyOf(Map<? extends K, ? extends V> map)
+
+These methods create unmodifiable Map objects. 
+See [`UnmodifiableMap`](todo)
+- `static <K,V> LinkedHashMap<K,V> newLinkedHashMap(int numMappings)`
+- `Map.of(...)`
+- `Map.ofEntries(...)`
+- `Map.copyOf(Map<? extends K, ? extends V> map)`
+
+</details>
 
 ### How to get the old value and put the new one into the map?
+<details>
+ <summary>Show answer</summary>
+
 `V put(K key, V value)` add or replace a key-value association; 
 return the old value if the key was present, otherwise null.
 
+</details>
+
 ### Using null values in a Map
+<details>
+ <summary>Show answer</summary>
 
 The contracts for `put`, `remove`, and `get` present a problem with `null`-tolerant maps: 
 a returned `null` for a map key can signify:
@@ -234,29 +218,50 @@ This is [the _TOCTOU_ problem](todo).
 
 The design decision to allow null values in maps is evaluated in [nulls](todo).
 
+</details>
+
 ### Views, what must you remember about when apply changes?
+<details>
+ <summary>Show answer</summary>
 
 The view collections returned by `entrySet`, `keySet`, `values` methods are backed by the map, 
 so they reflect changes to the map. 
 
 The connection in the opposite direction is more limited: 
 you can remove elements from the view collections, 
-but attempting to add elements will result in an `UnsupportedOperationException`. 
+but attempting to add elements will result in an `UnsupportedOperationException`.
+
+</details>
 
 ### Removing a key from the set returned by `keySet`
+<details>
+ <summary>Show answer</summary>
 
 Removing a key from the `keyset` removes the single corresponding key-value association.
 
+</details>
+
 ### Removing a value from the collection returned by `values`
+<details>
+ <summary>Show answer</summary>
+
 Removing a value from the collection returned by `values`, on the other hand,
 removes only one of the associations mapping to it;
 the value may still be present as part of an association with a different key.
 
+</details>
+
 ### Using an iterator over the view
+<details>
+ <summary>Show answer</summary>
 
 An iterator over the view will become undefined if the backing map is concurrently modified.
 
+</details>
+
 ### Compound Operations, history
+<details>
+ <summary>Show answer</summary>
 
 Because maps are very often used in multithreaded environments, 
 the interface exposes a variety of compound actions. 
@@ -272,12 +277,20 @@ when that was introduced in the `java.util.concurrent` package.
 Later, the introduction of default methods in Java 8 allowed the `Map` interface to be extended to include them, 
 and new ones were added to both `Map` and `ConcurrentMap`.
 
+</details>
+
 ### You want to use a default value for all the keys without storing that value in the map
+<details>
+ <summary>Show answer</summary>
 
 If a map has values only for certain keys, the `getOrDefault` method allows you to use a default value 
 for all other keys without having to store that value in the map against them all.
 
+</details>
+
 ### You want to write something the first time you see it but not thereafter
+<details>
+ <summary>Show answer</summary>
 
 `putIfAbsent` is useful if you want to write something the first time you see it but not thereafter. 
 For example, to record the timestamp corresponding to the first occurrence of a particular kind of event, 
@@ -289,12 +302,18 @@ Map<EventKind,Long> firstOccurrenceMap = ... ;
 firstOccurrenceMap.putIfAbsent(event.getKind(), System.currentTimeMillis());
 ```
 
+</details>
+
 ### What issue exist with `putIfAbsent`?
+<details>
+ <summary>Show answer</summary>
+
 ```java
 Map<EventKind,Long> firstOccurrenceMap = ... ;
 ...
 firstOccurrenceMap.putIfAbsent(event.getKind(), System.currentTimeMillis());
 ```
+
 In this example, the overhead of boxing the timestamp into a Long will be incurred for every event, not only the first. 
 You will usually want to avoid this performance cost by using another compound method, `computeIfAbsent`, 
 which computes the new value lazily:
@@ -304,17 +323,27 @@ firstOccurrenceMap.computeIfAbsent(event.getKind(),
   key -> System.currentTimeMillis());
 ```
 
-### Into a map of a key to a list mappings add a new list and then add a value into that list
+</details>
+
+
+### How to add an element to a `Map<K, List<V>>` - creating the list on first insert?
+<details>
+ <summary>Show answer</summary>
 
 ```java
 map.computeIfAbsent(key, k -> new ArrayList<V>()).add(newValue);
 ```
+
 - For the missing key k, create a new empty `ArrayList<V>` and associate it with that key.
   So after `computeIfAbsent` call, you are guaranteed that `map.get(key)` returns a non-null `ArrayList<V>`.
 - The result of `computeIfAbsent` is the list associated with the key. 
   Then `.add(newValue)` adds the new element to that list.
 
+</details>
+
 ### How to apply some logic and remove entry? Give an example
+<details>
+ <summary>Show answer</summary>
 
 In the same way that `computeIfAbsent` is most useful where it may be necessary to add a new key, 
 `computeIfPresent` can be used to remove an existing one. 
@@ -326,22 +355,32 @@ and only the first - of each kind in this later phase triggers
 the writing of a log entry with the previously recorded timestamp. 
 
 We can do that as follows:
+
 ```java
 firstOccurrenceMap.computeIfPresent(event.getKind(), (kind, timestamp) -> {
   log.info("first occurrence of event " + kind + " was at " + timestamp);
   return null;
 });
 ```
+
 Returning `null` from the lambda ensures that the key will be removed from the map 
 so that the log message can only be triggered once for each kind of event.
 
+</details>
+
 ### How to either initialize an entry value to a given string `msg` or append a new value to an existing one?
+<details>
+ <summary>Show answer</summary>
 
 ```java
 map.merge(key, msg, String::concat);
 ```
 
+</details>
+
 ### What used for accumulating values based on the key’s properties and any previous value?
+<details>
+ <summary>Show answer</summary>
 
 `Map.compute`
 
@@ -352,20 +391,29 @@ map.compute(word, (s,i) -> s.length() + (i == null ? 0 : i));
 ```
 
 Full example:
+
 ```java
 Map<String, Integer> map = new HashMap<>();
 map.compute("apple", (s, i) -> s.length() + (i == null ? 0 : i));
 map.compute("banana", (s, i) -> s.length() + (i == null ? 0 : i));
 // map ==> {banana=6, apple=5}
+
 ```
 
+
+</details>
+
 ### `Map.merge` vs `Map.compute`
+<details>
+ <summary>Show answer</summary>
 
 `compute`, is similar to `merge`, but with the difference that instead of an initial value, 
 it allows the contents of the `key` to be used in a lazy computation of the new value:
+
 ```java
 map.compute(word, (s,i) -> s.length() + (i == null ? 0 : i));
 ```
+
 - Use `merge` when you want to add or combine values (like counters or lists).
 - Use `compute` when you need full control and possibly use the key in the logic.
 
@@ -375,21 +423,34 @@ map.compute(word, (s,i) -> s.length() + (i == null ? 0 : i));
 | When key absent  | Function called with oldValue = null | Puts the given value directly           |
 | Typical use case | Complex logic based on key and value | Accumulating or combining values easily |
 
+</details>
+
 ### `Map.compute` vs `Map.computeIfPresent` vs `Map.computeIfAbsent`
+<details>
+ <summary>Show answer</summary>
+
 - `computeIfAbsent` - Use when you want to initialize a value if it’s missing
 - `computeIfPresent` - Use when you want to update an existing value only if it’s present.
 - `compute` - Use when you want full control over the value regardless of presence.
 
+</details>
+
 ### `Map.Entry` interface, its methods
+<details>
+ <summary>Show answer</summary>
 
 The members of the set returned by `entrySet` implement the interface `Map.Entry`, representing a key-value association. 
 This interface exposes:
 - factory methods for creating `Comparators` by key and value and 
 - instance methods for accessing the components of the entry.
 - An optional `setValue` method can be used to change the value in an entry if the backing map is modifiable, 
-  and if so will write changes through. 
+  and if so will write changes through.
+
+</details>
 
 ### Iteration over entries, returned by `entrySet`, recommendations
+<details>
+ <summary>Show answer</summary>
 
 According to the Javadoc, a `Map.Entry` object obtained by iterating over a set returned by `entrySet` 
 retains its connection only for the duration of the iteration, 
@@ -403,18 +464,37 @@ you would now be more likely to call `entrySet.removeIf`.
 Alternatively, and also for use cases in which you want to change association values, 
 the instance methods of `Map` provide a variety of ways to remove mappings or alter their values.
 
+</details>
+
 ### How to create `Map.Entry`?
+<details>
+ <summary>Show answer</summary>
 
 You can create `Map.Entry` objects using the `Map.entry` factory method; 
 this is most commonly useful for creating [unmodifiable Maps](todo).
 
+</details>
+
+</details>
+
+---
+
 ## Java Maps interfaces and implementations, answers
 
+<details>
+ <summary><strong>Show questions</strong></summary>
+
 ### Hierarchy of Map Implementations
+<details>
+ <summary>Show answer</summary>
 
 <img src="../../docs/images/Map_Implementations_Hierarchy.png" alt="Map implementations" width="600">
 
+</details>
+
 ### Constructors for Map implementations
+<details>
+ <summary>Show answer</summary>
 
 `HashMap`, `LinkedHashMap`, and `WeakHashMap` have other constructors for configuration purposes, 
 but these have been replaced in practice by factory methods, 
@@ -423,7 +503,11 @@ for the reasons described in ["creation of `HashSet`"](../sets/faq.sets.md#creat
 `static <K,V> HashMap<K,V> HashMap::newHashMap(int numElements)`
 static <K,V> WeakHashMap<K,V> newWeakHashMap(int numMappings)
 
+</details>
+
 ### `HashMap`, its performance and its iterators
+<details>
+ <summary>Show answer</summary>
 
 `HashMap` implemented based on hash tables with the related performance.
 
@@ -437,7 +521,11 @@ to the capacity of the map plus the number of key-value mappings that it contain
 
 The iterators are fail-fast.
 
+</details>
+
 ### `WeakHashMap`, its purpose
+<details>
+ <summary>Show answer</summary>
 
 Most maps keep ordinary (“strong”) references to all the objects they contain. 
 That means that even when a key has become unreachable by any means other than through the map itself, 
@@ -446,20 +534,32 @@ So preserving entries unnecessarily has the potential to degrade garbage collect
 The idea behind `WeakHashMap` is to avoid this situation by allowing a mapping and its referenced objects 
 to be reclaimed once the key is no longer reachable in the application.
 
+</details>
+
 ### `WeakHashMap` implementation details
+<details>
+ <summary>Show answer</summary>
 
 Internally, `WeakHashMap` holds references to its key objects through objects of the class `java.lang.ref.WeakReference`. 
 A [`WeakReference`](../../references_caches/faq.references_caches.md#weakreference) 
-introduces an extra level of indirection in reaching an object. 
+introduces an extra level of indirection in reaching an object.
+
+</details>
 
 ### `WeakHashMap` performance
+<details>
+ <summary>Show answer</summary>
 
 `WeakHashMap` performs similarly to `HashMap`, 
 though more slowly because of the overheads of the extra level of indirection for keys. 
 The cost of clearing out unwanted key-value associations before each operation is proportional 
-to the number of associations that need to be removed because the garbage collector has reclaimed the key. 
+to the number of associations that need to be removed because the garbage collector has reclaimed the key.
+
+</details>
 
 ### `IdentityHashMap`, idea, its purpose, use-cases
+<details>
+ <summary>Show answer</summary>
 
 `IdentityHashMap` for the equivalence relation on its keys, it uses the identity relation. 
 In other words, every physically distinct object is a distinct key.
@@ -489,7 +589,11 @@ Use Case:
 - Object Graph Serialization
 - Detect Cycles in Object Graph
 
+</details>
+
 ### `EnumMap`
+<details>
+ <summary>Show answer</summary>
 
 Implementing a mapping from an enumerated type is straightforward and very efficient.
 In an array implementation, the `ordinal` value of each enumerated type constant can serve 
@@ -500,7 +604,11 @@ in the enumerated type and returns the keys in their natural order (the order in
 
 Iterators over the collection views of this class are weakly consistent.
 
+</details>
+
 ### UnmodifiableMap, idea, creation, performance
+<details>
+ <summary>Show answer</summary>
 
 The properties of the members of this family are described in the Javadoc for Map:
 - They are unmodifiable; keys and values cannot be added or removed.
@@ -524,18 +632,30 @@ With a `hashCode` function that provides good distribution, lookup is `O(1)`.
 As with `UnmodifiableSet`, and for the same reason, 
 the order of iteration over the entry or key set is randomly determined for each virtual machine instance.
 
+</details>
+
 ### Hierarchy of `SequencedMap` and related types
+<details>
+ <summary>Show answer</summary>
 
 - [`SequencedMap`](#sequencedmap)
 - [`NavigableMap`](#navigablemap)
 
 <img src="../../docs/images/SequencedMap_Hierarchy.png" alt="SequencedMap and related types" width="600">
 
+</details>
+
 ### `SequencedMap`
+<details>
+ <summary>Show answer</summary>
 
 A `SequencedMap` is a Map that maintains its entries in a defined order.
 
+</details>
+
 ### `SequencedMap` API
+<details>
+ <summary>Show answer</summary>
 
 #### Adding or updating entries
 - `V  putFirst(K k, V v)` - insert the given mapping, or updates it if it is already present
@@ -555,19 +675,37 @@ A `SequencedMap` is a Map that maintains its entries in a defined order.
 - `SequencedSet<K> sequencedkeySet()` return a `SequencedSet` view of the map’s keySet
 - `SequencedCollection<V> sequencedValues()` return a `SequencedCollection` view of the map’s values collection
 
+</details>
+
 ### `SequencedMap` view-generating methods
-[See view-generated methods](#view-generating-methods) 
+<details>
+ <summary>Show answer</summary>
+
+[See view-generated methods](#view-generating-methods)
+
+</details>
 
 ### Direct `SequencedMap` implementations
+<details>
+ <summary>Show answer</summary>
+
 - [`LinkedHashMap`](#linkedhashmap)
 
+</details>
+
 ### `LinkedHashMap`
+<details>
+ <summary>Show answer</summary>
 
 Like `LinkedHashSet`, the class `LinkedHashMap` refines the contract of its parent class, `HashMap`, 
 by guaranteeing the order in which iterators return its elements. 
 Also like `LinkedHashSet`, it implements the sequenced subinterface (`SequencedMap`) of its main interface.
 
+</details>
+
 ### `LinkedHashMap` iteration, compare with `LinkedHashSet`
+<details>
+ <summary>Show answer</summary>
 
 Unlike `LinkedHashSet`, however, `LinkedHashMap` offers a choice of iteration orders; 
 elements can be returned either:
@@ -576,25 +714,39 @@ elements can be returned either:
 
  
 An access-ordered `LinkedHashMap` is created by supplying an argument of true for the last parameter of the constructor:
+
 ```java
 public LinkedHashMap(int initialCapacity, float loadFactor, boolean accessOrder)
 ```
+
 Supplying false will give an insertion-ordered map. 
 The other constructors, which are just like those of `HashMap`, also produce insertion-ordered maps. 
 As with `LinkedHashSet`, iteration over a `LinkedHashMap` takes time proportional 
 only to the number of elements in the map, not its capacity.
 
+</details>
+
 ### Iteration over a collection of keys or values returned by a `LinkedHashMap`
+<details>
+ <summary>Show answer</summary>
 
 Iteration over a collection of keys or values returned by a `LinkedHashMap` is linear in the number of elements. 
 The iterators over such collections are fail-fast.
 
+</details>
+
 ### An access-ordered `LinkedHashMap`, its purpose
+<details>
+ <summary>Show answer</summary>
 
 Access-ordered maps are especially useful for constructing 
 [least recently used (LRU) caches](../../references_caches/faq.references_caches.md#an-access-ordered-linkedhashmap-its-purpose).
 
+</details>
+
 ### `NavigableMap`
+<details>
+ <summary>Show answer</summary>
 
 A `NavigableMap` is a `SequencedMap` whose keys form a `NavigableSet` so that its entries are automatically sorted 
 by the key ordering and its methods can find keys and key-value pairs adjacent to a target key value.
@@ -608,15 +760,23 @@ The equivalence relation on the keys of a NavigableMap is again defined by the o
 two keys that compare as equal—that is, 
 for which the comparison method returns 0—will be regarded as duplicates by a NavigableMap
 
+</details>
+
 ### `SequencedMap::putFirst` for `TreeMap`
+<details>
+ <summary>Show answer</summary>
 
 In the case of an internally ordered implementation like `TreeMap`, 
 both `SequencedMap::putFirst` and `SequencedMap::putLast` methods will throw `UnsupportedOperationException`.
 
+</details>
+
 ### `NavigableMap` methods API
+<details>
+ <summary>Show answer</summary>
 
 #### Retrieving the Comparator
-- `Comparator<? super K> comparator()` return the map’s key comparator if it has been given one, 
+- `Comparator&lt;? super K> comparator()` return the map’s key comparator if it has been given one, 
   instead of relying on the natural ordering of the keys; otherwise, return null
 
 #### Getting Range Views
@@ -651,19 +811,32 @@ both `SequencedMap::putFirst` and `SequencedMap::putLast` methods will throw `Un
 - `NavigableSet<K> descendingKeySet()` return a reverse-order key set
 - `NavigableSet<K> navigableKeySet()` return a forward-order key set
 
+</details>
+
 ### NavigableMap methods that return range views
+<details>
+ <summary>Show answer</summary>
 
 Each of the methods in this group appears in two overloads:
 - one inherited from `SortedMap` and returning a half-open SortedMap view, and 
 - one defined in `NavigableMap` and returning a `NavigableSet` view that can be open, half-open, or closed 
-  according to the user’s choice - provide more flexibility. 
+  according to the user’s choice - provide more flexibility.
+
+</details>
 
 ### NavigableMap methods that return entries and key views in different orders
+<details>
+ <summary>Show answer</summary>
+
 - `NavigableMap<K,V> descendingMap()` return a reverse-order view of the map
 - `NavigableSet<K> descendingKeySet()` return a reverse-order key set
 - `NavigableSet<K> navigableKeySet()` return a forward-order key set
 
+</details>
+
 ### Why `keySet` method, inherited from `Map`, could not simply be overridden using a covariant return type to return a `NavigableSet`?
+<details>
+ <summary>Show answer</summary>
 
 Indeed, the platform implementations of `NavigableMap::keySet` do return a `NavigableSet`. 
 But there is a compatibility concern: 
@@ -672,10 +845,19 @@ any existing `TreeMap` subclasses that override that method would fail to compil
 unless they too changed their return type.
 [See _Maintain Binary Compatibility_](todo)
 
+</details>
+
 ### `NavigableMap` implementations
+<details>
+ <summary>Show answer</summary>
+
 - [`TreeMap`](#treemap)
 
+</details>
+
 ### `TreeMap`
+<details>
+ <summary>Show answer</summary>
 
 In fact, the internal representation of a `TreeSet` is just a `TreeMap` in which every key 
 is associated with the same standard value, 
@@ -683,7 +865,11 @@ so the explanation of the mechanism and performance of red-black trees
 [given there](../sets/faq.sets.md#what-data-structure-is-backed-by-treeset-its-properties)
 applies equally here.
 
+</details>
+
 ### `TreeMap` construction
+<details>
+ <summary>Show answer</summary>
 
 The constructors for `TreeMap` include, besides the standard ones, 
 one that allows you to supply a `Comparator` and one that allows you to create a `TreeMap` from another `NavigableMap` 
@@ -700,33 +886,62 @@ always uses the natural ordering of the keys,
 so if you supply a reference to a `SortedMap` to the conversion constructor of `TreeMap`, 
 the ordering of the constructed map will depend on the static type of that reference.
 
+</details>
+
 ### `TreeMap` performance and its iterators
+<details>
+ <summary>Show answer</summary>
 
 `TreeMap` has similar performance characteristics to `TreeSet`: 
 the basic operations (get, put, and remove) perform in O(log N) time. 
 
 The collection view iterators are fail-fast.
 
+</details>
+
+</details>
+
+---
+
 ## Map for multithreaded context, answers
 
+<details>
+ <summary><strong>Show questions</strong></summary>
+
 ### Map interfaces for concurrent environment
+<details>
+ <summary>Show answer</summary>
 
 - [`ConcurrentMap`](#concurrentmap)
-- [`ConcurrentNavigableMap`](#concurrentnavigablemap)
+- [`ConcurrentNavigableMap`](#concurrentnavigablemap-purpose)
+
+</details>
 
 ### ConcurrentMap
+<details>
+ <summary>Show answer</summary>
+
 `ConcurrentMap` - It provided declarations for four methods:
 `putIfAbsent`, `remove`, and two overloads of `replace` - that perform compound operations atomically. 
-At Java 8, new [compound operations](#compound-operations) were introduced, 
+At Java 8, new [compound operations](#groups-of-compound-operations) were introduced, 
 and `ConcurrentMap` was provided with default implementations for these. 
 However, the existing four compound methods were promoted to the `Map` interface, 
 so `ConcurrentMap` no longer exposes any new functionality
 
+</details>
+
 ### Concurrent map implementations
+<details>
+ <summary>Show answer</summary>
+
 - [`ConcurrentHashMap`](#concurrenthashmap) - implementation of `ConcurrentMap`
 - [`ConcurrentSkipListMap`](#concurrentskiplistmap-idea-performance-iterators) - implementation of `ConcurrentNavigableMap`
 
+</details>
+
 ### `ConcurrentHashMap`
+<details>
+ <summary>Show answer</summary>
 
 The class `ConcurrentHashMap` provides an implementation of `ConcurrentMap` and offers an effective solution 
 to the problem of reconciling throughput with thread safety. 
@@ -735,7 +950,11 @@ To allow for this, the contract states that the results of retrievals will refle
 completed before the start of the retrieval. 
 Concurrent updates can proceed safely, even while the table is being resized.
 
+</details>
+
 ### `ConcurrentHashMap` creation issue
+<details>
+ <summary>Show answer</summary>
 
 The constructors for `ConcurrentHashMap` are similar to those of `HashMap`, 
 but with an extra one that provides the programmer 
@@ -743,7 +962,11 @@ with the ability to hint to the implementation the expected number of concurrent
 (its concurrency level):
 - `ConcurrentHashMap(int initialCapacity, float loadFactor, int concurrencyLevel)`
 
+</details>
+
 ### When `ConcurrentHashMap` should be used? What must you care about?
+<details>
+ <summary>Show answer</summary>
 
 `ConcurrentHashMap` is a useful implementation of `Map` in any concurrent application 
 where it is unnecessary to lock the entire table; 
@@ -753,18 +976,30 @@ A map cannot be locked as a whole, so if it is undergoing concurrent updates it 
 while these methods are working. 
 In that case, their results will not reflect any consistent state and **should be treated as approximations**.
 
+</details>
+
 ### `ConcurrentHashMap` performance and its iterators
+<details>
+ <summary>Show answer</summary>
 
 Disregarding locking overheads, the cost of the operations of `ConcurrentHashMap` are similar to those of `HashMap`. 
 The collection views return weakly consistent iterators.
 
+</details>
+
 ### `ConcurrentNavigableMap`, purpose
+<details>
+ <summary>Show answer</summary>
 
 `ConcurrentNavigableMap` inherits from both `ConcurrentMap` and `NavigableMap`. 
 It contains just the methods of these two interfaces, with a few changes to make the return types more precise.
 The range-view methods inherited from `SortedMap` and `NavigableMap` now return views of type `ConcurrentNavigableMap`.
 
+</details>
+
 ### Range-view methods of `ConcurrentNavigableMap` vs `NavigableMap`
+<details>
+ <summary>Show answer</summary>
 
 The compatibility concerns that prevented `NavigableMap` from overriding the methods of `SortedMap` 
 don’t apply to overriding the range-view methods of `NavigableMap` or `SortedMap`; 
@@ -772,10 +1007,19 @@ because neither of these has any implementations that have been retrofitted to t
 the danger of breaking implementation subclasses does not arise. 
 For the same reason, it is now possible to override `keySet` to return `NavigableSet`.
 
+</details>
+
 ### `ConcurrentNavigableMap` implementations
+<details>
+ <summary>Show answer</summary>
+
 - [`ConcurrentSkipListMap`](#concurrentskiplistmap-idea-performance-iterators)
 
+</details>
+
 ### `ConcurrentSkipListMap`, idea, performance, iterators
+<details>
+ <summary>Show answer</summary>
 
 The relationship between `ConcurrentSkipListMap` and `ConcurrentSkipListSet` is like that 
 between `TreeMap` and `TreeSet`. 
@@ -787,12 +1031,20 @@ and iterators over the collection views execute next in constant time.
 
 These iterators are weakly consistent.
 
+</details>
 
+</details>
+
+---
 
 ## Maps choice and practice questions, answers
 
-### Comparing Map Implementations
+<details>
+ <summary><strong>Show questions</strong></summary>
 
+### Comparing Map Implementations
+<details>
+ <summary>Show answer</summary>
 
 | Map Type              | get      | containsKey | next     | Notes                     |
 |-----------------------|----------|-------------|----------|---------------------------|
@@ -805,7 +1057,11 @@ These iterators are weakly consistent.
 | ConcurrentHashMap     | O(1)     | O(1)        | O(h/N)   | *h* is the table capacity |
 | ConcurrentSkipListMap | O(log N) | O(log N)    | O(1)     |                           |
 
+</details>
+
 ### Collecting streams of elements into the Map
+<details>
+ <summary>Show answer</summary>
 
 When you collect stream(s) of elements into the Java map you need to think about if:
 - keys might be duplicated
@@ -852,3 +1108,9 @@ When you collect stream(s) of elements into the Java map you need to think about
           toList())));
     ```
    [See `MapsConcatenationTest.duplicatedKey_Grouping()`](src/test/java/com/savdev/maps/MapsConcatenationTest.java)
+
+</details>
+
+</details>
+
+---
