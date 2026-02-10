@@ -1,4 +1,4 @@
-Creating and Destroying Objects
+## Creating and Destroying Objects
 
 ### Java Object creations, ways
 <details><summary>Show answer</summary>
@@ -143,8 +143,7 @@ they care only that it is some subclass of EnumSet.
 Unlike constructors, with static factory methods the class of the returned object 
 need not exist when the class containing the method is written.
 
-Such flexible static factory methods form the basis of service provider frameworks, 
-like the Java Database Connectivity API (JDBC). 
+Such flexible static factory methods form the basis of service provider frameworks.
 A service provider framework is a system in which providers implement a service, 
 and the system makes the implementations available to clients, 
 decoupling the clients from the implementations.
@@ -161,6 +160,38 @@ There are three essential components in a service provider framework:
   which describes a factory object that produce instances of the service interface. 
   In the absence of a service provider interface, implementations must be instantiated reflectively. 
 
+</details>
+
+### Service provider frameworks examples
+<details><summary>Show answer</summary>
+
+- [Java Logging](#java-logging-and-its-component-roles-in-a-service-provider-framework)
+- [the Java Database Connectivity API (JDBC)](#java-database-connectivity-api-jdbc-and-its-component-roles-in-a-service-provider-framework)
+
+</details>
+
+### Java Logging and its component roles in a service provider framework
+<details><summary>Show answer</summary>
+
+- Service interface - Logging API – what clients program against
+  - org.slf4j.Logger
+  - org.apache.logging.log4j.Logger
+  - java.util.logging.Logger
+- Service providers - Logging bindings / providers
+  - logback-classic for SLF4J
+  - Log4j2 core for Log4j2 API
+- Provider registration / discovery mechanism - Logging provider loader – use different discovery approaches
+  - SLF4J - Uses classpath scanning to find a single binding (`StaticLoggerBinder`). 
+    This is exactly parallel to `DriverManager` discovering JDBC drivers.
+  - Log4j2 - Uses Plugin discovery (annotation processing + plugin cache).
+- Service access API – how clients obtain an implementation
+  - access methods (LoggerFactory.getLogger(), LogManager.getLogger())
+- (Optional) Service provider interface (SPI) – how providers create instances.
+
+</details>
+
+### Java Database Connectivity API (JDBC) and its component roles in a service provider framework
+<details><summary>Show answer</summary>
 
 In the case of JDBC:
 - `Connection` plays the part of the service interface, 
@@ -220,8 +251,7 @@ they do not scale well to large numbers of optional parameters.
 Bad options:
 - [_Telescoping constructor_ pattern](#telescoping-constructor-pattern)
 - [The JavaBeans pattern](#the-javabeans-pattern)
-Best and the only recommended option:
-- [the Builder pattern](#the-builder-pattern)
+- [the Builder pattern](#the-builder-pattern) - Best and the only recommended option
 
 </details>
 
@@ -413,6 +443,15 @@ NutritionFacts cocaCola = new NutritionFacts.Builder(240, 8)
 <details><summary>Show answer</summary>
 
 The Builder pattern simulates named optional parameters as found in Python and Scala.
+
+```scala
+def connect(host: String = "localhost", port: Int = 3306, secure: Boolean = false): Unit =
+  println(s"Connecting to $host:$port, secure = $secure")
+
+// Using only the parameters you want (named)
+connect(port = 5432)
+connect(secure = true, host = "db.example.com")
+```
 
 </details>
 
@@ -907,162 +946,9 @@ As a result, prefer primitives to boxed primitives, and watch out for unintentio
 
 </details>
 
-### Memory leak, what is it?
-<details><summary>Show answer</summary>
+### TODO Item 5: Prefer dependency injection to hardwiring resources
 
-A memory leak is a situation where a program unintentionally holds onto memory that it no longer needs, 
-preventing that memory from being reclaimed by the garbage collector.
 
-Having memory leaks can silently manifest itself as reduced performance due to:
-- increased garbage collector activity or 
-- increased memory footprint
-- In extreme cases, such memory leaks can cause disk paging and even program failure with an `OutOfMemoryError`, 
-  but such failures are relatively rare.
-
-</details>
-
-### What happens in a memory leak?
-<details><summary>Show answer</summary>
-
-- Your application allocates memory for objects or data structures.
-- Later, those objects are no longer needed, but references to them still exist 
-  (e.g., in a static field, collection, cache, or listener).
-- Because the garbage collector sees these references, it cannot free the memory.
-- Over time, this unused memory accumulates, leading to:
-  - Increased heap usage.
-  - Slower performance.
-  - Eventually, `OutOfMemoryError` or system instability.
-
-</details>
-
-### Why a garbage collector cannot fix the issue with memory leaks?
-<details><summary>Show answer</summary>
-
-A garbage collector (GC) only frees memory for objects that are truly unreachable, 
-but a memory leak occurs when objects are still reachable (via references) 
-even though they are logically no longer needed.
-
-</details>
-
-### Common causes in Java
-<details><summary>Show answer</summary>
-
-Static collections (e.g., Map, List) that keep growing and never cleared.
-Listeners or callbacks registered but never removed.
-ThreadLocal variables not cleaned up in thread pools.
-Caches without eviction policies.
-Improper use of singletons holding large object graphs.
-
-</details>
-
-### How to detect memory leaks?
-<details><summary>Show answer</summary>
-
-- Use tools like VisualVM, JProfiler, or Eclipse MAT to analyze heap dumps.
-- Look for objects that should have been garbage collected but remain referenced.
-
-</details>
-
-### How to fix memory leaks?
-<details><summary>Show answer</summary>
-
-- Removing unnecessary references.
-- Implementing proper cleanup (e.g., removeListener()).
-- Using weak references (WeakHashMap) for caches.
-- Applying proper lifecycle management.
-
-</details>
-
-### Memory leak
-<details><summary>Show answer</summary>
-
-```java
-public class Stack {
-  private Object[] elements;
-  private int size = 0;
-  private static final int DEFAULT_INITIAL_CAPACITY = 16;
-
-  public Stack() {
-    elements = new Object[DEFAULT_INITIAL_CAPACITY];
-  }
-
-  public void push(Object e) {
-    ensureCapacity();
-    elements[size++] = e;
-  }
-
-  public Object pop() {
-    if (size == 0)
-      throw new EmptyStackException();
-    return elements[--size];
-  }
-
-  /**
-   * Ensure space for at least one more element, roughly
-   * doubling the capacity each time the array needs to grow.
-   */
-  private void ensureCapacity() {
-    if (elements.length == size)
-      elements = Arrays.copyOf(elements, 2 * size + 1);
-  }
-}
-```
-If a stack grows and then shrinks, the objects that were popped off the stack will not be garbage collected, 
-even if the program using the stack has no more references to them. 
-This is because the stack maintains obsolete references to these objects. 
-An obsolete reference is simply a reference that will never be dereferenced again. 
-In this case, any references outside of the _"active portion"_ of the element array are obsolete. 
-The active portion consists of the elements whose index is less than size.
-
-null out references once they
-become obsolete. In the case of our Stack class, the reference to an item
-becomes obsolete as soon as it’s popped off the stack:
-
-```java
-public Object pop() {
-  if (size == 0)
-    throw new EmptyStackException();
-  Object result = elements[--size];
-  elements[size] = null; // Eliminate obsolete reference
-  return result;
-}
-```
-An added benefit of nulling out obsolete references is that if they are
-subsequently dereferenced by mistake, the program will immediately fail with a
-NullPointerException, rather than quietly doing the wrong thing. It is
-always beneficial to detect programming errors as quickly as possible.
-
-When programmers are first stung by this problem, they may overcompensate
-by nulling out every object reference as soon as the program is finished using it.
-This is neither necessary nor desirable; it clutters up the program unnecessarily.
-Nulling out object references should be the exception rather than the norm.
-The best way to eliminate an obsolete reference is to let the variable that
-contained the reference fall out of scope. This occurs naturally if you define each
-variable in the narrowest possible scope
-
-So when should you null out a reference? What aspect of the Stack class
-makes it susceptible to memory leaks? Simply put, it manages its own memory.
-The storage pool consists of the elements of the elements array (the object
-reference cells, not the objects themselves). The elements in the active portion of
-the array (as defined earlier) are allocated, and those in the remainder of the
-array are free. The garbage collector has no way of knowing this; to the garbage
-collector, all of the object references in the elements array are equally valid.
-Only the programmer knows that the inactive portion of the array is unimportant.
-The programmer effectively communicates this fact to the garbage collector by
-manually nulling out array elements as soon as they become part of the inactive
-portion.
-Generally speaking, whenever a class manages its own memory, the
-programmer should be alert for memory leaks. Whenever an element is freed,
-any object references contained in the element should be nulled out.
-
-</details>
-
-### Describe the following code
-<details><summary>Show answer</summary>
-
-#
-
-</details>
 
 ### String instances creation
 <details><summary>Show answer</summary>
@@ -1083,3 +969,11 @@ String s = "bikini";
 This version uses a single String instance, rather than creating a new one each time it is executed.
 
 </details>
+
+### Item 7: Eliminate obsolete object references
+In context with memory leak file
+
+### TODO Item 8: Avoid finalizers and cleaners
+
+### TODO Item 9: Prefer try-with-resources to try-finally
+
