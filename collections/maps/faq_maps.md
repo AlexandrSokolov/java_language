@@ -635,7 +635,7 @@ the order of iteration over the entry or key set is randomly determined for each
 </details>
 
 ### Hierarchy of `SequencedMap` and related types
-🔗 Copy link
+[🔗 Copy link](#user-content-hierarchy-of-sequencedmap-and-related-types)
 
 <details>
  <summary>Show answer</summary>
