@@ -479,7 +479,7 @@ this is most commonly useful for creating [unmodifiable Maps](todo).
 
 ---
 
-## Java Maps interfaces and implementations, answers
+## Java Maps interfaces and implementations
 
 <details>
  <summary><strong>Show questions</strong></summary>
@@ -635,6 +635,7 @@ the order of iteration over the entry or key set is randomly determined for each
 </details>
 
 ### Hierarchy of `SequencedMap` and related types
+
 <details>
  <summary>Show answer</summary>
 
@@ -903,7 +904,7 @@ The collection view iterators are fail-fast.
 
 ---
 
-## Map for multithreaded context, answers
+## Maps for multithreaded context
 
 <details>
  <summary><strong>Show questions</strong></summary>
@@ -1037,7 +1038,7 @@ These iterators are weakly consistent.
 
 ---
 
-## Maps choice and practice questions, answers
+## Maps choice and practice
 
 <details>
  <summary><strong>Show questions</strong></summary>
