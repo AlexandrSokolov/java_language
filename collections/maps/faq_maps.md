@@ -1,8 +1,5 @@
 ## Java Maps, API
 
-<details>
- <summary><strong>Show questions</strong></summary>
-
 ### A Map, its purpose and performance characteristics
 <details>
  <summary>Show answer</summary>
@@ -475,14 +472,9 @@ this is most commonly useful for creating [unmodifiable Maps](todo).
 
 </details>
 
-</details>
-
 ---
 
 ## Java Maps interfaces and implementations
-
-<details>
- <summary><strong>Show questions</strong></summary>
 
 ### Hierarchy of Map Implementations
 <details>
@@ -635,8 +627,6 @@ the order of iteration over the entry or key set is randomly determined for each
 </details>
 
 ### Hierarchy of `SequencedMap` and related types
-[🔗 Copy link](#user-content-hierarchy-of-sequencedmap-and-related-types)
-
 <details>
  <summary>Show answer</summary>
 
@@ -901,14 +891,9 @@ The collection view iterators are fail-fast.
 
 </details>
 
-</details>
-
 ---
 
 ## Maps for multithreaded context
-
-<details>
- <summary><strong>Show questions</strong></summary>
 
 ### Map interfaces for concurrent environment
 <details>
@@ -1035,14 +1020,9 @@ These iterators are weakly consistent.
 
 </details>
 
-</details>
-
 ---
 
 ## Maps choice and practice
-
-<details>
- <summary><strong>Show questions</strong></summary>
 
 ### Comparing Map Implementations
 <details>
@@ -1110,8 +1090,6 @@ When you collect stream(s) of elements into the Java map you need to think about
           toList())));
     ```
    [See `MapsConcatenationTest.duplicatedKey_Grouping()`](src/test/java/com/savdev/maps/MapsConcatenationTest.java)
-
-</details>
 
 </details>
 
