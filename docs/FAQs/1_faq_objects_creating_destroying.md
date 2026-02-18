@@ -910,20 +910,45 @@ Use when
 
 </details>
 
-### Unnecessary objects issue, solution
+### TODO Item 5: Prefer dependency injection to hardwiring resources
+
+### Unnecessary objects creation, examples how not to do, solution
 <details><summary>Show answer</summary>
 
 It is often appropriate to reuse a single object instead of creating 
 a new functionally equivalent object each time it is needed. 
 Reuse can be both faster and more stylish. An object can always be reused if it is immutable.
 
-A good example how not to do:
-[String instances creation](#string-instances-creation)
-[Autoboxing](#autoboxing)
+Examples how not to do:
+- [String instances creation, what must you care about?](#string-instances-creation-what-must-you-care-about)
+- [Autoboxing](#autoboxing)
+- [Boolean creation from a string, what must you remember about?](#boolean-creation-from-a-string-what-must-you-remember-about)
 
 You can often avoid creating unnecessary objects by [static factory methods](#static-factory-methods)
 The constructor must create a new object each time it’s called, 
 while the factory method is never required to do so and won’t in practice.
+
+</details>
+
+### Unnecessary objects creation, cases
+<details><summary>Show answer</summary>
+
+It is often appropriate to reuse a single object instead of creating
+a new functionally equivalent object each time it is needed.
+Reuse can be both faster and more stylish. An object can always be reused if it is immutable.
+
+Examples how not to do:
+- [String instances creation, what must you care about?](#string-instances-creation-what-must-you-care-about)
+- [Autoboxing](#autoboxing)
+- [Boolean creation from a string, what must you remember about?](#boolean-creation-from-a-string-what-must-you-remember-about)
+- [Using regular expression](#using-regular-expression)
+
+Possible workarounds:
+- You can often avoid creating unnecessary objects by [static factory methods](#static-factory-methods)
+  The constructor must create a new object each time it’s called,
+  while the factory method is never required to do so and won’t in practice.
+- [Object caching and reusing](#using-regular-expression)
+- [maintaining your own object pool - only for extremely heavyweight objects](#avoiding-object-creation-by-maintaining-your-own-object-pool)
 
 </details>
 
@@ -946,11 +971,7 @@ As a result, prefer primitives to boxed primitives, and watch out for unintentio
 
 </details>
 
-### TODO Item 5: Prefer dependency injection to hardwiring resources
-
-
-
-### String instances creation
+### String instances creation, what must you care about?
 <details><summary>Show answer</summary>
 
 ```java
@@ -967,6 +988,93 @@ The improved version is simply the following:
 String s = "bikini";
 ```
 This version uses a single String instance, rather than creating a new one each time it is executed.
+
+</details>
+
+### Boolean creation from a string, what must you remember about?
+<details><summary>Show answer</summary>
+
+- `Boolean(String)` constructor must create a new object each time it’s called.
+- the factory method `Boolean.valueOf(String)` is preferable, it reuses existing immutable object
+
+Note: `Boolean(String)`  constructor was deprecated in Java 9.
+
+</details>
+
+### Using regular expression
+<details><summary>Show answer</summary>
+
+```java
+static boolean isRomanNumeral(String s) {
+  return s.matches("^(?=.)M*(C[MD]|D?C{0,3})" + "(X[CL]|L?X{0,3})(I[XV]|V?I{0,3})$");
+}
+```
+- It’s not suitable for repeated use in performance-critical situations. 
+- The problem is that it internally creates a `Pattern` instance for the regular expression and uses it only once, 
+  after which it becomes eligible for garbage collection.
+- Creating a `Pattern` instance is expensive 
+  because it requires compiling the regular expression into a finite state machine.
+
+Solution to improve the performance:
+- explicitly compile the regular expression into a Pattern instance (which is immutable) as part of class initialization, 
+- cache it
+- and reuse the same instance for every invocation
+
+```java
+public class RomanNumerals {
+  private static final Pattern ROMAN = Pattern.compile(
+          "^(?=.)M*(C[MD]|D?C{0,3})"
+                  + "(X[CL]|L?X{0,3})(I[XV]|V?I{0,3})$");
+
+  static boolean isRomanNumeral(String s) {
+    return ROMAN.matcher(s).matches();
+  }
+}
+```
+
+</details>
+
+### What issue might exist with caching from the previous example? How can it be fixed?
+<details><summary>Show answer</summary>
+
+```java
+public class RomanNumerals {
+  private static final Pattern ROMAN = Pattern.compile(
+          "^(?=.)M*(C[MD]|D?C{0,3})"
+                  + "(X[CL]|L?X{0,3})(I[XV]|V?I{0,3})$");
+
+  static boolean isRomanNumeral(String s) {
+    return ROMAN.matcher(s).matches();
+  }
+}
+```
+- It would be possible to eliminate the initialization by lazily initializing the field 
+  the first time the `isRomanNumeral` method is invoked, but this is not recommended.
+- As is often the case with lazy initialization, it would complicate the implementation 
+  with no measurable performance improvement
+
+</details>
+
+### Avoiding object creation by maintaining your own object pool
+<details><summary>Show answer</summary>
+
+- Avoiding object creation by maintaining your own object pool is a bad idea 
+  **unless** the objects in the pool are **extremely heavyweight**. 
+- The classic example of an object that does justify an object pool is a database connection.
+
+**Maintaining your own object pools clutters your code, increases memory footprint, and harms performance**.
+
+</details>
+
+### In which situations you cannot reuse an existing object and must create a new one?
+<details><summary>Show answer</summary>
+
+With defensive copying you should create a new one. Don’t reuse an existing object in such cases.
+
+- The penalty for reusing an object when defensive copying is called for is far greater 
+  than the penalty for needlessly creating a duplicate object. 
+- Failing to make defensive copies where required can lead to insidious bugs and security holes; 
+- creating objects unnecessarily merely affects style and performance.
 
 </details>
 
