@@ -34,7 +34,8 @@ public static Boolean valueOf(boolean b) {
 
 Advantages:
 - [Unlike constructors, static factory methods have names](#named-static-factory-methods-compare-with-a-constructor)
-- [Unlike constructors, they can help to avoid creating unnecessary duplicate objects](#how-to-avoid-creating-unnecessary-duplicate-objects)
+- [Unlike constructors, they can help to avoid creating unnecessary duplicate objects](#unnecessary-objects-constructors-vs-static-factories)
+- [Can be used by instance-controlled classes](#instance-controlled-classes)
 - [flexibility in choosing the class of the returned object](#choosing-the-class-of-the-returned-object-when-it-gets-created)
 - [the class of the returned object can vary from call to call as a function of the input parameters](#how-to-vary-the-class-of-the-created-object-from-call-to-call-as-a-function-of-the-input-parameters-motivation)
 - [the class of the returned object need not exist when the class containing the method is written](#service-provider-frameworks)
@@ -59,18 +60,7 @@ Unlike constructors, static factory methods have names.
 
 </details>
 
-### How to avoid creating unnecessary duplicate objects?
-<details><summary>Show answer</summary>
-
-Unlike constructors, static factory methods are not required to create a new object each time they’re invoked.
-This allows:
-- to use preconstructed instances, or 
-- to cache instances as they’re constructed
-to avoid creating unnecessary duplicate objects.
-
-</details>
-
-### Why avoid creating unnecessary duplicate objects could be useful?
+### Instance-controlled classes
 <details><summary>Show answer</summary>
 
 The ability of static factory methods to return the same object from repeated invocations 
@@ -912,25 +902,7 @@ Use when
 
 ### TODO Item 5: Prefer dependency injection to hardwiring resources
 
-### Unnecessary objects creation, examples how not to do, solution
-<details><summary>Show answer</summary>
-
-It is often appropriate to reuse a single object instead of creating 
-a new functionally equivalent object each time it is needed. 
-Reuse can be both faster and more stylish. An object can always be reused if it is immutable.
-
-Examples how not to do:
-- [String instances creation, what must you care about?](#string-instances-creation-what-must-you-care-about)
-- [Autoboxing](#autoboxing)
-- [Boolean creation from a string, what must you remember about?](#boolean-creation-from-a-string-what-must-you-remember-about)
-
-You can often avoid creating unnecessary objects by [static factory methods](#static-factory-methods)
-The constructor must create a new object each time it’s called, 
-while the factory method is never required to do so and won’t in practice.
-
-</details>
-
-### Unnecessary objects creation, cases
+### Unnecessary objects creation, examples how not to do, solutions
 <details><summary>Show answer</summary>
 
 It is often appropriate to reuse a single object instead of creating
@@ -949,6 +921,16 @@ Possible workarounds:
   while the factory method is never required to do so and won’t in practice.
 - [Object caching and reusing](#using-regular-expression)
 - [maintaining your own object pool - only for extremely heavyweight objects](#avoiding-object-creation-by-maintaining-your-own-object-pool)
+
+</details>
+
+### Unnecessary objects, constructors vs static factories
+<details><summary>Show answer</summary>
+
+Unlike constructors, static factory methods are not required to create a new object each time they’re invoked.
+To avoid creating unnecessary duplicate objects they can:
+- use preconstructed instances, or
+- cache instances as they’re constructed
 
 </details>
 
