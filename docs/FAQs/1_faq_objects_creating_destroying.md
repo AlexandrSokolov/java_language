@@ -1060,8 +1060,350 @@ With defensive copying you should create a new one. Don’t reuse an existing ob
 
 </details>
 
-### Item 7: Eliminate obsolete object references
-In context with memory leak file
+### Obsolete references, idea
+<details><summary>Show answer</summary>
+
+Objects popped from the stack are never dereferenced:
+```java
+public Object pop() {
+  if (size == 0)
+    throw new EmptyStackException();
+  return elements[--size];
+}
+```
+- After decrementing size, the element is no longer logically part of the stack.
+- But the array slot still contains a reference to that object.
+  This means:
+    - The object remains reachable from the Stack instance. 
+    - As far as the JVM GC is concerned, this object is still in use. 
+    - It cannot be garbage collected even though the program no longer needs it. 
+    - Over time, especially in long-lived stacks, this produces a memory leak.
+
+Why this is a real memory leak?
+This leak does not show up as a sudden OutOfMemoryError.
+
+Instead:
+- Memory usage grows slowly and unnecessarily.
+- The GC runs more often and works harder.
+- Latency increases.
+- If the application is long-running (server, background service), memory pressure builds up.
+
+This is a classic **accumulating logical leak**, not a spike.
+
+Solution:
+You should always null-out references to "dead" elements:
+
+</details>
+
+### Obsolete references how to avoid and examples
+<details><summary>Show answer</summary>
+
+If your class **manually manages object storage** (e.g., with an array, buffer, or custom pooling) and 
+an element becomes logically unused, **explicitly clear the reference**.
+
+This applies to:
+* caches
+* object pools
+* stacks/queues/ring buffers/custom collections
+* any growable array-like structure
+* listeners and other callbacks
+
+How to recognize when you need this rule
+Ask yourself:
+- Do I store objects in an array or similar manual container?
+  If yes → potential for obsolete references.
+- Does the container shrink logically without shrinking physically?
+  (example: pop, removeAt, dequeue)
+  If yes → clear the slot.
+- Does my container reuse the same internal array over time?
+  If yes → clear stale entries.
+
+</details>
+
+
+### Java collections and obsolete references
+<details><summary>Show answer</summary>
+
+Java collections (`ArrayList`, `HashMap`, etc.) already follow this rule internally - 
+to eliminate obsolete object references.
+
+</details>
+
+### Describe a code snippet #X
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```java
+public class Stack {
+  private Object[] elements;
+  private int size = 0;
+  private static final int DEFAULT_INITIAL_CAPACITY = 16;
+  public Stack() {
+    elements = new Object[DEFAULT_INITIAL_CAPACITY];
+  }
+  public void push(Object e) {
+    ensureCapacity();
+    elements[size++] = e;
+  }
+  public Object pop() {
+    if (size == 0)
+      throw new EmptyStackException();
+    return elements[--size];
+  }
+  /**
+   * Ensure space for at least one more element, roughly
+   * doubling the capacity each time the array needs to grow.
+   */
+  private void ensureCapacity() {
+    if (elements.length == size)
+      elements = Arrays.copyOf(elements, 2 * size + 1);
+  }
+}
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+- The implementation does not null out popped values, meaning objects may remain reachable and cause memory leaks.
+- A safer pop would be:
+  ```java
+  Object result = elements[--size];
+  elements[size] = null; // eliminate obsolete reference
+  return result;
+  ```
+  Note: **the best solution isn’t to fix your custom Stack at all**.
+  The best solution is to replace it with `Deque` (usually `ArrayDeque`).
+- parameterize class: `public class Stack<E> { ... }`
+- For production code: prefer `Deque<E>` (like `ArrayDeque<E>`) instead of writing your own stack.
+
+</details>
+
+</details>
+
+### For the previous example with stack, describe the workflow in details
+<details><summary>Show answer</summary>
+
+- If stack once had 1000 elements, and now has 100, then 900 obsolete references remain.
+- But if I start pushing again, those obsolete references will be overwritten.
+- Therefore, the leak cannot grow unbounded
+
+**This implementation does NOT leak memory unboundedly.**
+
+It leaks **up to the high-water mark** — the highest number of elements the stack has ever held.
+
+So if:
+- the stack once grew to 1000 items
+- later shrank to 10
+- then it permanently holds references for 990 elements that are _logically deleted but still strongly reachable_
+
+This is a **bounded leak**, but a leak nonetheless.
+Such leak is **not infinite**, but **persistent**.
+
+**Why it is still considered a memory leak in Java?**
+
+A memory leak in Java is not only:
+> memory that keeps growing forever
+
+It is also:
+> memory that should be collectible, but is not collectible because your code keeps references to unused objects.
+
+Even if it is **bounded**, it satisfies the definition.
+
+This is called a "logical leak" (or "loitering objects")
+
+</details>
+
+### When does logical (bounded) leak become a real problem?
+<details><summary>Show answer</summary>
+
+Such leaks:
+- leaks are bounded
+- leaks don’t grow indefinitely
+- leaks don’t crash immediately
+
+But they still:
+- bloat heap usage
+- prevent GC from reclaiming memory
+- degrade performance
+- cause long-term memory accumulation
+
+Imagine:
+- The stack belongs to a singleton.
+- Or a thread pool.
+- Or a server-side session.
+- Or a long-running service.
+
+If the stack peaks once at huge size — say 1M elements — and then is used with only 10 or 20 elements
+your app will permanently retain memory for 1M objects.
+
+Even though you never need them again.
+This is a classic real-world production failure pattern.
+
+</details>
+
+### Nulling out object references, what it means in general?
+<details><summary>Show answer</summary>
+
+**Nulling out object references should be the exception rather than the norm.**
+
+The best way to eliminate an obsolete reference are:
+- to let the variable that contained the reference fall out of scope. 
+  This occurs naturally if you define each variable in the narrowest possible scope
+- to use standard library collections instead of implementing your own data structures that manually manage memory
+
+</details>
+
+### How to avoid obsolete references in caches?
+<details><summary>Show answer</summary>
+
+**A cache that grows but never shrinks will eventually leak memory.
+To prevent this, you need automatic or explicit eviction.**
+
+- Use `WeakHashMap` for caches where keys determine lifetime
+
+    Idea: If the only reference to a key is inside the cache, the key should be collectable — 
+    and the cache entry should disappear automatically.
+    
+    - Entries disappear automatically once the key becomes weakly reachable.
+    - Good for “data associated with an object,” like metadata or mirrors.
+    - **Not good for large or long-lived caches** (WeakHashMap is not a general-purpose cache).
+
+- Use `java.util.concurrent` caches (e.g., `CacheBuilder`, custom maps) that auto-expire or are bounded
+
+    Modern Java uses:
+    - LRU, LFU, size-based eviction
+    - time-based eviction (expireAfterWrite / expireAfterAccess)
+    - reference-based eviction (using weak or soft references)
+  
+    For example, `Guava Cache` (or `Caffeine`):
+    - automatically evicts old entries (time-based eviction)
+    - prevents memory blow-up
+    - never requires manual nulling
+  
+    **This is the preferred production solution.**
+
+- Run periodic cleanup for hand-made caches.
+  - run a periodic cleanup that removes entries older than N minutes
+  - or removes entries that haven’t been used recently
+
+- Manually remove entries when they become stale.
+
+  Remove entries you no longer need immediately
+
+</details>
+
+### Memory leaks caused by listeners and other callbacks, example
+<details><summary>Show answer</summary>
+
+If you implement an API where clients register callbacks but don’t deregister them explicitly,
+they will accumulate unless you take some action.
+
+1. Object A registers itself as a listener for something
+2. Object B stores a reference to A (e.g., in a list of listeners)
+3. Object A is no longer needed, but
+4. B still keeps a reference to A
+5. GC cannot collect A because B is still alive
+
+This happens in:
+* Swing, JavaFX
+* Observer pattern
+* Event buses
+* Reactive frameworks
+* Custom callback registries
+* Threading frameworks
+* Even scheduled timers!
+
+
+Possible solutions:
+- unregister listeners when you no longer need them
+- (preferable) store only weak references to them, for instance, by storing them only as keys in a `WeakHashMap`.
+
+</details>
+
+### Describe a code snippet #X
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```java
+public class BigObject implements EventListener {
+  private byte[] largeData = new byte[10_000_000]; // 10 MB block
+
+  public BigObject(EventSource source) {
+    source.addListener(this); // registers as a listener
+  }
+
+  @Override
+  public void onEvent(Event e) {
+    // handle event...
+  }
+}
+public class EventSource {
+  private final List<EventListener> listeners = new ArrayList<>();
+
+  public void addListener(EventListener l) {
+    listeners.add(l);
+  }
+
+  public void fireEvent(Event e) {
+    for (var l : listeners) {
+      l.onEvent(e);
+    }
+  }
+}
+EventSource source = new EventSource();
+
+BigObject obj = new BigObject(source);
+obj = null;
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+- You think it's free to be garbage collected, but it is not. 
+- Even though you did: `obj = null;` the object is **not** garbage-collected.
+- `EventSource` still has a strong reference to the listener: `listeners -> BigObject`
+
+As long as `EventSource` lives, so does every listener it ever collected.
+If many such objects register and disappear logically but remain referenced, memory keeps accumulating.
+
+Correct solutions: 
+
+1. unregister listeners when you no longer need them:
+    ```java
+    public class BigObject implements EventListener {
+      private EventSource source;
+    
+      public BigObject(EventSource source) {
+        this.source = source;
+        source.addListener(this);
+      }
+    
+      public void close() {
+        source.removeListener(this);
+      }
+    
+      @Override
+      public void onEvent(Event e) {
+      }
+    }
+    //usage;
+    BigObject obj = new BigObject(source);
+    ...
+    obj.close(); // prevents the leak
+    obj = null;
+    ```
+2. Better solution for long-lived systems: Weak listeners
+    ```java
+    private final List<WeakReference<EventListener>> listeners = new ArrayList<>();
+    ```
+   
+</details>
+
+</details>
 
 ### TODO Item 8: Avoid finalizers and cleaners
 

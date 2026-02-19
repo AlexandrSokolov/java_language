@@ -1,3 +1,9 @@
+### 
+The stack example does leak, but not unboundedly — it leaks up to the high-water mark, and that retained memory stays forever unless overwritten, which may never happen.
+
+bounded vs unboundedn memory leaks, more examples, see also:
+[When does logical (bounded) leak become a real problem?](1_faq_objects_creating_destroying.md#when-does-logical-bounded-leak-become-a-real-problem)
+
 ### Memory leak, what is it?
 <details><summary>Show answer</summary>
 
