@@ -1,5 +1,75 @@
 ## Creating and Destroying Objects
 
+### When designing a new class in Java, what key considerations should a programmer think about regarding how instances of that class are created and destroyed?
+<details><summary>Show answer</summary>
+
+- Instance Creation Considerations
+- Destruction and Lifecycle Considerations
+- Memory and Reference Management
+- Resource Management Patterns
+- General Construction and Destruction Principles
+
+</details>
+
+### What specific topics belong to *Instance Creation Considerations*?
+<details><summary>Show answer</summary>
+
+- Prefer static factory methods
+- Consider telescoping constructors vs. builder pattern
+- Enforce singleton property when necessary
+- Enforce noninstantiability when necessary
+- Control how and when instances are created
+- Avoid unnecessary object creation
+- Reuse immutable objects
+- Reuse shared instances where appropriate
+- Cache expensive objects when beneficial
+
+</details>
+
+### What specific topics belong to *Destruction and Lifecycle Considerations*?
+<details><summary>Show answer</summary>
+
+- Provide explicit termination methods when resources must be released
+- Ensure timely release of underlying resources
+- Avoid using finalizers
+- Avoid using cleaners
+- Understand non‑deterministic finalization behavior
+- Use cleaners only as a last‑resort safety net, not as primary mechanism
+
+</details>
+
+### What specific topics belong to *Memory and Reference Management*?
+<details><summary>Show answer</summary>
+
+- Eliminate obsolete references
+- Consider object lifetime and reachability
+- Prevent memory leaks from lingering references
+- Manage caches to avoid unintended retention
+- Manage listeners and observers properly
+
+</details>
+
+### What specific topics belong to *Resource Management Patterns*?
+<details><summary>Show answer</summary>
+
+- Prefer try‑with‑resources
+- Ensure deterministic release of external resources
+- Implement `AutoCloseable` where appropriate
+
+</details>
+
+### What specific topics belong to *General Construction and Destruction Principles*?
+<details><summary>Show answer</summary>
+
+- Consider immutability during construction
+- Consider defensive copying if needed
+- Ensure all required fields are initialized before use
+- Design constructor visibility carefully
+- Consider performance implications of object creation
+- Avoid object pools unless absolutely necessary
+
+</details>
+
 ### Java Object creations, ways
 <details><summary>Show answer</summary>
 
@@ -1405,7 +1475,303 @@ Correct solutions:
 
 </details>
 
-### TODO Item 8: Avoid finalizers and cleaners
+### Java features used to execute actions once an object is unreachable by the GC, prior to its memory being reclaimed? 
+<details><summary>Show answer</summary>
 
-### TODO Item 9: Prefer try-with-resources to try-finally
+- finalizers - **deprecated** and considered **unsafe**
+- cleaners (replacement for finalizers since Java 9) - still **non-deterministic**
+- deterministic destruction with try-with-resources
 
+</details>
+
+### Java cleanup actions vs C++ destructors
+<details><summary>Show answer</summary>
+
+Conceptually - they do the same thing - execute actions on object prior to its memory being reclaimed.
+
+But with the important nuances:
+- In C++, a destructor runs deterministically at the exact moment an object goes out of scope
+- In Java, **finalizers (legacy)** and **cleaners** (modern replacement) run **non‑deterministically**.
+  Java cannot guarantee when or even if this code will execute
+
+</details>
+
+### Use cases, when cleanup actions might be useful
+<details><summary>Show answer</summary>
+
+- Releasing operating system resources
+  - file descriptors
+  - sockets
+  - pipes
+  - memory‑mapped files
+  - native handles
+- Closing network connections
+  - HTTP connections
+  - WebSocket sessions
+  - database connections
+  - message queue channels (AMQP, Kafka clients, etc.)
+- Releasing expensive runtime resources
+  - caches
+  - thread pools
+  - executor services
+  - schedulers
+  - memory buffers
+  - GPU contexts
+- Freeing native memory (via JNI)
+  JNI or Panama API objects may allocate memory outside the Java heap.
+  Java’s GC does not automatically release this memory.
+- Flushing buffered data
+  - buffered writers
+  - loggers
+  - compression streams (GZIP, ZIP)
+  - database batch writers
+
+and more.
+
+
+</details>
+
+### What may happen if a `FileInputStream` object becomes unreachable without its resources being released?
+<details><summary>Show answer</summary>
+
+The OS may run out of file handles.
+
+</details>
+
+### What may happen if network connections are not explicitly closed?
+<details><summary>Show answer</summary>
+
+You may get:
+- hanging connections
+- resource leaks
+- server‑side timeouts
+
+</details>
+
+### What may happen if buffered data is not flushed?
+<details><summary>Show answer</summary>
+
+If the object simply vanishes, the data in the buffer may be lost.
+
+</details>
+
+### What problem(s) exist with finalizers and cleaners? Conclusions
+<details><summary>Show answer</summary>
+
+- It can take arbitrarily long between the time that an object becomes unreachable 
+  and the time its finalizer or cleaner runs.
+- It provides no guarantee that they’ll run at all.
+- An uncaught exception thrown during finalization is ignored, and finalization of that object terminates.
+  - Normally, an uncaught exception will terminate the thread and print a stack trace, 
+    but not if it occurs in a finalizer - it won’t even print a warning.
+  - Cleaners do not have this problem because a library using a cleaner has control over its thread.
+- There is a severe performance penalty for using finalizers and cleaners.
+- Finalizers have a serious security problem: they open your class up to finalizer attacks.
+
+Recommendations:
+- **Finalizers are unpredictable, often dangerous, and generally unnecessary.**
+- **Cleaners are less dangerous than finalizers, but still unpredictable, slow, and generally unnecessary.**
+- **Never do anything time-critical in a finalizer or  cleaner**
+
+For example, it is a grave error to depend on a finalizer or cleaner to close files 
+because open file descriptors are a limited resource. 
+If many files are left open as a result of the system’s tardiness in running finalizers or cleaners, 
+a program may fail because it can no longer open files.
+
+</details>
+
+### Using `System.gc` and `System.runFinalization` to force to run cleaners
+<details><summary>Show answer</summary>
+
+They may increase the odds of finalizers or cleaners getting executed, but they don’t guarantee it. 
+Two methods once claimed to make this guarantee: 
+- `System.runFinalizersOnExit` and its evil twin, 
+- `Runtime.runFinalizersOnExit`. 
+
+These methods are fatally flawed and have been deprecated for decades.
+
+</details>
+
+### What should you do for a class whose objects encapsulate resources that require termination?
+<details><summary>Show answer</summary>
+
+- Just have your class implement `AutoCloseable`, and require its clients to invoke the `close` method 
+  on each instance when it is no longer needed, typically using try-with-resources 
+  to ensure termination even in the  face of exceptions. 
+- The instance must keep track of whether it has been closed: 
+  the `close` method must record in a field that the object is no longer valid, 
+  and other methods must check this field and throw an `IllegalStateException` 
+  if they are called after the object has been closed.
+
+</details>
+
+### What, if anything, are cleaners and finalizers good for?
+<details><summary>Show answer</summary>
+
+- to act as a safety net in case the owner of a resource neglects to call its `close` method. 
+  While there’s no guarantee that the cleaner or finalizer will run promptly (or at all), 
+  it is better to free the resource late than never if the client fails to do so. 
+  If you’re considering writing such a safety-net finalizer, 
+  think long and hard about whether the protection is worth the cost.
+  Some Java library classes, such as `FileInputStream`, `FileOutputStream`, `ThreadPoolExecutor`, 
+  and `java.sql.Connection`, have finalizers that serve as safety nets.
+- objects with native peers. 
+  A native peer is a native (non-Java) object to which a normal object delegates via native methods. 
+  Because a native peer is not a normal object, the garbage collector doesn’t know about it 
+  and can’t reclaim it when its Java peer is reclaimed. 
+  A cleaner or finalizer may be an appropriate vehicle for this task, 
+  assuming the performance is acceptable and the native peer holds no critical resources. 
+  If the performance is unacceptable or the native peer holds resources that must be reclaimed promptly, 
+  the class should have a `close` method.
+
+</details>
+
+### Describe a code snippet #X
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```java
+public class Room implements AutoCloseable {
+  private static final Cleaner cleaner = Cleaner.create();
+
+  // Resource that requires cleaning. Must not refer to Room!
+  private static class State implements Runnable {
+    int numJunkPiles; // Number of junk piles in this room
+
+    State(int numJunkPiles) {
+      this.numJunkPiles = numJunkPiles;
+    }
+
+    // Invoked by close method or cleaner
+    @Override
+    public void run() {
+      System.out.println("Cleaning room");
+      numJunkPiles = 0;
+    }
+  }
+
+  // The state of this room, shared with our cleanable
+  private final State state;
+  // Our cleanable. Cleans the room when it’s eligible for gc
+  private final Cleaner.Cleanable cleanable;
+
+  public Room(int numJunkPiles) {
+    state = new State(numJunkPiles);
+    cleanable = cleaner.register(this, state);
+  }
+
+  @Override
+  public void close() {
+    cleanable.clean();
+  }
+}
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+- The static nested `State` class holds the resources that are required by the cleaner to clean the room. 
+- In this case, it is simply the `numJunkPiles` field, which represents the amount of mess in the room. 
+  More realistically, it might be a final long that contains a pointer to a native peer. 
+- State implements `Runnable`, and its `run` method is called at most once, by the `Cleanable`. 
+- The call to the `run` method will be triggered by one of two things:
+  - Usually it is triggered by a call to Room’s `close` method calling Cleanable’s `clean` method. 
+  - If the client fails to call the close method by the time a Room instance is eligible for garbage collection, 
+    the cleaner will (hopefully) call State’s run method. 
+- It is critical that a `State` instance does not refer to its `Room` instance. 
+  If it did, it would create a circularity that would prevent the Room instance from becoming eligible 
+  for garbage collection (and from being automatically cleaned).
+- Therefore, `State` must be a static nested class because nonstatic nested classes contain references 
+  to their enclosing instances (Item 24). 
+- It is similarly inadvisable to use a lambda because they can easily capture references to enclosing objects.
+
+</details>
+
+</details>
+
+### Using try-finally for resources
+<details><summary>Show answer</summary>
+
+Historically, a try-finally statement was the best way to guarantee that a resource would be closed properly, 
+even in the face of an exception or return:
+
+```java
+static String firstLineOfFile(String path) throws IOException {
+  BufferedReader br = new BufferedReader(new FileReader(path));
+  try {
+    return br.readLine();
+  } finally {
+    br.close();
+  }
+}
+```
+
+This may not look bad, but it gets worse when you add a second resource:
+
+```java
+static void copy(String src, String dst) throws IOException {
+  InputStream in = new FileInputStream(src);
+  try {
+    OutputStream out = new FileOutputStream(dst);
+    try {
+      byte[] buf = new byte[BUFFER_SIZE];
+      int n;
+      while ((n = in.read(buf)) >= 0)
+        out.write(buf, 0, n);
+    } finally {
+      out.close();
+    }
+  } finally {
+    in.close();
+  }
+}
+```
+- The code in both the `try` block and the `finally` block is capable of throwing exceptions. 
+- For example, in the `firstLineOfFile` method, the call to `readLine` could throw an exception 
+  due to a failure in the underlying physical device, and the call to `close` could then fail for the same reason. 
+- Under these circumstances, the second exception completely obliterates the first one. 
+  There is no record of the first exception in the exception stack trace, 
+  which can greatly complicate debugging in real systems - usually it’s the first exception that you want to see 
+  in order to diagnose the problem. 
+- While it is possible to write code to suppress the second exception in favor of the first, 
+  virtually no one did because it’s just too verbose.
+
+All of these problems were solved with the try-with-resources.
+
+</details>
+
+### The only reliable and recommended way to clean up resources
+<details><summary>Show answer</summary>
+
+- Use the try-with-resources statement.
+- A resource must implement the `AutoCloseable` interface, which consists of a single `void close()` method.
+
+</details>
+
+### Give an example of try-with-resources on multiple resources
+<details><summary>Show answer</summary>
+
+```java
+static void copy(String src, String dst) throws IOException {
+  try (InputStream in = new FileInputStream(src);
+       OutputStream out = new FileOutputStream(dst)) {
+    byte[] buf = new byte[BUFFER_SIZE];
+    int n;
+    while ((n = in.read(buf)) >= 0)
+      out.write(buf, 0, n);
+  }
+}
+```
+
+- It is shorter
+- It provides far better diagnostics.
+  - If exceptions are thrown by both the `read` call and the (invisible) `close`, 
+    the latter exception is suppressed in favor of the former.
+  - In fact, multiple exceptions may be suppressed in order to preserve the exception that you actually want to see.
+  - These suppressed exceptions are not merely discarded; 
+    they are printed in the stack trace with a notation saying that they were suppressed.
+  - You can also access them programmatically with the `getSuppressed` method, which was added to `Throwable` in Java 7. 
+
+</details>
