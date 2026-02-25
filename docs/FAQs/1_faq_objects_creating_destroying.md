@@ -11,7 +11,15 @@
 
 </details>
 
-### What specific topics belong to *Instance Creation Considerations*?
+### What specific groups of topics belong to *Instance Creation Considerations*?
+<details><summary>Show answer</summary>
+
+- How you create instances
+- How you avoid creating too many
+
+</details>
+
+### What specific topics belong to *How you create instances*?
 <details><summary>Show answer</summary>
 
 - Prefer static factory methods
@@ -19,6 +27,13 @@
 - Enforce singleton property when necessary
 - Enforce noninstantiability when necessary
 - Control how and when instances are created
+
+</details>
+
+
+### What specific topics belong to *How you avoid creating too many*?
+<details><summary>Show answer</summary>
+
 - Avoid unnecessary object creation
 - Reuse immutable objects
 - Reuse shared instances where appropriate
@@ -29,23 +44,51 @@
 ### What specific topics belong to *Destruction and Lifecycle Considerations*?
 <details><summary>Show answer</summary>
 
-- Provide explicit termination methods when resources must be released
-- Ensure timely release of underlying resources
-- Avoid using finalizers
-- Avoid using cleaners
-- Understand non‑deterministic finalization behavior
-- Use cleaners only as a last‑resort safety net, not as primary mechanism
+- Explicit and timely resource release via close/AutoCloseable
+- Avoid finalizers and cleaners; rely on them only as last‑resort safety nets due to non‑deterministic cleanup
+
+Note: _timely_ release == deterministic, immediate, predictable cleanup
 
 </details>
 
 ### What specific topics belong to *Memory and Reference Management*?
 <details><summary>Show answer</summary>
 
-- Eliminate obsolete references
-- Consider object lifetime and reachability
-- Prevent memory leaks from lingering references
-- Manage caches to avoid unintended retention
-- Manage listeners and observers properly
+- Manage object lifetime & reachability:
+  - object reachability (strong / weak / soft / phantom)
+  - avoiding obsolete references (objects no longer needed) 
+  - avoiding unintended references (accidental captures, closures, inner classes)
+  - avoiding lingering references (references living longer than intended)
+- Accidental Retention & Memory Leaks
+- Manage long-lived containers to prevent accidental object retention - specific leak sources:
+  - caches 
+  - listeners and observers
+  - event handlers / callback registration
+  - thread-local storage
+
+</details>
+
+### Obsolete references vs lingering
+<details><summary>Show answer</summary>
+
+Notes:
+- _obsolete_ references - “The object is dead, but I forgot to throw away the body.”
+  - You no longer need the object.
+  - You simply forgot to clear the reference.
+  - The reference still exists, but has no logical purpose.
+  - This is a usefulness problem, object usefulness ended.
+  - The programmer knows it's useless, but forgot to release it.
+  - Example in one line: “We already processed the request; why are we still holding its DTO?”
+- _lingering_ reference - “The object is still theoretically needed, but it lives much longer than planned.”
+  - The reference **is still logically valid**.
+  - But it outlives its intended scope, often by accident:
+    - stored in a static collection
+    - in a cache that never evicts
+    - an event listener you forgot to unsubscribe
+    - a closure holding context longer than the function call
+  - This is a lifetime mismatch problem, object lifetime exceeded expectations.
+  - The programmer did not want the reference forever — but the system kept it.
+  - Example in one line: “This listener stayed registered 5 hours after the UI closed.”
 
 </details>
 
@@ -61,12 +104,14 @@
 ### What specific topics belong to *General Construction and Destruction Principles*?
 <details><summary>Show answer</summary>
 
-- Consider immutability during construction
-- Consider defensive copying if needed
-- Ensure all required fields are initialized before use
+- Ensure safe and correct construction (complete initialization, immutability, defensive copying)
+  - Consider immutability during construction
+  - Consider defensive copying if needed
+  - Ensure all required fields are initialized before use
 - Design constructor visibility carefully
-- Consider performance implications of object creation
-- Avoid object pools unless absolutely necessary
+- Evaluate performance implications realistically
+  - Consider performance implications of object creation
+  - Avoid object pools unless absolutely necessary
 
 </details>
 
