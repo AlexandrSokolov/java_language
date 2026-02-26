@@ -25,7 +25,7 @@
 - Prefer static factory methods
 - Consider telescoping constructors vs. builder pattern
 - Enforce singleton property when necessary
-- Enforce noninstantiability when necessary
+- Prevent instantiation when appropriate
 - Control how and when instances are created
 
 </details>
@@ -61,9 +61,9 @@ Note: _timely_ release == deterministic, immediate, predictable cleanup
   - avoiding lingering references (references living longer than intended)
 - Accidental Retention & Memory Leaks
 - Manage long-lived containers to prevent accidental object retention - specific leak sources:
-  - caches 
-  - listeners and observers
-  - event handlers / callback registration
+  - caches
+  - listeners and observers (Forgotten unregistration = accidental retention = leak)
+  - event handlers / callback registration (ad hoc function capture leaks or “closure capture” leaks)
   - thread-local storage
 
 </details>
@@ -89,6 +89,58 @@ Notes:
   - This is a lifetime mismatch problem, object lifetime exceeded expectations.
   - The programmer did not want the reference forever — but the system kept it.
   - Example in one line: “This listener stayed registered 5 hours after the UI closed.”
+
+</details>
+
+### Memory leak vs Accidental retention
+<details><summary>Show answer</summary>
+
+- Memory leak ≈ forgetting to release references
+- Accidental retention ≈ keeping references you do not actually need anymore
+
+</details>
+
+### Listeners vs Observers vs Event Handlers vs Callback
+<details><summary>Show answer</summary>
+
+- They all represent “someone storing references to someone else for later use.”
+- This storage is what causes accidental retention.
+- The four words differ mainly in **convention**, **intent**, and **pattern**, not in mechanism.
+
+
+Listeners
+- Usually long‑lived.
+- Usually registered explicitly with an object.
+- Often part of a classical event model (Swing, AWT, Java Beans).
+- Usually multiple listeners per source.
+- Example: `source.addListener(myListener);`
+
+Observers
+- Conceptually similar to listeners, but comes from the Observer pattern.
+- More abstract: "someone watching someone else"
+- Often used in reactive/event‑stream frameworks (RxJava, Flow).
+- Example: `observable.subscribe(myObserver);`
+
+Difference from listener:
+- Mostly semantic — Observer means a higher-level, more architectural pattern. 
+- Listener is a more "concrete API object".
+
+Event Handlers
+- More “action-oriented”
+- Represent a piece of logic executed when event fires.
+- Can be:
+  - listeners
+  - lambdas
+  - anonymous classes
+  - method references
+- Example: `button.setOnClick(event -> handleClick());`
+
+Callback
+- Most general term
+- Just "call this function later"
+- Not necessarily tied to an event system
+- Often passed inline, not registered
+- Example: `runAsync(() -> doSomething());`
 
 </details>
 
