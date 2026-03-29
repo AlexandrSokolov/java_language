@@ -431,3 +431,14 @@ assert reverseThenSublist.equals(subListThenReverse);
 
 ---
 
+### How can you remember when Java uses toXxx() versus asXxx() for converting or viewing collections?
+<details>
+<summary>Show answer</summary>
+
+Rule of thumb:
+- `toXxx()` - creates something new.
+  `List::toArray()` - **create a new array** (or fill one you pass in)
+- `asXxx()` - creates a view of something that already exists. 
+  `Arrays.asList` - returns a **view backed by the original array**.
+
+</details>
