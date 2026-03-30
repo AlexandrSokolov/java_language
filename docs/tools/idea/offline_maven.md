@@ -24,12 +24,11 @@ As a result, it may still try to download metadata from Nexus or Maven Central d
 To enforce offline mode **for all Maven actions started from IntelliJ**, create the following structure in your project:
 
 ```
-.idea/
-    .mvn/
-        maven.config
+.mvn/
+    maven.config
 ```
 
-If `.idea/.mvn/` does not exist, create both folders manually.
+If `.mvn/` does not exist, create the folder manually.
 
 Then add this content to `maven.config`:
 
@@ -44,9 +43,7 @@ Maven will now **always** run in offline mode when invoked from IntelliJ (builds
 
 ## ✅ Notes
 
-- This configuration applies **only** to IntelliJ’s internal Maven execution.
-- It does **not** affect command‑line Maven (`mvn`), unless you replicate the same `.mvn/maven.config` in the project root.
-- You can temporarily disable offline mode by commenting out the line:
+You can temporarily disable offline mode by commenting out the line:
 
 ```bash
 # -o
