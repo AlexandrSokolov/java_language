@@ -1,38 +1,31 @@
 ### Sets, its purpose
 <details><summary>Show answer</summary>
 
-
 A _set_ is a collection of items that cannot contain duplicates;
 adding an item that is already present in the set has no effect.
 
-
 </details>
 
-### What does define a duplicate in sets?
+### What defines a duplicate in sets?
 <details><summary>Show answer</summary>
 
 
-It depends on implementations
-#### Objects equality with _equivalence relation_
+In different set implementation, duplicates are determined differently using:
+#### _equivalence relation_
 
 `HashSet`, for which the equivalence relation is the `equals` method
 and two objects are duplicates if and only if the `equals` method,
 called on one with the other as its argument, returns `true`.
 
-#### Objects equality with _identity relation_
+#### _identity relation_
 
-A set using that relation will contain a reference to every unique object that has been added to it.
-Examples:
-- `EnumSet` since enums are singletons, the result of the `equals` method matches
-  the result of the identity relation for all comparisons
-- the set view of the keys of an `IdentityHashMap`
-- any set created from an `IdentityHashMap` using the `Collections.newSetFromMap` method
-- Explicitly create set view from identity map:
-    ```java
-    Set<Integer> concurrentIntegerSet = Collections.newSetFromMap(new IdentityHashMap<Integer,Boolean>());
-    ```
+Duplicates are defined by reference equality (a == b).
+Only objects that are literally the same instance are considered duplicates; 
+all other instances, even if equal in content, are stored separately.
 
-#### Objects equality with _ordering relation_
+[Set implementations examples](#which-set-implementations-use-the-_identity-relation_-for-equality).
+
+#### _ordering relation_
 
 `NavigableSet` - maintains its elements in sorted order using an ordering relation
 provided by either its natural order or a `Comparator`.
@@ -40,12 +33,23 @@ provided by either its natural order or a `Comparator`.
 It defines two objects as equivalent if, using it, they compare as equal -
 that is, if the comparison method returns 0 - regardless of whether they satisfy the equality relation.
 
+</details>
+
+### Which set implementations use the _identity relation_ for equality?
+<details><summary>Show answer</summary>
+
+- `EnumSet` since enums are singletons, the result of the `equals` method matches
+  the result of the identity relation for all comparisons
+- the set view of the keys of an `IdentityHashMap`
+- any set created from an `IdentityHashMap` using the `Collections.newSetFromMap` method:
+    ```java
+    Set<Integer> concurrentIntegerSet = Collections.newSetFromMap(new IdentityHashMap<Integer,Boolean>());
+    ```
 
 </details>
 
-### What are consequences of using different equivalence relations?
+### What are the consequences of using different equivalence relations?
 <details><summary>Show answer</summary>
-
 
 - sets may contain duplicate elements that satisfy `equals` or, conversely,
   that they may elide occurrences of ones that don’t.
@@ -54,21 +58,19 @@ that is, if the comparison method returns 0 - regardless of whether they satisfy
   If the roles are reversed, and if A and B are using different equivalence relations,
   the results may be different, so set equality loses symmetry.
 
-
 </details>
 
-### Containing by set multiple objects, that return true when compared to each other by `equals`?
+### Is it possible for a set to contain multiple objects that all return true when compared with each other using `equals()`?
 <details><summary>Show answer</summary>
 
-
-It is possible for `NavigableSet` that uses _ordering relation_ to check equality.
-
+It is possible for:
+- `NavigableSet` that uses _ordering relation_ 
+- `EmumSet` that uses identity relation 
 
 </details>
 
 ### How to determine that 2 sets with equivalence relation are equal?
 <details><summary>Show answer</summary>
-
 
 The `equals` method is overridden:
 the `Set` contract states that a `Set` can only ever be equal to another `Set`,
@@ -79,55 +81,73 @@ and then only if:
 The `hashCode` method is also overridden, as should always be the case when equals is overridden.
 The hash code of a Set is the sum of the hash codes of its elements.
 
-
 </details>
 
 ### `Set` direct implementations
 <details><summary>Show answer</summary>
 
-
 - [`HashSet`](#hashset)
-- [`CopyOnWriteArraySet`](#copyonwritearrayset-its-operations-compare-with-hashset)
+- [`CopyOnWriteArraySet`](./03_Concurrency%20and%20Set%20Implementations.md/#copyonwritearrayset-its-operations-compare-with-hashset)
 - [`EnumSet`](#enumset)
-
 
 </details>
 
 ### `HashSet`
 <details><summary>Show answer</summary>
 
-
 `HashSet` - the most commonly used, implemented by a _hash table_,
 an array in which elements are stored at a position derived from their contents
 
 `HashSet` is unsychronized and not thread-safe; its iterators are fail-fast.
-
 
 </details>
 
 ### Hash table data structure
 <details><summary>Show answer</summary>
 
+A hash table stores elements in an array of buckets, selecting a bucket using the hash code of the element.
 
-An element’s position in a hash table is calculated by a hash function of its contents.
-Hash functions are designed to give, as far as possible, an even spread of results (hash codes)
-from the element values that might be stored.
+</details>
 
-Unless your table has more locations than there are values that might be stored in it,
-sometimes two distinct values will hash to the same location in the hash table (this is called a _collision_).
-We can minimize the problem with a good hash function - one that spreads the elements out equally in the table - but,
-when collisions do occur, we need to have a way of keeping the colliding elements
-at the same table location, or _bucket_.
-This is often done by storing them in a linked structure - a list or a tree:
+### How are hash functions designed? 
+<details><summary>Show answer</summary>
+
+Hash functions are designed to produce, as far as possible, 
+an even distribution of hash codes across the range of element values that may be stored.
+
+</details>
+
+### How does a hash table handle cases where multiple values hash to the same bucket?
+<details><summary>Show answer</summary>
+
+Unless a hash table has more buckets than the number of possible values that might be stored, 
+it is inevitable that some distinct values will hash to the same location in the table. 
+This situation is called a _collision_. 
+A good hash function can reduce how often _collisions_ occur by spreading values as evenly as possible across the table, 
+but _collisions_ cannot be avoided entirely.
+
+
+When _collisions_ do occur, the table needs a way to store multiple elements in the same location, or bucket. 
+A common approach is to keep the colliding elements in a linked structure, 
+such as a list or a tree, stored within that bucket:
 
 <img src="../../docs/images/Hash_Table.png" alt="A hash table with chained overflow" width="600">
 
+</details>
+
+### How would a set behave if hashCode() returned 1 for all elements?
+<details><summary>Show answer</summary>
+
+If `hashCode()` returns `1` for all elements in a set, then every element ends up in the same bucket 
+of the underlying hash table. The set will still work correctly because duplicates are ultimately detected using 
+`equals()`, but all operations degrade to linear time. 
+Adding, searching, and removing elements becomes `O(N)` instead of `O(1)` because the set must scan 
+through the entire list of elements stored in that single bucket.
 
 </details>
 
 ### `HashSet` advantages and disadvantages
 <details><summary>Show answer</summary>
-
 
 Advantages: the constant-time performance (for lightly loaded tables and with a good hash function)
 of the basic operations of `add`, `remove`, `contains`, and `size`
@@ -137,116 +157,131 @@ Its main performance disadvantages are:
 - the iteration performance: iterating through the table involves examining every bucket,
   so the cost includes a factor attributable to the table length, regardless of the size of the set it contains.
 
-
 </details>
 
 ### Creation of `HashSet`
 <details><summary>Show answer</summary>
 
-
-Additional `HashSet` constructors to no-arguments constructors:
+Besides the no‑argument constructor, `HashSet` provides two additional constructors:
 - `HashSet(int initialCapacity)`
 - `HashSet(int initialCapacity, float loadFactor)`
 
-Both of these constructors create an empty set but allow some control over the size of the underlying table,
-creating one at least as large as the supplied capacity and, optionally, with the desired load factor.
+Both create an empty set but allow you to influence the size of the underlying hash table by specifying 
+an initial capacity and, optionally, a load factor. These constructors can be used to pre‑allocate enough 
+space for the expected number of elements and avoid costly resizing.
 
-You can use these constructors to create a table large enough to store all the elements you expect it to hold
-without requiring expensive resizing operations.
 
-In practice, however, they have proved confusing and difficult to use - confusing because their int parameter,
-often misunderstood to be the expected number of entries,
-is in fact used to compute the table size, and difficult to use because
-computing the argument correctly from the expected maximum number of entries
-is implementation-dependent and error-prone.
+In practice, however, these constructors often cause confusion. The `initialCapacity` parameter is frequently 
+mistaken for the expected number of elements, even though it is actually used to compute the internal table size. 
+Correctly calculating the parameter from the expected maximum number of entries is 
+**implementation‑dependent** and **error‑prone**.
 
-So Java 19 added static factory methods, which take only a parameter signifying the expected maximum number of entries.
-These methods are recommended as being easier to use and less subject to implementation changes.
-The factory method for `HashSet` is `newHashSet`:
 
-```java
-public class HashSet<E> implements Set<E> {
-  static <T> HashSet<T> newHashSet(int numElements) {
-    
-  }
-}
-```
+To address this, Java 19 introduced static factory methods that take only the _expected maximum number of elements_. 
+These methods are simpler to use and independent of internal implementation details.
 
+
+For `HashSet`, the recommended factory method is: `HashSet.newHashSet(int expectedSize)`.
 
 </details>
 
 ### `EnumSet`
 <details><summary>Show answer</summary>
 
-
-`EnumSet` should always be preferred over any other Set implementation when we are storing enum values.
-
-This class exists to take advantage of the efficient implementations that are possible when:
-- the maximum number of possible elements is fixed and
-- a unique index can be assigned to each
-
-These two conditions hold for a set of elements of the same Enum class;
-the number of keys is fixed by the constants of the enumerated type,
-and the `ordinal` method returns values that are guaranteed to be unique to each constant.
-In addition, the values that `ordinal` returns form a compact range, starting from zero -
-ideal, in fact, for use as array indices or, in the standard implementation, indices of a bit vector.
+`EnumSet` should always be preferred over other Set implementations when storing enum values.
 
 
+It exists to take advantage of two properties of enum types:
+- the set of possible elements is fixed, and
+- each element has a unique, stable index
+
+In Java, both conditions are guaranteed by the structure of enum classes:
+
+the number of possible keys is defined by the enum constants, and each constant has a unique `ordinal` value. 
+These `ordinals` form a compact range starting at zero, making them ideal for use as array indices or, 
+as in the standard `EnumSet` implementation, positions in a bit vector.
+
+
+Because of these properties, `EnumSet` can represent sets of enum values extremely efficiently — 
+in both memory usage and performance — compared to general-purpose set implementations.
 
 </details>
 
-### `UnmodifiableSet`, how to create? Its properties, pros and cons
+### What is an `UnmodifiableSet` and how is it created?
 <details><summary>Show answer</summary>
 
+There is no public type named `UnmodifiableSet<E>` in the Collections Framework.
 
-You won’t find any reference to the name `UnmodifiableSet<E>` in the Javadoc or
-in the code of the Collections Framework.
-It’s a name invented for a family of package-private classes that client programmers can never access by name,
-but that are important because they provide the implementation of the unmodifiable sets obtained
-from the various overloads of the factory methods `Set.of` and `Set.copyOf`.
+The name refers informally to a group of _package‑private_ classes used internally 
+to implement unmodifiable sets returned by:
+- `Set.of(...)`
+- `Set.copyOf(...)`
 
-The properties of the members of this family are described in the Javadoc for Set:
-- They are unmodifiable: elements cannot be added or removed.
-  Calling any mutator method will always cause UnsupportedOperationException to be thrown.
-- They are null-hostile. Attempts to create them with null elements result in `NullPointerException`.
-- They reject duplicate elements at creation time.
-  Duplicate elements passed to a factory method result in an `IllegalArgumentException`.
+Client code cannot reference these classes directly. 
+Instead, you obtain an unmodifiable set through the factory methods:
+```java
+JavaSet<String> s1 = Set.of("A", "B", "C");
+Set<String> s2 = Set.copyOf(existingSet);
+```
+These factory methods return highly optimized, unmodifiable set implementations.
+
+</details>
+
+
+### Properties of unmodifiable sets
+<details><summary>Show answer</summary>
+
+- **Unmodifiable** - Any mutating operation throws `UnsupportedOperationException`.
+- **Null‑hostile** - Passing null to `Set.of` or `Set.copyOf` causes a `NullPointerException`.
+- **Duplicate‑rejecting** - If duplicate elements are provided during creation, an IllegalArgumentException is thrown.
+- **Fixed size** - Internally backed by fixed‑length arrays rather than resizable hash tables.
+
+</details>
+
+
+### What are Advantages and disadvantages of using of unmodifiable sets
+<details><summary>Show answer</summary>
 
 Advantages:
-- The classes that make up `UnmodifiableSet` use fixed-length arrays as the backing structures.
-  Without the overhead of empty table buckets or linked overflow structures,
-  these implementations _require much less space_ than a hashed structure.
-- Iteration is also correspondingly more efficient, with the added benefit of improved spatial locality
+- Very compact representation
+  - They use fixed‑length arrays without empty hash buckets or overflow chains.
+  - This typically requires much less memory than hash‑based sets.
+- Efficient iteration
+  - Iteration is extremely fast and cache‑friendly because elements are stored contiguously, improving spatial locality.
+- Immutable - safer for concurrent or defensive programming since the contents cannot change.
 
 Disadvantage:
-The trade-off for faster iteration is that containment can only be determined by a linear search, O(N) in complexity.
 
+Because unmodifiable sets use an array instead of a hash structure, `contains()` must scan the array linearly, 
+making membership checks `O(n)` rather than the `O(1)` average time provided by HashSet.
+
+
+This is the main trade‑off: 
+
+**fast iteration and low memory usage versus slower `contains()` performance**.
 
 </details>
 
-### Set Views of Maps, main purpose
+### How can I obtain a set with specialized behavior that the standard Set classes don’t support?
 <details><summary>Show answer</summary>
 
+**Set views provided by maps can solve this.**
 
-In the Collections Framework, many sets are implemented as wrappers around a corresponding map,
-although the maps are encapsulated and invisible to the client.
-However, the converse does not hold: some maps do not have a corresponding set:
-`WeakHashMap`, `IdentityHashMap`, and `ConcurrentHashMap`.
+If the standard Set implementations do not support a particular behavior — such as identity‑based equality, 
+concurrent access semantics, or other special properties — you can create a set backed by a map using 
+`Collections.newSetFromMap(...)`.
 
-To obtain a set for one of these (weak references, identity-equality based, concurrency) with the same
-ordering, concurrency, and performance characteristics as the backing map,
-you can call the method `Collections::newSetFromMap` on an empty map with a type `Map<E,Boolean>`,
-where `E` is the element type of the set that you want to create.
 
-For example, to create a concurrent set of `Integer`, you could write:
+This technique allows you to reuse the behavior of a specific `Map` implementation while 
+exposing it as a `Set` interface. 
 
-```java
-Set<Integer> concurrentIntegerSet = Collections.newSetFromMap(new ConcurrentHashMap<Integer,Boolean>());
-```
+Examples include:
+- identity‑based sets using IdentityHashMap
+- concurrent sets using ConcurrentHashMap
+- insertion‑ordered, sorted, or otherwise specialized sets backed by custom map types
 
-This idiom guarantees that no direct access to the backing map can take place after the set view is created,
-as required by the specification of `newSetFromMap`.
-
+This approach provides a flexible way to obtain set behavior that is not available directly 
+through existing `Set` classes.
 
 </details>
 
@@ -256,7 +291,6 @@ as required by the specification of `newSetFromMap`.
 ```java
 Set<Integer> concurrentIntegerSet = Collections.newSetFromMap(new IdentityHashMap<Integer,Boolean>());
 ```
-
 
 </details>
 
