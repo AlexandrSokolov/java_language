@@ -294,72 +294,86 @@ Set<Integer> concurrentIntegerSet = Collections.newSetFromMap(new IdentityHashMa
 
 </details>
 
-### `SequencedSet`
+### Which Java Set types should I use if I need ordering or element navigation?
+<details><summary>Show answer</summary>
+
+- [`SequencedSet`](#what-problem-does-sequencedset-solve)
+- [`NavigableSet`](#what-problem-does-navigableset-solve)
+
+</details>
+
+### What problem does `SequencedSet` solve?
 <details><summary>Show answer</summary>
 
 
-A SequencedSet is an externally or internally ordered Set that also exposes the methods of SequencedCollection.
-It combines the methods of these two interfaces, adding to them in only one respect:
-it provides a covariant override of the method `reversed` of `SequencedCollection`
-in order to return a value of type `SequencedSet`
+A `SequencedSet` represents a Set with a guaranteed encounter order and supports the sequencing operations 
+defined in `SequencedCollection` (such as accessing the first or last element, or iterating in reverse).
+
+
+Its only additional contribution is a covariant override of the `reversed()` method, 
+so calling `reversed()` on a `SequencedSet` produces another `SequencedSet`, preserving type‑safety and fluent usage.
 
 <img src="../../docs/images/SequencedSet_Hierarchy.png" alt="SequencedSet and related types" width="600">
 
 
 </details>
 
-### `SequencedSet` direct implementation
+### `SequencedSet` direct implementations
 <details><summary>Show answer</summary>
 
-
-`LinkedHashSet`
+- [`LinkedHashSet`](#what-is-the-main-idea-behind-linkedhashset-and-how-does-it-differ-from-hashset)
 
 
 </details>
 
-### `LinkedHashSet` idea, compare with `HashSet`
+### What is the main idea behind `LinkedHashSet`, and how does it differ from `HashSet`?
 <details><summary>Show answer</summary>
 
-
 `LinkedHashSet` implements `SequencedSet` by maintaining a linked list of its elements.
-The iterators of a `LinkedHashSet` return their elements in insertion order.
+This guarantees that its iterators return elements in **insertion order**.
+
+The linked structure also improves iteration performance: 
+
+moving to the next element is `O(1)` because the linked list directly connects entries.
 
 
-The linked structure also has a useful consequence in terms of improved performance for iteration:
-next executes in constant time, as the linked list can be used to visit each element in turn.
-This is in contrast to `HashSet`, for which every bucket in the hash table must be visited,
-whether it is occupied or not.
+In contrast, iterating over a `HashSet` requires scanning all hash table buckets, 
+including empty ones, which makes iteration less efficient.
 
 This class is unsychronized and not thread-safe; its iterators are fail-fast.
 
-
 </details>
 
-### `NavigableSet`
+### What problem does `NavigableSet` solve?
 <details><summary>Show answer</summary>
 
+`NavigableSet` extends the `SequencedSet` contract by guaranteeing that iteration always proceeds in 
+**ascending element order**. It also introduces navigation methods that allow you to 
+efficiently find elements adjacent to a given value, such as `lower()`, `higher()`, `floor()`, and `ceiling()`.
 
-The interface `NavigableSet` adds to the `SequencedSet` contract a guarantee that its iterator will
-traverse the set in ascending element order, and adds further methods to find the elements adjacent to a target value.
-Unlike `LinkedHashSet`, its elements are ordered internally by
-the comparison method of its natural order or of its comparator.
+
+Unlike `LinkedHashSet`, which preserves insertion order, a `NavigableSet` orders its elements 
+**by their natural ordering or by a provided `Comparator`**. 
+This means the ordering is defined by element comparison, not by the sequence of insertion.
 
 
 </details>
 
-### What set interface was before `NavigableSet` has been introduced? Recommendations
+### What interface did Java provide before NavigableSet, and what is the current recommendation regarding its usage?
 <details><summary>Show answer</summary>
 
+Before `NavigableSet` was introduced, the main ordered‑set abstraction in Java was `SortedSet`. 
+It guaranteed that iteration followed the sorted order of elements, 
+but it did not provide closest‑match navigation methods like `lower()`, `higher()`, `floor()`, or `ceiling()`.
 
-Prior to the introduction of `NavigableSet`, the only subinterface of `Set` was an interface called `SortedSet`,
-which guarantees iteration order but does not expose the closest-match methods.
-`SortedSet` is still in the JDK - it extends `SequencedSet` and is in turn extended by `NavigableSet` -
-but it is no longer of any great interest, since it has no direct implementations in the platform.
 
+`SortedSet` still exists in the JDK: it extends `SequencedSet` and is itself extended by `NavigableSet`. 
+However, it is no longer particularly relevant, since the platform provides **no direct implementations** of `SortedSet`, 
+and `NavigableSet` fully supersedes it with richer functionality.
 
 </details>
 
-### Using `NavigableSet` as a queue, available approaches, compare them
+### What methods exist for using a NavigableSet as a queue, and how do these approaches differ?
 <details><summary>Show answer</summary>
 
 
@@ -373,21 +387,22 @@ and help to support the use of NavigableSet in applications that require queue f
 - if its main requirement is efficient access to the next task to be performed,
   use `PriorityQueue` (accommodates duplicates).
 
-
 </details>
 
-### `NavigableSet`, how could its elements viewed?
+### In what way can we think about or view the elements of a `NavigableSet`?
 <details><summary>Show answer</summary>
 
+When working with an ordered set of values, a useful way to think about them is as a **range**.
 
-When you have to work with an ordered set of values, a useful way to view them is as a range.
-For example, given a set of timestamped events, you might like to inspect all those
-that happened within a certain time period.
-In the case of PriorityTasks, we might want to process all those that fall within a range of priorities -
-high and medium, say.
 
-Changes in the view - including structural changes - are reflected in the underlying set.
+For example, if you have a set of timestamped events, you may want to examine only those 
+that occurred within a specific time window.
 
+Similarly, in the case of `PriorityTask` objects, you might want to process only the tasks 
+whose priorities fall within a certain band — for instance, high and medium.
+
+
+Any changes made through such a view — including structural modifications — are reflected directly in the underlying set.
 
 </details>
 
@@ -395,47 +410,31 @@ Changes in the view - including structural changes - are reflected in the underl
 <details><summary>Show answer</summary>
 
 
-A SequencedSet is an externally or internally ordered Set that also exposes the methods of SequencedCollection.
-A NavigableSet is an internally ordered SequencedSet that therefore also automatically sorts its elements,
-and provides additional methods to find elements adjacent to a target value.
-
+- A `SequencedSet` is an externally or internally ordered Set that also exposes the methods of SequencedCollection.
+- A `NavigableSet` is an internally ordered SequencedSet that therefore also automatically sorts its elements,
+  and provides additional methods to find elements adjacent to a target value.
 
 </details>
 
 ### Implementations of `NavigableSet`
 <details><summary>Show answer</summary>
 
-
-- [`java.util.TreeSet`](#treeset)
-- [`ConcurrentSkipListSet`](#concurrentskiplistset)
-
+- [`java.util.TreeSet`](#treeset-its-purpose)
+- [`ConcurrentSkipListSet`](./03_Concurrency%20and%20Set%20Implementations.md#concurrentskiplistset)
 
 </details>
 
-### `TreeSet`
+### `TreeSet`, its purpose
 <details><summary>Show answer</summary>
 
+Trees are an ideal data structure when an application requires fast insertion and lookup of individual elements, 
+while also needing those elements to be retrieved in sorted order.
 
-Trees are the data structure you would choose for an application that needs
-fast insertion and retrieval of individual elements,
-but which also requires that elements can be retrieved in sorted order.
+
+`TreeSet` is built on exactly this kind of tree‑based structure (a balanced Red‑Black tree), 
+which allows it to maintain elements in sorted order while providing efficient operations.
+
 
 TreeSet is unsychronized and not thread-safe; its iterators are fail-fast.
-
-
-</details>
-
-### What data structure is backed by `TreeSet`? Its properties
-<details><summary>Show answer</summary>
-
-
-It is backed by a tree.
-
-A tree is a branching structure that represents hierarchy.
-An important class of tree often used in computing is a binary tree -
-one in which each node can have at most two children.
-
-TODO binary tree property
-
 
 </details>
