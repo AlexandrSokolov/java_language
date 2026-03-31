@@ -4,6 +4,14 @@ The stack example does leak, but not unboundedly — it leaks up to the high-wat
 bounded vs unboundedn memory leaks, more examples, see also:
 [When does logical (bounded) leak become a real problem?](1_faq_objects_creating_destroying.md#when-does-logical-bounded-leak-become-a-real-problem)
 
+### WeakReference`, `SoftReference`
+
+object reachability (strong / weak / soft / phantom)
+
+### What Destruction mechanisms exist and what are their drawbacks?
+
+finalizers/cleaners/autoclosable with try-with-resource
+
 ### Memory leak, what is it?
 <details><summary>Show answer</summary>
 
