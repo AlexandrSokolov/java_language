@@ -1,105 +1,135 @@
-### Queue, its purpose
+### What is the purpose of `Queue`?
 <details><summary>Show questions</summary>
 
-
-```text
-A queue is a collection designed to hold elements for processing, yielding them up in the order in which they are to be processed. 
-```
-
-"yielding them up" - giving the elements out when someone asks for them.
+A queue is a collection that holds elements for processing and retrieves them in a defined order, 
+usually first‑in, first‑out (FIFO). 
 
 </details>
 
-### What is specific about queues among other Java collections?
+### What is specific to the `Queue` interface compared to other Java collection interfaces?
 <details><summary>Show questions</summary>
 
 
-Queue is different in kind from the other collections.
-Sets, lists, and maps are typically
-["owned" by another object and form part of its state](../faq.collections.md#respect-the-ownership-of-collections).
+**Queues differ fundamentally from other Java collections in their intended use.**
+
+Sets, lists, and maps are typically _owned_ by another object and represent part of that object’s internal state.
 
 
-By contrast, queues are not usually owned by a single object,
-but are used for transmission of values from producers to consumers.
+**Queues, by contrast, are generally used as communication mechanisms rather than as state holders.**
 
-A queue can have multiple producers and multiple consumers; these can be objects, or threads, or processes.
+They are designed to transmit elements from _producers_ to _consumers_, often decoupling the two.
+
+
+**A queue may have multiple producers and multiple consumers**, which can be objects, threads, or even processes. 
+This makes queues especially suited for coordination, task scheduling, and concurrent programming.
 
 </details>
 
-### Hierarchy of `Queue` in the Collections Framework
+### What is the hierarchy of the `Queue` interface in the Java Collections Framework?
 <details><summary>Show questions</summary>
 
 <img src="../../docs/images/Implementations_of_Queue.png" alt="Implementations of Queue in the Collections Framework" width="600"/>
 
 </details>
 
-### `Queue` vs `List`
+### Why might a simple queue be insufficient in some scenarios, and what alternatives are available?
 <details><summary>Show questions</summary>
 
+**The methods provided by the Queue interface are useful 
+only when the element at the head is actually the one we want to process next.**
 
-The methods of `Queue` are useful to us only if the head element is actually one that we want.
 
-For example, it might help to know something about all the outstanding tasks before you choose the next one.
-Otherwise, in a situation of limited time with an entirely queue-based to-do manager,
-you might end up going for coffee until the meeting starts.
+In some situations, it may be important to inspect or compare all outstanding tasks before deciding which one to handle. 
+With a strictly queue‑based to‑do manager and limited time, you might end up processing tasks in an unhelpful order — 
+such as going for coffee just before an important meeting.
 
-As an alternative, you could consider using `List` interface, which provides more flexible means
-of accessing its elements but has the drawback that its implementations provide much less support for multithread use.
 
-Note: True, the class `PriorityQueue` allows us to provide a comparator that will order the queue elements
-so that the one we want is at the head, but that may not be a particularly good way of expressing the algorithm
-for choosing the next task.
+As an alternative, one could use a `List`, which offers more flexible access to its elements. 
+However, this comes at the cost of significantly weaker support for multithreaded use in most list implementations.
+
+
+**Note**: While `PriorityQueue` allows a comparator to reorder elements so that the most appropriate 
+task appears at the head, this may not be the most expressive or maintainable way 
+to represent the logic for selecting the next task to process.
+This approach can hide complex decision logic inside ordering rules, 
+making the task‑selection algorithm harder to read and maintain.
+
 
 </details>
 
-### What is the main difference in `Queue<>` implementations
+### What is the main distinguishing factor between different `Queue` implementations?
 <details><summary>Show questions</summary>
 
+**The primary difference between Queue implementations lies in their ordering semantics**.
 
-`ordering` - in choosing a Queue implementation, you’re also choosing the ordering of elements (tasks) processing.
-Different implementations embodying different rules about what the order should be in which elements are to be processed.
+
+Choosing a particular Queue implementation means choosing **how elements are ordered and selected for processing**. 
+Different implementations embody different rules that determine the order in which elements are retrieved.
 
 </details>
 
-### Queue orders examples
+### What are examples of queue ordering?
 <details><summary>Show questions</summary>
 
+- **FIFO (first in, first out)** - elements are processed in the order in which they are submitted.
 
-- FIFO (first in, first out) - the rule that tasks are to be processed in the order in which they were submitted.
   Examples: `ArrayDeque`, `LinkedBlockingQueue`
-- LIFO (last in, first out, also known as stacks)
-- priority queues order elements according to a supplied comparator - `PriorityQueue`
-- hold elements until their delay has expired - `DelayQueue`
+- **LIFO (Last‑In, First‑Out)** - elements are processed in reverse order of insertion, also known as **stack** behavior.
+  
+  Example: a `Deque` used as a stack
+- **Priority‑based ordering** - elements are ordered according to a supplied comparator (or their natural ordering), 
+  so the highest‑priority element is processed first.
+  
+  Example: `PriorityQueue`
+- **Delay‑based ordering** - elements are held until a specified delay has expired, 
+  and are only made available for processing afterward.
+  
+  Example: `DelayQueue`
 
 </details>
 
-### Queue Implementation Options. What does affect the choice?
+### What factors should be considered when choosing a Queue implementation?
 <details><summary>Show questions</summary>
 
+- [**Ordering policy**](#what-are-examples-of-queue-ordering)
 
-- [order](#queue-orders-examples)
-- thread-safe - most of them are thread-safe
-  (except `PriorityQueue`, `ArrayDeque`, `LinkedList` - the ones that are not located under `java.util.concurrent`)
-- blocking facilities (that is, operations that wait for conditions to be right for them to execute) - most of them
-  are blocking queues (except `PriorityQueue`, `ConcurrentLinkedQueue`)
-- a synchronization facility [see `SynchronousQueue`](#blockingqueue-implementations)
+  Different queue implementations impose different rules on element ordering, such as 
+  FIFO, LIFO, priority‑based ordering, or delay‑based availability.
+- **Thread safety**
+ 
+  Some queues are thread‑safe by design (primarily those in java.util.concurrent), 
+  while others — such as `PriorityQueue`, `ArrayDeque`, and `LinkedList` — are not and require external synchronization.
+- **Blocking behavior**
+
+  Many queue implementations support blocking operations, where producers or consumers wait 
+  until conditions are suitable (for example, space becoming available or an element arriving). 
+  These are typically provided by _blocking queues_.
+
+  Non‑blocking examples include `PriorityQueue` and `ConcurrentLinkedQueue`.
+- **Synchronization / handoff semantics**
+
+  Certain queues support direct handoff between producers and consumers rather than element storage.
+
+  **`SynchronousQueue`** is a notable example, providing synchronization without internal buffering.
 
 </details>
 
-### Queue attributes (properties)
+### Which queue properties matter most in concurrent systems?
 <details><summary>Show questions</summary>
 
+- **Blocking behavior** - whether queue operations block when they cannot proceed.
+- **Capacity (bound)** - the maximum number of elements the queue can hold, 
+  which determines whether producers may block or reject inserts
+- **Producer–consumer coordination** - how the queue manages interaction between producers and consumers.
 
-- `tail` - each time task (queue element) is added to the queue, it joins the tail of the queue
-- `head` - each added task (element) waits until it reaches the queue head,
-  when the tasks are assigned to the next consumer who becomes free.
-- `bound` - a maximum size of a queue (only if it is a bounded - queue - capacity-restricted)
+  Queues may support multiple producers and consumers, fairness guarantees, 
+  or even direct handoff (as in `SynchronousQueue`), where an element is transferred only when both sides are ready. 
+  The coordination strategy strongly affects latency, throughput, and system behavior under contention.
 
 </details>
 
-### What functionality does `Queue` interface methods offer?
+### What functionality is provided by the `Queue` interface methods?
 <details><summary>Show questions</summary>
-
 
 1. add an element to the tail of the queue
 2. inspect the element at its head (only to retrieve)
@@ -107,152 +137,214 @@ Different implementations embodying different rules about what the order should 
 
 </details>
 
-### Queue Interface Methods, what must you remember about
+### What is important to remember about Queue interface methods?
 <details><summary>Show questions</summary>
 
 
-Each of Queue operations comes in two forms:
-- one that returns either null or false, depending on the operation to indicate failure
-- one that throws an exception.
+**Each core Queue operation is provided in two variants**:
+- **A non‑exceptional form**, which returns null or false to indicate failure
+- **An exceptional form**, which throws an exception when the operation cannot be performed
 
 </details>
 
-### Adding an Element to a Queue
+### Which methods are used to add elements to a Queue?
 <details><summary>Show questions</summary>
 
 
-When you add an element you must think about:
-- If you use a bounded queue, you must think about how to handle the case, when queue is full.
-- Adding `null` as a queue element. Because methods that return/remove element and return null to
-  signify that the queue is empty, you should avoid using `null` as a queue element.
-  In general, the use of `null` as a queue element is discouraged by `Queue` interface;
-  in the JDK, the only implementation that allows it is the legacy class `LinkedList`.
+When adding an element to a Queue, there are two main things to keep in mind::
+- **Capacity constraints**
 
-Adding an Element to a Queue:
-- `boolean add(E e)` - returns true upon success and throws `IllegalStateException` if no space is currently available.
-- `boolean offer(E e)` - returns true if the element was added to this queue, else false
+  If the queue is bounded, you must decide what should happen when it is full: 
+  should the operation fail, block, or throw an exception?
+- **null elements**
 
-When using a capacity-restricted queue, `offer(E e)` is generally preferable to `add(E e)`,
-which can fail to insert an element only by throwing an exception.
+  The `Queue` interface discourages null elements, because methods like `poll()` use null to indicate an empty queue. 
+  In the JDK, only the legacy `LinkedList` allows null, and it is generally best avoided.
 
-Note: reaching capacity is an exceptional situation, as a result I suppose `add(E e)` is more preferable.
+
+**Methods for adding elements**:
+- **`boolean add(E e)`** - inserts the element if possible; throws `IllegalStateException` if the queue is full.
+- **`boolean offer(E e)`** - inserts the element if possible; returns false if the queue is full.
 
 </details>
 
-### Retrieving an Element from a Queue
+### How should a system interpret and handle capacity limits in bounded queues, and what considerations influence this choice?
 <details><summary>Show questions</summary>
 
+When working with bounded queues, there are two equally valid ways to interpret 
+what it means when the queue reaches its capacity. 
+Each interpretation leads naturally to a different choice of method for adding elements.
 
-Throws exception:
+1. **Capacity exhaustion as an error (fail‑fast approach)**
+
+    In this view, reaching the capacity limit indicates that the system is no longer functioning as designed. 
+    Producers are generating work faster than consumers can process it, 
+    which is treated as a system fault or misconfiguration.
+    
+    **Arguments for this approach:**
+      - Losing or rejecting elements is unacceptable
+      - Capacity exhaustion signals overload, incorrect sizing, or a bug
+      - Problems should surface immediately rather than being silently ignored
+      - It favors correctness and early failure over graceful degradation
+    
+    **Method choice:** `add(E e)`
+
+2. **Capacity exhaustion as flow control (back‑pressure approach)**
+
+    In this view, capacity limits are an intentional part of normal system operation. The queue is bounded specifically to:
+      - Protect memory
+      - Smooth bursts of load
+      - Regulate producer speed
+      Reaching capacity is expected during peak load and is used to apply **back‑pressure** to producers.
+    
+    **Arguments for this approach:**
+      - Temporary overload is normal in concurrent systems
+      - Producers should adapt (retry, delay, or drop work deliberately)
+      - Prevents resource exhaustion
+      - Favors stability and resilience under load
+    
+    **Method choice:** `offer(E e)`
+
+Note: **An exception applies fail‑fast pressure, not flow‑control back-pressure**.
+
+</details>
+
+### Which methods are used to retrieve elements from a Queue?
+<details><summary>Show questions</summary>
+
+**Exception‑throwing methods**:
 - `E element()` retrieve but do not remove the head element
 - `E remove()` retrieve and remove the head element
 
-The methods that return null for an empty queue are:
+**Null‑returning methods**:
 - `E peek()` retrieve but do not remove the head element
 - `E poll()` retrieve and remove the head element
 
 </details>
 
-### Bounded/unbounded `Queue` implementations
+### What role does capacity play in different `Queue` implementations?
 <details><summary>Show questions</summary>
 
+**Queue capacity:**
+- Queue implementations differ in whether they limit how many elements can be stored.
+- Capacity directly affects memory usage, producer behavior, and load handling.
+- Some queues limit growth to control resources; others grow dynamically.
+- A few queues store no elements at all and only transfer them directly between threads.
 
-Unbounded:
-- `ArrayDeque` (FIFO), `ConcurrentLinkedQueue` (FIFO)
-  Bounded:
-- `LinkedBlockingQueue` (FIFO)
+**Examples:**
+- Fixed capacity (bounded): `ArrayBlockingQueue`, `LinkedBlockingQueue`
+- No fixed capacity (unbounded): `ConcurrentLinkedQueue`, `LinkedBlockingQueue`, `PriorityQueue`
+- Direct handoff (no storage): `SynchronousQueue`
 
 </details>
 
-### `Queue` implementations that supports priority ordering
+### Which `Queue` implementations support priority ordering?
 <details><summary>Show questions</summary>
-
 
 - `PriorityQueue` - not thread-safe, nor does it provide blocking behavior
 - `PriorityBlockingQueue` thread-safe version of `PriorityQueue`
 
 </details>
 
-### What must you care about when use `PriorityQueue`, its alternatives
+### What should you consider when using PriorityQueue, and what alternatives are available?
 <details><summary>Show questions</summary>
 
+- **Concurrency and blocking behavior** - `PriorityQueue` is not designed for concurrent use
 
-`PriorityQueue` is not designed primarily for concurrent use.
-It is not thread-safe, nor does it provide blocking behavior (`PriorityBlockingQueue` - thread-safe alternative).
+  For concurrent scenarios, `PriorityBlockingQueue` provides a thread‑safe, optionally blocking alternative.
+- **Ordering semantics** - `PriorityQueue` orders elements using either their natural ordering or a supplied comparator, 
+  but guarantees priority only for the head element.
+- **Handling equal priorities**: - `PriorityQueue` provides no guarantees 
+  about the relative order of elements with the same priority.
+  If multiple elements share the highest priority, any one of them may be chosen as the head, 
+  making it unsuitable when deterministic ordering among equal‑priority elements is required.
 
-`PriorityQueue` gives up its elements for processing according to an ordering:
-1. either the natural order of its elements if they implement `Comparable`,
-2. or the ordering imposed by a `Comparator` supplied when the `PriorityQueue` is constructed.
 
-`PriorityQueue` vs `NavigableSet`
-- if it needs to examine and manipulate the set of waiting tasks, use `NavigableSet` (and uniqueness via `equal`);
-- if its main requirement is efficient access to the next task to be performed, use `PriorityQueue` (accommodates duplicates).
-
-`PriorityQueue` gives no guarantee of how it presents multiple elements with the same value.
-So if several tasks are tied for the highest priority in the queue,
-it will choose one of them arbitrarily as the head element.
+`PriorityQueue` vs `NavigableSet`:
+- Use `NavigableSet` (e.g. `TreeSet`, `ConcurrentSkipListSet`) 
+  when you need to inspect, navigate, or modify the full set of waiting tasks, and enforce uniqueness.
+- Use `PriorityQueue` when you need efficient access to the next task to process, and duplicates are acceptable.
 
 </details>
 
-### How are `PriorityQueue` usually implemented? What data structure is behind?
+### How is a PriorityQueue typically implemented, and what data structure underlies it?
 <details><summary>Show questions</summary>
 
+A PriorityQueue is typically implemented using a **heap**, most commonly a **binary heap**.
 
-Priority queues are usually efficiently implemented by `priority heaps`.
-A priority heap is a binary tree somewhat like `TreeSet`, but with two differences:
-1. the only ordering constraint is that each node in the tree should be ordered with respect to its children:
-    - either smaller, in the case of a min heap (which is Java’s default for naturally ordered elements),
-    - or larger, in the case of a max heap.
-2. the tree should be complete at every level except possibly the lowest;
-   if the lowest level is incomplete, the nodes it contains must be grouped together at the left.
+A binary heap is a tree‑based structure that is usually stored in an array and maintains the **heap property**, 
+ensuring that the highest‑priority element is always at the root.
+
+
+This structure allows efficient access to the head element, with `O(log n)` insertion and removal 
+and `O(1)` access to the highest‑priority element.
+
+</details>
+
+### How is an element added to a priority heap?
+<details><summary>Show questions</summary>
 
 ![Adding an element to a PriorityQueue](../../docs/images/Adding_to_PriorityQueue.png)
 
-To add a new element to a priority heap, it is first attached at the leftmost vacant position.
-Then it is repeatedly exchanged with its parent until it reaches a parent that has higher priority -
-that is, has a smaller value.
-
-![Removing the head of a PriorityQueue](../../docs/images/Removing_head_of_PriorityQue.png)
-
-Getting the highest-priority element from a priority heap is trivial: it is the root of the tree.
-But when that has been removed, the two separate trees that result must be reorganized into a priority heap again.
-This is done by first placing the rightmost element from the bottom row into the root position.
-Then - in the reverse of the procedure for adding an element - it is repeatedly exchanged
-with the smaller of its children until it has a higher priority than either, or until it has become a leaf.
+To insert a new element into a priority heap, the element is first placed in the leftmost available position 
+at the bottom of the heap. It is then repeatedly swapped with its parent until the heap property is restored — that is, 
+until its parent has higher priority (for a min‑heap, a smaller value).
 
 </details>
 
-### `Queue` implementation that is thread-safe but without blocking facility
+### How is the head element removed from a priority heap?
 <details><summary>Show questions</summary>
 
+![Removing the head of a PriorityQueue](../../docs/images/Removing_head_of_PriorityQue.png)
+
+**Retrieving the highest‑priority element from a priority heap is straightforward, as it is stored at the root**.
+
+However, once the root is removed, the remaining elements must be rearranged to restore the heap structure.
+
+**This is done by moving the rightmost element from the bottom level of the heap into the root position**.
+
+The element is then repeatedly exchanged with the child of higher priority (for a min‑heap, the smaller child), 
+a process known as _heapifying down_.
+
+**This continues until the heap property is restored — either because the element has higher priority 
+than both of its children or because it has reached a leaf position**.
+
+</details>
+
+### Which Queue implementations are thread‑safe but non‑blocking?
+<details><summary>Show questions</summary>
 
 `ConcurrentLinkedQueue` - an unbounded, thread-safe, FIFO-ordered queue.
 
 </details>
 
-### How is `ConcurrentLinkedQueue` implemented? What data structure is behind?
+### What data structure is used to implement ConcurrentLinkedQueue?
 <details><summary>Show questions</summary>
 
+**`ConcurrentLinkedQueue` is implemented using a linked‑node structure**, 
+similar to the linked lists used for overflow chaining in hash tables 
+and as the foundation of skip lists in `ConcurrentSkipListSet`.
 
-It uses a linked structure, similar to the one in `ConcurrentSkipListSet` as the basis for skip lists
-and in `HashSet` for hash table overflow chaining.
 
-One of the main attractions of linked structures is that the insertion and removal operations implemented by
-pointer rearrangements are performed in constant time.
-This makes them especially useful as FIFO queue implementations,
-where these operations are always required on nodes at the ends of the structure -
-that is, nodes that do not need to be located using the slow sequential search of linked structures.
+**A key advantage of linked structures is that insertion and removal can be performed 
+by simple pointer updates, which take constant time.** 
+This makes them particularly well suited for FIFO queue implementations, 
+where elements are always added at the tail and removed from the head.
+
+
+**Because these operations act only on the ends of the structure, there is no need to traverse the list**, 
+avoiding the linear search costs that would otherwise be associated with linked data structures.
 
 </details>
 
-### Concurrent algorithm used by `ConcurrentLinkedQueue`
+### Which concurrent algorithm is used by `ConcurrentLinkedQueue`?
 <details><summary>Show questions</summary>
 
+**`ConcurrentLinkedQueue` uses a CAS‑based, lock‑free algorithm that guarantees progress even under contention.**
 
-`ConcurrentLinkedQueue` uses a `CAS`-based wait-free algorithm—that is, one that guarantees that every thread
-will make progress over time, regardless of the state of other threads accessing the queue.
-It executes queue insertion and removal operations in constant time, but requires linear time to execute size.
-This is because the algorithm, which relies on cooperation between threads for insertion and removal,
-does not keep track of the queue size and has to iterate over the queue to calculate it when it is required.
+Insertion and removal operations run in constant time, but computing the queue size requires linear time.
+
+**This is because the algorithm does not maintain a size counter** — instead, 
+it relies on cooperation between threads for updates and must traverse the queue to determine its size when needed.
 
 </details>
