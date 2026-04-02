@@ -1,20 +1,23 @@
-### Queue blocking facilities
+### How does blocking behavior work in Java queues, and which Queue interface supports it?
 <details><summary>Show questions</summary>
 
+Many queue implementations support **blocking operations**, where producers or consumers wait
+until conditions are suitable (for example, space becoming available or an element arriving).
+These are typically provided by _blocking queues_.
 
-`BlockingQueue<E>` - is designed primarily for use in producer/consumer scenarios.
 
-Blocking facilities - that is, operations that wait for conditions to be right for them to execute.
+This blocking behavior is defined by the `BlockingQueue<E>` interface, 
+which is designed primarily for producer-consumer scenarios.
 
 </details>
 
-### What functionality does `BlockingQueue` interface methods offer?
+### What functionality is provided by the `BlockingQueue` API?
 <details><summary>Show questions</summary>
 
-
-`BlockingQueue` - A `Queue` that additionally supports operations that wait for the queue
-to become non-empty when retrieving an element, and wait for space to become available
-in the queue when storing an element.
+#### Blocking operations that wait until the queue’s state allows the operation to proceed
+`BlockingQueue` - A `Queue` that additionally supports operations that:
+- wait for the queue to become non-empty when retrieving an element, and 
+- wait for space to become available in the queue when storing an element
 
 |         | Throws exception | Special value | Blocks indefinitely  | Times out            |
 |:--------|:-----------------|:--------------|:---------------------|:---------------------|
@@ -22,7 +25,7 @@ in the queue when storing an element.
 | Remove  | remove()         | poll()        | take()               | poll(time, unit)     |
 | Examine | element()        | peek()        | not applicable       | not applicable       |
 
-#### Retrieving or querying the contents of the blocking queue:
+#### Inspecting queue state and transferring currently available elements:
 - `int drainTo(Collection<? super E> c)` - clear the queue into c
 - `int drainTo(Collection<? super E> c, int maxElements)` - clear at most the specified number of elements into c
 - `int remainingCapacity()` - return the number of elements that would be accepted without blocking,
@@ -30,13 +33,8 @@ in the queue when storing an element.
 
 </details>
 
-### How it works if you add an element into a bounded blocking queue that has reached capacity
+### What happens when you try to add an element to a bounded blocking queue that has reached its capacity?
 <details><summary>Show questions</summary>
-
-
-`add(e)` and `offer(e)` - the methods inherited from `Queue` - fail immediately:
-- `add` by throwing an exception,
-- `offer` by returning false
 
 The blocking methods are more patient:
 - `offer(e, time, unit)` waits for a time specified using `java.util.concurrent.TimeUnit`
@@ -46,118 +44,141 @@ Timed methods such as `poll(long timeout, TimeUnit unit)` and `offer(E e, long t
 do not throw an exception when the timeout expires because
 their design prioritizes indicating success or failure through their return value.
 
+The methods `add(e)` and `offer(e)`, which are inherited from the Queue interface, 
+fail immediately when a bounded blocking queue is at capacity:
+- `add(e)` throws an exception (typically `IllegalStateException`)
+- `offer(e)` returns false to indicate failure
+
+The blocking methods provided by `BlockingQueue` are more patient:
+- `offer(e, timeout, unit)` waits up to the specified time for space to become available
+- `put(e)` blocks indefinitely until the element can be inserted
+
+Timed methods such as:
+- `poll(long timeout, TimeUnit unit)` and 
+- `offer(E e, long timeout, TimeUnit unit)`
+
+do not throw an exception when the timeout expires. 
+Instead, their design favors communicating success or failure through their return value, 
+allowing the caller to handle timeouts without exception-based control flow.
+
 </details>
 
-### Retrieving and removing the head of an empty blocking queue
+### What happens when you try to retrieve and remove the head of an empty blocking queue?
 <details><summary>Show questions</summary>
 
-
-You have:
-- `remove()` and `poll()` are inherited from `Queue` and fail immediately, might not be the best choice
-- `poll(time, unit)` waits for time out and returns value, you need to implement, how to retrigger retrieving logic again
-- `put(e)` blocks until the queue is not empty,
-  but you need to make sure that you do not have multiple threads that invoke this method and are blocked.
-  You could use `Semaphore` for this check.
+Use:
+- `remove()` / `poll()` when immediate failure is acceptable
+- `poll(timeout, unit)` when bounded waiting and retry logic are required
+- `take()` when threads are expected to wait indefinitely for work, with proper coordination and lifecycle management
 
 </details>
 
-### How do blocking queues manage blocked requests? What is the issue with it?
+### How do blocking queues manage multiple blocked threads?
 <details><summary>Show questions</summary>
 
+Some BlockingQueue implementations allow configuring a **fairness policy** that determines how the queue 
+handles **multiple blocked threads**.
 
-Some blocking queue implementations allow an argument to control how the queue will handle multiple blocked requests.
-These will occur when multiple threads attempt to remove items from an empty queue or add items to a full one.
 
-When the queue becomes able to service one of these requests, which one should it choose?
+Blocked requests occur when multiple threads try to remove elements from an empty queue or add elements 
+to a full bounded queue. When the queue becomes able to proceed, it must decide **which waiting thread to unblock**.
 
-The alternatives are to provide a guarantee that the queue will choose the request that has been waiting longest -
-that is, to implement a fair scheduling policy - or to allow the implementation to choose one.
 
-Fair scheduling sounds like the better alternative, since it avoids the possibility that an unlucky thread
-might be delayed indefinitely, but in practice, the benefits it provides are rarely important enough to
-justify incurring the large overhead that it imposes on a queue’s operation.
+Two approaches are possible:
+- **Fair scheduling**, where the queue services the thread that has been waiting the longest
+- **Unfair scheduling**, where the implementation may choose any waiting thread
+
+Fair scheduling prevents **starvation** by ensuring that no thread waits indefinitely. 
+However, maintaining this guarantee requires additional synchronization, 
+which can significantly reduce performance under contention.
+
+
+As a result, most blocking queues default to unfair scheduling, favoring higher throughput, 
+while fairness remains an optional trade‑off when predictability is more important than performance.
 
 Example of such an argument: `fair` in `ArrayBlockingQueue` constructor:
 `ArrayBlockingQueue(int capacity, boolean fair)`
 
 </details>
 
-### What must you care about when use methods of `BlockingQueue`?
+### What thread‑safety guarantees and limitations apply when using `BlockingQueue` methods?
 <details><summary>Show questions</summary>
 
 
-`BlockingQueue` guarantees that the queue operations of its implementations will be thread-safe and atomic.
+`BlockingQueue` guarantees that its **queue operations** are thread-safe and atomic.
 
 
-But this guarantee doesn’t extend to the bulk operations inherited from Collection -
-`addAll`, `containsAll`, `retainAll`, and `removeAll` - unless the individual implementation provides it.
-So it is possible, for example, for `addAll` to fail, throwing an exception,
-after adding only some of the elements in a collection.
+However, this guarantee **does not extend to bulk operations** inherited from `Collection`, such as
+`addAll`, `containsAll`, `retainAll`, and `removeAll`, unless an individual implementation explicitly provides it.
+
+
+As a result, bulk operations may behave partially: 
+for example, `addAll` can throw an exception after **adding only some elements** from the collection.
 
 </details>
 
-### `BlockingQueue` Implementations
+### What are `BlockingQueue` implementations?
 <details><summary>Show questions</summary>
 
-
-1. `LinkedBlockingQueue` - FIFO-ordered queue, based on a linked node structure. Not bounded, but you can set capacity.
-2. `ArrayBlockingQueue` - FIFO-ordered, bounded queue, based on a circular array -
-   a linear structure in which the first and last elements are logically adjacent.
-3. `PriorityBlockingQueue` - a thread-safe, blocking version of `PriorityQueue`
-4. `DelayQueue` - a specialized priority queue, in which the ordering is based on the delay time for each element
-5. `SynchronousQueue` - a mechanism for synchronizing two threads. In work-sharing systems in which the design ensures
-   that there are enough consumer threads to guarantee that producer threads can hand tasks over without having to wait.
-   In this situation, it allows safe transfer of task data between threads without incurring the BlockingQueue
-   overhead of enqueuing, then dequeuing, each task being transferred.
+1. `LinkedBlockingQueue` - A FIFO queue backed by linked nodes, optionally bounded by a specified capacity.
+2. `ArrayBlockingQueue` - A bounded FIFO queue backed by a fixed‑size circular array.
+3. `PriorityBlockingQueue` - An unbounded blocking queue that orders elements according to their natural ordering 
+    or a provided comparator.
+4. `DelayQueue` - A blocking queue of delayed elements, 
+   ordered by their remaining delay, where elements become available only after their delay expires.
+5. `SynchronousQueue` - A zero‑capacity queue that transfers elements directly between producer and consumer threads 
+   without internal storage.
 
 </details>
 
-### `ArrayBlockingQueue`, based on what data structure is it implemented?
+### What is the underlying data structure used by `ArrayBlockingQueue`?
 <details><summary>Show questions</summary>
 
+`ArrayBlockingQueue` is implemented using a **circular array**, 
+a linear array structure where the first and last positions are treated as logically adjacent.
 
-`ArrayBlockingQueue` - is based on a circular array -
-a linear structure in which the first and last elements are logically adjacent.
+The queue maintains two indices: 
+- **head**, pointing to the next element to be removed, and 
+- **tail**, indicating where the next element will be inserted. 
+
+Each removal advances the head index, and each insertion advances the tail index. 
+When either index reaches the end of the array, it wraps around to 0.
+
+If the head and tail indices become equal, the queue may be either full or empty, 
+so the implementation keeps a separate element count to distinguish between these states.
+
 
 <img src="../../docs/images/circular_array.png" alt="A circular array" width="600"/>
 
-The position labeled “head” indicates the head of the queue; each time the head element is removed from the queue,
-the head index is advanced.
-Similarly, each new element is added at the tail position, resulting in that index being advanced.
-When either index needs to be advanced past the last element of the array, it gets the value 0.
-If the two indices have the same value, the queue is either full or empty,
-so an implementation must separately keep track of the count of elements in the queue.
+</details>
+
+### What should you be careful about when using `PriorityBlockingQueue`?
+<details><summary>Show questions</summary>
+
+`PriorityBlockingQueue` iterators are weakly consistent: 
+they are thread‑safe, do not throw `ConcurrentModificationException`, and may reflect concurrent modifications, 
+but they provide no ordering or snapshot guarantees.
+
+
+If a stable or consistent view of the queue is required for iteration, 
+the recommended approach is to transfer the queue’s contents to an array and iterate over that snapshot instead.
 
 </details>
 
-### `PriorityBlockingQueue`, what must you care about?
+### Which `Queue` implementation supports ordering based on delay time?
 <details><summary>Show questions</summary>
 
+`DelayQueue` orders elements by their remaining delay, making them available only after the delay has expired.
 
-`PriorityBlockingQueue` - its iterators are fail-fast, so they throw `ConcurrentModificationException`
-under multithread access; only if the queue is quiescent will they succeed.
-To iterate safely over a `PriorityBlockingQueue`, transfer the elements to an array and iterate over that instead.
+If all elements have a positive delay (that is, none of their delays has expired), calls to `poll()` return null.
+
+Once one or more elements have expired delays, 
+the element whose delay expired earliest is positioned at the head of the queue and becomes available for retrieval.
 
 </details>
 
-### `Queue` implementation that supports ordering based on the delay time
+### What options are available for exchanging information between a producer and a consumer without extra capacity?
 <details><summary>Show questions</summary>
-
-
-`DelayQueue` - is a specialized priority queue, in which the ordering is based on the delay time for each element -
-the time remaining before the element will be ready to be taken from the queue.
-
-If all elements have a positive delay time - that is, none of their associated delay times has expired -
-an attempt to poll the queue will return null.
-
-If one or more elements has an expired delay time, the one with the longest-expired delay time will be
-at the head of the queue.
-
-</details>
-
-### You want to exchange information between a producer and a consumer. What options are available?
-<details><summary>Show questions</summary>
-
 
 You need to exchange information between threads in a thread-safe manner. You have 2 options.
 
@@ -230,54 +251,194 @@ You need to exchange information between threads in a thread-safe manner. You ha
 
 </details>
 
-### Purpose of `SynchronousQueue`
+### What is the purpose of `SynchronousQueue`?
 <details><summary>Show questions</summary>
 
+SynchronousQueue is designed for **direct handoff** between a producer and a consumer, 
+without storing elements internally. 
 
-See also: [A Guide to Java `SynchronousQueue`](https://www.baeldung.com/java-synchronous-queue)
+It has **no capacity at all** — every insert must be paired with a simultaneous removal.
 
-Note: A common application for `SynchronousQueue` is in work-sharing systems in which the design ensures that
-there are enough consumer threads to guarantee that producer threads can hand tasks over without having to wait.
-In this situation, it allows safe transfer of task data between threads without incurring
-the `BlockingQueue` overhead of enqueuing, then dequeuing, each task being transferred.
+A thread attempting to put an element into a `SynchronousQueue` blocks until another thread is ready to take it, 
+and vice versa. This means elements are never enqueued: they are transferred directly from one thread to another.
 
-A thread that wants to add an element to a `SynchronousQueue` must wait until another thread is ready
-to simultaneously take it off, and the same is true — in reverse - for a thread that wants to
-take an element off the queue. So `SynchronousQueue` has the function that its name suggests:
-that of a rendezvous - a mechanism for synchronizing two threads.
+
+In work‑sharing systems, it is often guaranteed that **consumer threads are already available** to process tasks. 
+In such designs, buffering provides little value and only adds overhead. 
+`SynchronousQueue` enables task transfer **without the cost of enqueueing and dequeueing**, 
+while still providing full thread‑safety and coordination.
+
+
+Instead of acting as a container, `SynchronousQueue` acts as a `synchronization point` between threads.
 
 </details>
 
-### You want to use both synchronous and asynchronous messages in producer/consumer scenarios.
+### How can a producer–consumer system support both direct handoff of messages and asynchronous buffered delivery, depending on the situation?
 <details><summary>Show questions</summary>
 
+A `TransferQueue` extends the producer–consumer model by letting the producer choose the delivery semantics 
+at the moment of sending. 
 
-`TransferQueue<E>` - provides producers with a way of choosing between enqueuing data synchronously and asynchronously.
+It introduces methods that explicitly express intent:
+- “Just enqueue this message if no consumer is available.”
+- “Do not return until a consumer has actually taken this message.”
 
-1. As an extension of `BlockingQueue`, it provides a system with the ability to throttle production by
-   blocking producers from adding indefinitely to a bounded queue.
-2. In addition, however, it exposes a new method, `transfer`, which a producer can call if it wishes to block
-   until the enqueued element has been taken by a consumer -
-   a synchronous handshake like that provided by `SynchronousQueue`.
+This allows a **single coordination mechanism** to support:
+- asynchronous buffering when decoupling is desired, and
+- synchronous handoff when coordination or backpressure is required.
 
-- `void transfer(E e)` - transfer the element to a consumer, waiting as long as necessary
-- `boolean tryTransfer(E e);` - transfer the element to a consumer if possible
-- `boolean tryTransfer(E e, long timeout, TimeUnit unit)` - transfer the element to a consumer, waiting up to the timeout.
+In other words, the producer controls whether delivery is **fire‑and‑forget** or **hand‑to‑hand**.
 
-It also exposes two helper methods that provide a rough metric of the waiting consumer count:
-- `boolean hasWaitingConsumer();` - return true if there is at least one waiting consumer
-- `int getWaitingConsumerCount();` - return an estimate of the number of waiting consumers
+How this works in practice:
+1. **Asynchronous buffered delivery** - the producer submits a message and continues immediately.
+   - If consumers are present, one may take the message right away.
+   - If not, the message is stored until a consumer arrives.
+  
+   This is equivalent to standard queue‑based communication.
 
-The JDK offers one implementation of `TransferQueue`, `LinkedTransferQueue`. This is an unbounded FIFO queue,
-with some interesting properties: it is lock-free, like `ConcurrentLinkedQueue` but with
-the blocking methods that that class lacks; it supports the transfer methods of its interface via a `dual queue`
-whose nodes can represent either enqueued data or outstanding deque requests;
-and, unusually among concurrent classes, it provides fairness without degrading performance.
-In fact, it outperforms `SynchronousQueue` even in the latter’s `nonfair` mode.
+2. **Direct handoff (synchronous transfer)** - the producer submits a message and **waits** until a consumer receives it.
+   - If a consumer is already waiting, the transfer happens immediately.
+   - If not, the producer blocks until one arrives.
+
+   This creates a **rendezvous** between producer and consumer, 
+   guaranteeing that the message has been accepted before the producer proceeds.
 
 </details>
 
-### How to share a blocking queue in multithreaded contexts between producers and consumers?
+### How does the `TransferQueue` API fit together to support both synchronous and asynchronous message delivery?
+<details><summary>Show questions</summary>
+
+**Synchronous transfer (handoff) methods** - provide **direct producer–consumer handoff**, 
+where the producer may wait until a consumer receives the element:
+- `void transfer(E e)` Transfers the element to a consumer, blocking until it is taken.
+- `boolean tryTransfer(E e)` Transfers the element only if a consumer is already waiting.
+- `boolean tryTransfer(E e, long timeout, TimeUnit unit)` Attempts to transfer the element, 
+  waiting up to the specified timeout.
+
+**Consumer‑availability probes** - expose **approximate information about waiting consumers**:
+- `boolean hasWaitingConsumer()` - Returns true if at least one consumer is waiting.
+- `int getWaitingConsumerCount()` - Returns an estimate of the number of waiting consumers.
+
+How these pieces fit together:
+- **enqueue elements asynchronously** using standard BlockingQueue methods,
+- **perform synchronous handoff** when coordination or confirmation is required,
+- **choose behavior dynamically**, based on consumer availability or system state.
+
+**This dual model is exactly what distinguishes TransferQueue from**:
+- `BlockingQueue` (always asynchronous)
+- `SynchronousQueue` (always synchronous)
+
+</details>
+
+### What implementations of TransferQueue are provided by the Java API?
+<details><summary>Show questions</summary>
+
+`LinkedTransferQueue` is the standard implementation of `TransferQueue` in the Java concurrent library.
+
+Key characteristics:
+- It is unbounded and non‑blocking internally, designed for high throughput.
+- It supports both modes without separate queues or coordination mechanisms.
+- It allows producers and consumers to pair up dynamically at runtime.
+
+Crucially, producers can:
+- enqueue work when consumers are busy or absent, or
+- block until handoff when immediate delivery or feedback is required — all using the same queue instance.
+
+</details>
+
+
+### Why might a producer–consumer system need to support both direct message handoff and asynchronous buffered delivery?
+<details><summary>Show questions</summary>
+
+**The core tension**
+
+In producer–consumer systems there are two competing needs:
+- **Throughput and decoupling**
+  - Producers should be able to keep working even if consumers are busy.
+  - This argues for **asynchronous buffering**.
+- **Coordination and feedback**
+  - Sometimes producers must know that a consumer has actually accepted the work.
+  - This argues for direct (synchronous) handoff.
+
+
+**Why always buffering is not enough**
+
+Buffered queues solve throughput, but they hide important information:
+- Has any consumer actually seen my message?
+- Is the system overloaded or just temporarily slow?
+- Am I producing work faster than it can ever be consumed?
+
+**Example: backpressure**
+
+Imagine a system where:
+- tasks are expensive
+- producing too many tasks can exhaust memory or external resources
+
+If producers always enqueue:
+- the queue grows
+- latency explodes
+- failures happen far away from the cause
+
+Sometimes a producer must wait: “Do not let me proceed until a consumer is ready.”
+
+That’s **direct handoff**.
+
+**Why always synchronous handoff is not enough**
+
+**Example: bursty production**
+
+Imagine:
+- a producer generates tasks in bursts
+- consumers can lag briefly, but catch up quickly
+
+With pure handoff:
+- producers block frequently
+- throughput collapses
+- threads are wasted waiting unnecessarily
+
+Here you want: “If consumers are busy, just queue it and move on.”
+
+That’s **asynchronous buffering**.
+
+</details>
+
+### In which real‑world scenarios is it necessary to support both direct message handoff and asynchronous buffering?
+<details><summary>Show questions</summary>
+
+1. **Mixed‑importance tasks**
+
+   - High‑priority control messages:
+     - must be processed now
+     - producer should wait if no consumer is ready
+   - Low‑priority background tasks:
+     - can be buffered
+     - producer should not block
+
+    Same producer. Same consumers. Different semantics.
+2. **Load‑sensitive systems**
+   A producer might say:
+   - “If a consumer is ready right now, hand this off immediately.”
+   - “If not, queue it — but only then.”
+   This lets the system:
+   - exploit idle consumers
+   - avoid unnecessary blocking
+   - still apply backpressure when needed
+3. **Thread pool task submission**
+   This is a _classic_ motivation.
+
+   A task submitter might want:
+   - immediate execution if a worker is free
+   - otherwise enqueue the task
+   Why?
+   - Immediate handoff reduces latency
+   - Queueing avoids throwing work away
+   - Blocking is avoided unless truly necessary
+
+   Pure queue or pure handoff alone can’t express this policy.
+
+</details>
+
+### How can a BlockingQueue be safely shared between producers and consumers in a multithreaded environment?
 <details><summary>Show questions</summary>
 
 
@@ -311,17 +472,26 @@ In fact, it outperforms `SynchronousQueue` even in the latter’s `nonfair` mode
 
 </details>
 
-### You use a thread-safe, blocking queue in multithreaded contexts. Are you safe?
+### Does using a thread‑safe blocking queue make a multithreaded system safe?
 <details><summary>Show questions</summary>
 
+A thread‑safe (and blocking) queue correctly handles concurrent access by multiple threads, 
+ensuring that adding and removing elements is safe and well‑coordinated.
 
-The thread-safe (and blocking) collection itself takes care of the problems arising
-from the interaction of different threads in adding items to or removing them from the queue.
 
-But when we go on to use the queues in a larger system, we will need to be able to stop daily task queues
-without losing task information.
+However, this guarantee applies **only to the queue itself**. 
+When such a queue is used as part of a larger multithreaded system, 
+additional concerns arise that the queue alone does not solve.
 
-Achieving graceful shutdown can often be a problem in concurrent systems.
+
+In particular, real systems must be able to **shut down gracefully** — for example, 
+stopping worker threads or daily task processing without losing queued tasks, duplicating work, 
+or leaving threads permanently blocked.
+
+Graceful shutdown requires explicit coordination beyond thread‑safe collections, such as signaling consumers to stop, 
+ensuring all queued tasks are processed or persisted, and managing thread lifecycles correctly. 
+As a result, achieving a clean shutdown remains one of the **harder problems in concurrent system design**, 
+even when thread‑safe queues are used correctly.
 
 [`StoppableTaskQueue` solves the problem of providing an orderly shutdown mechanism.](/src/main/java/com/savdev/collections/queues/StoppableTaskQueue.java)
 
