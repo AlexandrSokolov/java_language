@@ -1,5 +1,5 @@
-### Comparative performance of different Queue and Deque implementations
-<details><summary>Show questions</summary>
+### How does the performance of different `Queue` and `Deque` implementations compare?
+<details><summary>Show answer</summary>
 
 
 |                       | offer    | peek | poll     | size |
@@ -17,92 +17,96 @@
 
 </details>
 
-### First question to ask to choose the right implementation
-<details><summary>Show questions</summary>
+### What is the first question to ask when choosing the right Queue implementation?
+<details><summary>Show answer</summary>
 
-
-the first question to ask is whether the implementation you choose needs to support concurrent access.
+The first question to ask is whether the chosen implementation needs to support concurrent access.
 
 </details>
 
-### Queue implementations that do not need concurrent access
-<details><summary>Show questions</summary>
-
+### Which Queue implementations do not require concurrent access?
+<details><summary>Show answer</summary>
 
 - `ArrayDeque` - for FIFO ordering
 - `PriorityQueue` - for priority ordering
 
 </details>
 
-### Your application does demand thread safety. What is the next question to ask?
-<details><summary>Show questions</summary>
+### If thread safety is required, what is the next question you should ask when choosing a Queue implementation?
+<details><summary>Show answer</summary>
 
-
-If your application does demand thread safety, you next need to consider ordering.
-
-</details>
-
-### Queue implementations that demand thread safety
-<details><summary>Show questions</summary>
-
-
-- `PriorityBlockingQueue` - priority ordering
-- `DelayQueue` - delay ordering
-- [for FIFO ordering, you need consider several options](#queue-implementations-that-demand-thread-safety-and-fifo-ordering)
+After deciding that thread safety is required, there are two independent concerns you must consider next:
+- [What ordering semantics are required?](#which-threadsafe-queue-implementations-support-different-ordering-guarantees)
+- Is blocking behavior needed?
 
 </details>
 
-### Queue implementations that demand thread safety and FIFO ordering
-<details><summary>Show questions</summary>
+### Which thread‑safe Queue implementations support different ordering guarantees?
+<details><summary>Show answer</summary>
 
-
-If FIFO ordering is acceptable, the third question is whether you need blocking methods,
-as you usually will for producer/consumer problems
-(either because the consumers must handle an empty queue by waiting,
-or because you want to constrain demand on them by bounding the queue, and then producers must sometimes wait).
-
-- `ConcurrentLinkedQueue` - wait-free implementation - if you don’t need blocking methods or a bound on the queue size.
-- [If you do need a blocking queue, consider additional options](#blocking-queue-implementations-that-demand-thread-safety-and-fifo-ordering)
+- `ConcurrentLinkedQueue` - FIFO ordering without blocking
+- `PriorityBlockingQueue` - blocking priority ordering
+- `DelayQueue` - blocking delay ordering
 
 </details>
 
-### Blocking Queue implementations that demand thread safety and FIFO ordering
-<details><summary>Show questions</summary>
+### Which thread‑safe Queue implementations support non-blocking behavior?
+<details><summary>Show answer</summary>
 
+- `ConcurrentLinkedQueue` - FIFO ordering without blocking
 
-If you do need a blocking queue, because your application requires support for producer/consumer cooperation,
-**pause to consider whether you really need to buffer data**,
-or whether all you need is a safe hand-off of data between the threads.
+</details>
 
-If you can do without buffering
-(usually because you are confident that there will be enough consumers to prevent data from piling up),
-then `SynchronousQueue` is an efficient alternative to the remaining FIFO-blocking implementations,
-`LinkedBlockingQueue` and `ArrayBlockingQueue`.
+### Which queue implementations provide thread‑safe blocking behavior?
+<details><summary>Show answer</summary>
+
+- `LinkedBlockingQueue` and `ArrayBlockingQueue` - for classic producer–consumer scenarios
+- `SynchronousQueue` - blocking queue with no internal capacity, providing **direct handoff** between producer and consumer
+- `LinkedTransferQueue` - supports both asynchronous enqueuing and synchronous handoff
 
 </details>
 
 ### `LinkedBlockingQueue` vs `ArrayBlockingQueue`
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
+
+If you **cannot define a realistic upper bound** for the queue size, `LinkedBlockingQueue` is the only viable choice, 
+since `ArrayBlockingQueue` is always bounded and requires its capacity to be fixed at construction time.
 
 
-If you cannot fix a realistic upper bound for the queue size,
-then you must choose `LinkedBlockingQueue`, as `ArrayBlockingQueue` is always bounded.
+When a bounded queue is acceptable, the choice between the two is primarily driven by performance and memory trade‑offs, 
+especially under concurrent load. While both queues provide constant‑time insertion and removal in theory, 
+their behavior differs significantly in practice due to design choices.
 
-For bounded use, you will choose between the two on the basis of performance.
-Their performance characteristics are the same, but these are only the formulas for sequential access;
-how they perform in concurrent use is a different question.
 
-A number of factors combine to influence their relative performance:
-- Having separate locks on the head and the tail means that producer and consumer threads
-  do not need to contend with each other for `LinkedBlockingQueue`.
-  `ArrayBlockingQueue` uses a single lock.
-- An upside of the bounded nature of `ArrayBlockingQueue` is that its use of memory is predictable:
-  it never allocates, unlike `LinkedBlockingQueue`.
-  On the other hand, preallocation means that it may be using more memory than it needs, unlike `LinkedBlockingQueue`,
-  whose allocation will more or less match the queue size.
-- Conversely, an `ArrayBlockingQueue` does not have to allocate new objects with each insertion,
-  unlike a `LinkedBlockingQueue`.
-- Linked data structures generally have much worse cache behavior than array-based ones.
-  As we saw in [_Memory_](todo), cache misses can be the dominant factor in an algorithm’s performance.
+Several factors influence their relative performance:
+- **Locking strategy**
+  - `LinkedBlockingQueue` uses separate locks for enqueueing and dequeueing, 
+    allowing producers and consumers to operate concurrently with minimal contention.
+  - `ArrayBlockingQueue`, by contrast, uses a single lock, 
+    which can increase contention when producers and consumers are active simultaneously.
+- **Memory allocation behavior**
+  - `ArrayBlockingQueue` **preallocates all required storage upfront**, resulting in fixed and predictable 
+    memory usage and avoiding any allocation during runtime. Because elements are stored in a reusable array, 
+    insertions do not require creating new objects, which can improve performance under high throughput.
+  - `LinkedBlockingQueue`, in contrast, allocates a new node for each inserted element. 
+    This allows memory usage to grow and shrink dynamically with the queue size, 
+    but it comes at the cost of ongoing object allocation and garbage collection overhead, 
+    which can negatively impact performance under heavy load.
+- **Cache locality**
+  - Array‑based structures like `ArrayBlockingQueue` typically exhibit better cache locality than linked structures.
+  - Linked structures such as `LinkedBlockingQueue` are more prone to cache misses due to pointer chasing, 
+    which can become a dominant performance factor on modern CPUs.
+
+
+**Practical guidance**
+
+* Prefer LinkedBlockingQueue when:
+  - the maximum queue size is unknown or difficult to estimate
+  - minimizing producer–consumer contention is important
+  - adaptability matters more than raw memory predictability
+* Prefer ArrayBlockingQueue when:
+  - a fixed capacity is acceptable or desired
+  - predictable memory usage is important
+  - high throughput and cache efficiency are priorities
 
 </details>

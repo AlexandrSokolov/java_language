@@ -1,5 +1,5 @@
 ### How does blocking behavior work in Java queues, and which Queue interface supports it?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 Many queue implementations support **blocking operations**, where producers or consumers wait
 until conditions are suitable (for example, space becoming available or an element arriving).
@@ -12,7 +12,7 @@ which is designed primarily for producer-consumer scenarios.
 </details>
 
 ### What functionality is provided by the `BlockingQueue` API?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 #### Blocking operations that wait until the queue’s state allows the operation to proceed
 `BlockingQueue` - A `Queue` that additionally supports operations that:
@@ -34,7 +34,7 @@ which is designed primarily for producer-consumer scenarios.
 </details>
 
 ### What happens when you try to add an element to a bounded blocking queue that has reached its capacity?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 The blocking methods are more patient:
 - `offer(e, time, unit)` waits for a time specified using `java.util.concurrent.TimeUnit`
@@ -64,7 +64,7 @@ allowing the caller to handle timeouts without exception-based control flow.
 </details>
 
 ### What happens when you try to retrieve and remove the head of an empty blocking queue?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 Use:
 - `remove()` / `poll()` when immediate failure is acceptable
@@ -74,7 +74,7 @@ Use:
 </details>
 
 ### How do blocking queues manage multiple blocked threads?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 Some BlockingQueue implementations allow configuring a **fairness policy** that determines how the queue 
 handles **multiple blocked threads**.
@@ -102,7 +102,7 @@ Example of such an argument: `fair` in `ArrayBlockingQueue` constructor:
 </details>
 
 ### What thread‑safety guarantees and limitations apply when using `BlockingQueue` methods?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 
 `BlockingQueue` guarantees that its **queue operations** are thread-safe and atomic.
@@ -118,7 +118,7 @@ for example, `addAll` can throw an exception after **adding only some elements**
 </details>
 
 ### What are `BlockingQueue` implementations?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 1. `LinkedBlockingQueue` - A FIFO queue backed by linked nodes, optionally bounded by a specified capacity.
 2. `ArrayBlockingQueue` - A bounded FIFO queue backed by a fixed‑size circular array.
@@ -132,7 +132,7 @@ for example, `addAll` can throw an exception after **adding only some elements**
 </details>
 
 ### What is the underlying data structure used by `ArrayBlockingQueue`?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 `ArrayBlockingQueue` is implemented using a **circular array**, 
 a linear array structure where the first and last positions are treated as logically adjacent.
@@ -153,7 +153,7 @@ so the implementation keeps a separate element count to distinguish between thes
 </details>
 
 ### What should you be careful about when using `PriorityBlockingQueue`?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 `PriorityBlockingQueue` iterators are weakly consistent: 
 they are thread‑safe, do not throw `ConcurrentModificationException`, and may reflect concurrent modifications, 
@@ -166,7 +166,7 @@ the recommended approach is to transfer the queue’s contents to an array and i
 </details>
 
 ### Which `Queue` implementation supports ordering based on delay time?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 `DelayQueue` orders elements by their remaining delay, making them available only after the delay has expired.
 
@@ -178,7 +178,7 @@ the element whose delay expired earliest is positioned at the head of the queue 
 </details>
 
 ### What options are available for exchanging information between a producer and a consumer without extra capacity?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 You need to exchange information between threads in a thread-safe manner. You have 2 options.
 
@@ -252,7 +252,7 @@ You need to exchange information between threads in a thread-safe manner. You ha
 </details>
 
 ### What is the purpose of `SynchronousQueue`?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 SynchronousQueue is designed for **direct handoff** between a producer and a consumer, 
 without storing elements internally. 
@@ -274,7 +274,7 @@ Instead of acting as a container, `SynchronousQueue` acts as a `synchronization 
 </details>
 
 ### How can a producer–consumer system support both direct handoff of messages and asynchronous buffered delivery, depending on the situation?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 A `TransferQueue` extends the producer–consumer model by letting the producer choose the delivery semantics 
 at the moment of sending. 
@@ -306,7 +306,7 @@ How this works in practice:
 </details>
 
 ### How does the `TransferQueue` API fit together to support both synchronous and asynchronous message delivery?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 **Synchronous transfer (handoff) methods** - provide **direct producer–consumer handoff**, 
 where the producer may wait until a consumer receives the element:
@@ -331,7 +331,7 @@ How these pieces fit together:
 </details>
 
 ### What implementations of TransferQueue are provided by the Java API?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 `LinkedTransferQueue` is the standard implementation of `TransferQueue` in the Java concurrent library.
 
@@ -348,7 +348,7 @@ Crucially, producers can:
 
 
 ### Why might a producer–consumer system need to support both direct message handoff and asynchronous buffered delivery?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 **The core tension**
 
@@ -403,7 +403,7 @@ That’s **asynchronous buffering**.
 </details>
 
 ### In which real‑world scenarios is it necessary to support both direct message handoff and asynchronous buffering?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 1. **Mixed‑importance tasks**
 
@@ -439,7 +439,7 @@ That’s **asynchronous buffering**.
 </details>
 
 ### How can a BlockingQueue be safely shared between producers and consumers in a multithreaded environment?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 
 1. You could pass a shared queue into a producer/consumer:
@@ -473,7 +473,7 @@ That’s **asynchronous buffering**.
 </details>
 
 ### Does using a thread‑safe blocking queue make a multithreaded system safe?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 A thread‑safe (and blocking) queue correctly handles concurrent access by multiple threads, 
 ensuring that adding and removing elements is safe and well‑coordinated.

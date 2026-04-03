@@ -1,5 +1,5 @@
 ### What is the purpose of `Queue`?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 A queue is a collection that holds elements for processing and retrieves them in a defined order, 
 usually first‑in, first‑out (FIFO). 
@@ -7,7 +7,7 @@ usually first‑in, first‑out (FIFO).
 </details>
 
 ### What is specific to the `Queue` interface compared to other Java collection interfaces?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 
 **Queues differ fundamentally from other Java collections in their intended use.**
@@ -26,14 +26,14 @@ This makes queues especially suited for coordination, task scheduling, and concu
 </details>
 
 ### What is the hierarchy of the `Queue` interface in the Java Collections Framework?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 <img src="../../docs/images/Implementations_of_Queue.png" alt="Implementations of Queue in the Collections Framework" width="600"/>
 
 </details>
 
 ### Why might a simple queue be insufficient in some scenarios, and what alternatives are available?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 **The methods provided by the Queue interface are useful 
 only when the element at the head is actually the one we want to process next.**
@@ -58,7 +58,7 @@ making the task‑selection algorithm harder to read and maintain.
 </details>
 
 ### What is the main distinguishing factor between different `Queue` implementations?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 **The primary difference between Queue implementations lies in their ordering semantics**.
 
@@ -69,7 +69,7 @@ Different implementations embody different rules that determine the order in whi
 </details>
 
 ### What are examples of queue ordering?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 - **FIFO (first in, first out)** - elements are processed in the order in which they are submitted.
 
@@ -89,7 +89,7 @@ Different implementations embody different rules that determine the order in whi
 </details>
 
 ### What factors should be considered when choosing a Queue implementation?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 - [**Ordering policy**](#what-are-examples-of-queue-ordering)
 
@@ -115,7 +115,7 @@ Different implementations embody different rules that determine the order in whi
 </details>
 
 ### Which queue properties matter most in concurrent systems?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 - **Blocking behavior** - whether queue operations block when they cannot proceed.
 - **Capacity (bound)** - the maximum number of elements the queue can hold, 
@@ -129,7 +129,7 @@ Different implementations embody different rules that determine the order in whi
 </details>
 
 ### What functionality is provided by the `Queue` interface methods?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 1. add an element to the tail of the queue
 2. inspect the element at its head (only to retrieve)
@@ -138,7 +138,7 @@ Different implementations embody different rules that determine the order in whi
 </details>
 
 ### What is important to remember about Queue interface methods?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 
 **Each core Queue operation is provided in two variants**:
@@ -148,7 +148,7 @@ Different implementations embody different rules that determine the order in whi
 </details>
 
 ### Which methods are used to add elements to a Queue?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 
 When adding an element to a Queue, there are two main things to keep in mind::
@@ -169,7 +169,7 @@ When adding an element to a Queue, there are two main things to keep in mind::
 </details>
 
 ### How should a system interpret and handle capacity limits in bounded queues, and what considerations influence this choice?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 When working with bounded queues, there are two equally valid ways to interpret 
 what it means when the queue reaches its capacity. 
@@ -210,7 +210,7 @@ Note: **An exception applies fail‑fast pressure, not flow‑control back-press
 </details>
 
 ### Which methods are used to retrieve elements from a Queue?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 **Exception‑throwing methods**:
 - `E element()` retrieve but do not remove the head element
@@ -223,7 +223,7 @@ Note: **An exception applies fail‑fast pressure, not flow‑control back-press
 </details>
 
 ### What role does capacity play in different `Queue` implementations?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 **Queue capacity:**
 - Queue implementations differ in whether they limit how many elements can be stored.
@@ -239,7 +239,7 @@ Note: **An exception applies fail‑fast pressure, not flow‑control back-press
 </details>
 
 ### Which `Queue` implementations support priority ordering?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 - `PriorityQueue` - not thread-safe, nor does it provide blocking behavior
 - `PriorityBlockingQueue` thread-safe version of `PriorityQueue`
@@ -247,7 +247,7 @@ Note: **An exception applies fail‑fast pressure, not flow‑control back-press
 </details>
 
 ### What should you consider when using PriorityQueue, and what alternatives are available?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 - **Concurrency and blocking behavior** - `PriorityQueue` is not designed for concurrent use
 
@@ -268,7 +268,7 @@ Note: **An exception applies fail‑fast pressure, not flow‑control back-press
 </details>
 
 ### How is a PriorityQueue typically implemented, and what data structure underlies it?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 A PriorityQueue is typically implemented using a **heap**, most commonly a **binary heap**.
 
@@ -282,7 +282,7 @@ and `O(1)` access to the highest‑priority element.
 </details>
 
 ### How is an element added to a priority heap?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 ![Adding an element to a PriorityQueue](../../docs/images/Adding_to_PriorityQueue.png)
 
@@ -293,7 +293,7 @@ until its parent has higher priority (for a min‑heap, a smaller value).
 </details>
 
 ### How is the head element removed from a priority heap?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 ![Removing the head of a PriorityQueue](../../docs/images/Removing_head_of_PriorityQue.png)
 
@@ -312,14 +312,14 @@ than both of its children or because it has reached a leaf position**.
 </details>
 
 ### Which Queue implementations are thread‑safe but non‑blocking?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 `ConcurrentLinkedQueue` - an unbounded, thread-safe, FIFO-ordered queue.
 
 </details>
 
 ### What data structure is used to implement ConcurrentLinkedQueue?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 **`ConcurrentLinkedQueue` is implemented using a linked‑node structure**, 
 similar to the linked lists used for overflow chaining in hash tables 
@@ -338,7 +338,7 @@ avoiding the linear search costs that would otherwise be associated with linked 
 </details>
 
 ### Which concurrent algorithm is used by `ConcurrentLinkedQueue`?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 **`ConcurrentLinkedQueue` uses a CAS‑based, lock‑free algorithm that guarantees progress even under contention.**
 

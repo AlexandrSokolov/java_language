@@ -1,5 +1,5 @@
 ### What problem does `Deque` solve compared to Queue?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 
 A **Deque** (pronounced “deck”) is a **double‑ended queue** that allows elements to be 
@@ -22,7 +22,7 @@ Deques can also be used to model state where updates are naturally applied at ei
 </details>
 
 ### What is a common problem in parallel systems with multiple threads, and what solutions are used to handle it?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 In parallel systems, work is often divided across multiple threads. A common problem is load imbalance:
 - Some threads finish their tasks quickly and become idle
@@ -53,7 +53,7 @@ With a simple Queue, all threads would compete for the same end, increasing cont
 </details>
 
 ### What does system‑level coordination look like in a work‑stealing scheduler?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 **The core question restated:**
 
@@ -95,7 +95,7 @@ The system relies on **probability**, not strict ordering.
 </details>
 
 ### Where is work‑stealing commonly used?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 - Fork/Join frameworks (e.g., Java’s ForkJoinPool)
 - Parallel task schedulers
@@ -105,7 +105,7 @@ The system relies on **probability**, not strict ordering.
 </details>
 
 ### What is the interface hierarchy of `Deque`?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 The Deque interface extends both Queue and SequencedCollection, inheriting queue semantics while adding symmetric access to the beginning and end of the collection.
 
@@ -115,7 +115,7 @@ The Deque interface extends both Queue and SequencedCollection, inheriting queue
 </details>
 
 ### What functionality is exposed by the `Deque` API?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 The Deque interface extends Queue with symmetric methods that operate explicitly on both the head and the tail.
 
@@ -157,7 +157,7 @@ throw an exception for a full deque:
 </details>
 
 ### What implementations of `Deque` are provided in Java?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 - [`ArrayDeque`](#what-is-arraydeque)
 - [`LinkedList`](#linkedlist-as-implementation-of-deque)
@@ -165,7 +165,7 @@ throw an exception for a full deque:
 </details>
 
 ### What is ArrayDeque?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 `ArrayDeque` fills an important gap among Queue implementations.
 
@@ -180,7 +180,7 @@ for both deques and FIFO queues in single‑threaded or externally synchronized 
 </details>
 
 ### What underlying data structure does `ArrayDeque` use, and why?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 
 `ArrayDeque` is based on a **circular array**, similar to `ArrayBlockingQueue`.
@@ -201,7 +201,7 @@ providing better cache locality and generally superior performance for insertion
 </details>
 
 ### What are the performance characteristics of `ArrayDeque`, and how do its iterators behave?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 Head and tail insertions and removals run in constant time, as in a circular array.
 
@@ -210,7 +210,7 @@ The iterators are fail-fast.
 </details>
 
 ### What is `LinkedList` as an implementation of `Deque`
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 As an implementation of Deque, **`LinkedList` is rarely the preferred choice**. 
 Its primary advantage — constant‑time insertion and removal at the head and tail — is also provided by `ArrayDeque`, 
@@ -232,7 +232,7 @@ Its iterators are fail-fast.
 </details>
 
 ### `LinkedList` vs `ArrayDeque` as implementations of `Deque`
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 When comparing `LinkedList` and `ArrayDeque` as implementations of Deque, `ArrayDeque` is generally the better choice.
 
@@ -257,7 +257,7 @@ performance is less critical.
 </details>
 
 ### What blocking‑specific operations are introduced by the BlockingDeque interface?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 
 `BlockingQueue` adds blocking variants of queue operations, 
@@ -283,7 +283,7 @@ Blocking removal methods:
 </details>
 
 ### What implementations of `BlockingDeque` are available, and what are their characteristics?
-<details><summary>Show questions</summary>
+<details><summary>Show answer</summary>
 
 `BlockingDeque` has a single implementation in the JDK: `LinkedBlockingDeque`.
 
