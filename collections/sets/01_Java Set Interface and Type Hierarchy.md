@@ -53,10 +53,53 @@ that is, if the comparison method returns 0 - regardless of whether they satisfy
 
 - sets may contain duplicate elements that satisfy `equals` or, conversely,
   that they may elide occurrences of ones that don’t.
-- to determine whether two sets A and B are equal,
-  A must test each member of B to discover whether it is equivalent to a member of A.
-  If the roles are reversed, and if A and B are using different equivalence relations,
-  the results may be different, so set equality loses symmetry.
+- **In theory**, to determine whether two sets A and B are equal, 
+  A must verify that every element of B is equivalent to some element of A, and vice versa 
+
+  One natural way to express this is to test whether A contains every element of B and B contains every element of A, 
+  using each set’s `contains` operation. This approach appears attractive because contains can be optimized 
+  by the set’s internal data structure (for example, by hashing or tree lookup).
+
+  However, if A and B rely on **different equivalence relations** for their `contains` operations, 
+  reversing the roles of the sets may yield different results, breaking the symmetry of equality.
+
+  Why the contains‑based approach is problematic (theoretically)
+
+  The contains method is defined in terms of the set’s own equivalence relation:
+  - HashSet -> uses equals
+  - identity‑based set -> uses ==
+  - tree‑based set -> uses its Comparator
+
+   If two sets use different equivalence relations, then:
+  - A.contains(x) and B.contains(x) may disagree
+  - A.equals(B) and B.equals(A) may yield different answers
+  
+  as a result, symmetry is lost.
+
+  In the Java Collections Framework, **set equality is intentionally not defined in terms of `contains` semantics**.
+
+  Instead:
+  - All standard Set implementations inherit equals from AbstractSet
+  - AbstractSet.equals compares elements using `Object.equals` only
+  - The internal equivalence relation of the set is ignored
+
+  Yes, this can look less efficient — it resembles comparing elements pairwise — but it has a crucial property:
+  - Both directions of the comparison use the same equivalence relation
+  - Symmetry is guaranteed
+
+  ```java
+  Set<String> identitySet = Collections.newSetFromMap(new IdentityHashMap<>());
+  identitySet.addAll(List.of("a", "b"));
+  
+  Set<String> hashSet = new HashSet<>(List.of("a", "b"));
+  
+  //both return true:
+  hashSet.equals(identitySet);
+  identitySet.equals(hashSet);
+  ```
+  `AbstractSet.equals` iterates over elements and compares them using `String.equals`
+
+  **Symmetry is guaranteed**, regardless of how the set stores or matches its elements.
 
 </details>
 
