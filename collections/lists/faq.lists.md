@@ -1,45 +1,38 @@
-- [Lists, its purpose, compare with other collections](#lists-its-purpose-compare-with-other-collections)
-- [What it means to be equal for two lists?](#what-it-means-to-be-equal-for-two-lists)
-- [`List.hashCode`](#listhashcode)
-- [`List` Interface Methods](#list-interface-methods)
-- [Methods Inherited from SequencedCollection and their List equivalents](#methods-inherited-from-sequencedcollection-and-their-list-equivalents)
-- [`List.remove`, what must you care about?](#listremove-what-must-you-care-about)
-- [Changes in list view and its backing list issue](#changes-in-list-view-and-its-backing-list-issue)
-- [`Iterator` vs. `ListIterator`](#iterator-vs-listiterator)
-- [List Hierarchy](#list-hierarchy)
-- [`ArrayList`](#arraylist)
-- [`ArrayList` backed data structure, related issues](#arraylist-backed-data-structure-related-issues)
-- [`ArrayList` performance](#arraylist-performance)
-- [`LinkedList`, recommendations](#linkedlist-recommendations)
-- [`UnmodifiableList`](#unmodifiablelist)
-- [Lists for multithreaded context](#lists-for-multithreaded-context)
-- [`CopyOnWriteArrayList`](#copyonwritearraylist)
-- [Comparing List Implementations](#comparing-list-implementations)
-- [List implementation choice](#list-implementation-choice)
-- [ArrayList vs LinkedList](#arraylist-vs-linkedlist)
-- [Using LinkedList instead of ArrayList if the insertions and removals are at the start of the list](#using-linkedlist-instead-of-arraylist-if-the-insertions-and-removals-are-at-the-start-of-the-list)
-- [Using `ArrayDeque` for random access](#using-arraydeque-for-random-access)
+### What is the purpose of lists, and how do they differ from other collection types?
+<details><summary>Show answer</summary>
 
-### Lists, its purpose, compare with other collections
+Lists preserve positional ordering and allow explicit access to elements by index.
 
-A list is a collection that (unlike a set) can contain duplicates, 
-and that (unlike a queue) gives the user full visibility of and control over the ordering of its elements. 
+Unlike:
+- a set, **allows duplicate elements**, and 
+- a queue, **provides full control over the ordering** of its elements.
 
-The corresponding Collections Framework interface is `List<E>`.
 
-### What it means to be equal for two lists?
+In the Java Collections Framework, this behavior is defined by the `List<E>` interface.
 
-The List contract overrides the `equals` method; 
-it states that a `List` can only ever be equal to another `List`, 
-and then only if they contain **the same elements, in the same order**.
+</details>
 
-### `List.hashCode`
+### What does it mean for two lists to be equal?
+<details><summary>Show answer</summary>
 
-todo
+- Two lists are considered equal if and only if they contain **the same elements in the same order**.
+- Element equality is determined using the `equals` method of the elements themselves.
 
-### `List` Interface Methods
 
-#### Positional Access Methods
+</details>
+
+### How is `List.hashCode` calculated?
+<details><summary>Show answer</summary>
+
+The `hashCode` of a `List` is computed from the hash codes of its elements, in **iteration order**, 
+so that lists which are equal according to `equals` produce the same hash code.
+
+</details>
+
+### What methods are exposed by the `List` API?
+<details><summary>Show answer</summary>
+
+#### Index‑based methods
 - `void add(int index, E e)` add element e at given index
 - `boolean addAll(int index, Collection<? extends E> c)` add contents of c at given index
 - `E get(int index)` return element at given index
@@ -61,10 +54,13 @@ or `-1` if the object is not present.
 - `ListIterator<E> listIterator()` return a `ListIterator` for this list, initially positioned at index 0
 - `ListIterator<E> listIterator(int idx)` return a `ListIterator` for this list, initially positioned at index `idx`
 
-#### [Methods Inherited from SequencedCollection](#methods-inherited-from-sequencedcollection-and-their-list-equivalents)
+#### [Methods Inherited from SequencedCollection](#how-do-methods-from-sequencedcollection-map-to-corresponding-list-operations)
 
+</details>
 
-### Methods Inherited from SequencedCollection and their List equivalents
+### How do methods from SequencedCollection map to corresponding List operations?
+<details><summary>Show answer</summary>
+
 
 | SequencedCollection call | List positional access call |
 |:-------------------------|:----------------------------|
@@ -75,16 +71,30 @@ or `-1` if the object is not present.
 | removeFirst()            | remove(0)                   |
 | removeLast()             | remove(size() - 1)          |
 
-### `List.remove`, what must you care about?
+</details>
 
-The declaration of `remove` has an unfortunate conflict with the inherited method `Collection::remove` 
-in the case of a `List<Integer>`. 
-Although overload resolution rules make it clear that a call like `list.remove(0)` 
-refers to the element at index 0, 
-this is a common source of confusion to programmers, 
-and hence a common source of errors as well.
+### What common issues arise when using `List.remove`?
+<details><summary>Show answer</summary>
 
-### Changes in list view and its backing list issue
+The `List.remove` method can be confusing because it **overloads** the `remove` method inherited from `Collection`.
+
+This is especially problematic for `List<Integer>`:
+- `remove(int index)` removes the element **at the specified position**
+- `remove(Object o)` removes the **first occurrence of the given value**
+
+As a result, a call like `list.remove(0)` removes the element at index `0`,  
+*not* the element with value `0`. Although this behavior is well defined by the language’s overload‑resolution rules, 
+it is a common source of programmer confusion and bugs.
+
+
+To avoid mistakes, be explicit when removing by value, for example:
+- use `list.remove(Integer.valueOf(0))` to remove the value `0`
+- or assign the argument to an `Integer` variable before calling `remove`
+
+</details>
+
+### How do changes to a list view and its backing list affect each other?
+<details><summary>Show answer</summary>
 
 #### for list view you get via `subList`
 Changes made to the `sublist` write through to the backing list, but the reverse is true only for nonstructural changes. 
@@ -94,87 +104,136 @@ subsequent attempts to use the sublist will result in a `ConcurrentModificationE
 #### for list view you get via `reversed`
 The view returned by `reversed` allows any modifications that are permitted by the original list.
 
-### `Iterator` vs. `ListIterator`
+</details>
+
+### What is the difference between `Iterator` and `ListIterator`?
+<details><summary>Show answer</summary>
 
 `ListIterators` - a subtype of `Iterator` with additional features that take advantage of a List’s sequential nature:
 - `E previous()` (additionally to `E next()`)
 - `boolean hasPrevious()`, (additionally to `boolean hasNext()`)
 - `void set(E)` and `void add(E)` additionally to `void remove()`
 
-### List Hierarchy
+</details>
 
-- [`ArrayList`](#arraylist)
-- [`LinkedList`](#linkedlist-recommendations)
-- [`UnmodifiableList`](#unmodifiablelist)
-- [`CopyOnWriteArrayList`](#copyonwritearraylist)
+### What is the hierarchy of `List` implementations in Java?
+<details><summary>Show answer</summary>
+
+
+- [`ArrayList`](#what-is-arraylist)
+- [`LinkedList`](#what-considerations-should-be-taken-into-account-when-using-linkedlist)
+- [`UnmodifiableList`](#what-is-unmodifiablelist-and-how-is-it-intended-to-be-used)
+- [`CopyOnWriteArrayList`](#what-is-copyonwritearraylist-and-how-does-it-work)
 
 <img src="../../docs/images/List_Implementations_Hierarchy.png" alt="Implementations of the List interface" width="600">
 
-### `ArrayList`
 
-todo
+</details>
 
-### `ArrayList` backed data structure, related issues
+### What is `ArrayList`?
+<details><summary>Show answer</summary>
 
-`ArrayList` - a list backed by an array. Arrays, once created, they cannot be resized.
+`ArrayList` is a resizable, array‑backed implementation of the `List` interface,
+whose growth is handled by reallocating and copying its underlying array.
 
-The standard implementation of `ArrayList` stores the `List` elements in contiguous array locations, 
-with the first element always stored at index 0 in the array. 
-It requires an array at least large enough (with sufficient capacity) to contain the elements, 
-together with a way of keeping track of the number of "_occupied_" locations (the size of the `List`). 
-If an `ArrayList` has grown to the point where its size is equal to its capacity, 
-attempting to add another element will require it to replace the backing array with a larger one 
-capable of holding the old contents and the new element, 
-and with a margin for further expansion 
-(the standard implementation actually uses a new array that is 1.5 times the length of the old one).
+</details>
 
-### `ArrayList` performance
+### What data structure is `ArrayList` based on, and what are the implications of this choice?
+<details><summary>Show answer</summary>
 
-The performance of `ArrayList` reflects array performance for “random-access” operations:
-set and get take constant time.
+`ArrayList` is backed by a **contiguous array**, which cannot be resized once created.
 
+Elements are stored starting at index `0`, with the list tracking its current size separately from the array’s capacity. 
+When the array becomes full, `ArrayList` grows by **allocating a larger array and copying existing elements** into it.
 
-The downside of an array implementation is in inserting or removing elements at arbitrary positions,
-because that may require adjusting the position of other elements.
+As a result:
+- Random access is fast.
+- Adding elements is usually efficient.
+- Resizing is costly due to array reallocation and copying.
 
-### `LinkedList`, recommendations
+</details>
 
-There is rarely a good reason to choose it as a List implementation:
-- since the list must iterate internally to reach the required position, 
-  positional add and remove have linear time complexity, on average
-- Compared to a circular array implementation like `ArrayDeque`, 
-  it is superior only in addition of the first or last element, 
-  since it never has to copy or resize as an array-backed implementation must do **when its capacity is reached**.
-- [Avoid `LinkedList`](todo)
+### What are the performance characteristics of `ArrayList`?
+<details><summary>Show answer</summary>
 
-### `UnmodifiableList`
+The performance characteristics of `ArrayList` closely mirror those of arrays for
+**random‑access operations**: both `get` and `set` execute in constant time (`O(1)`).
 
-The unmodifiable lists can be obtained from the various overloads of the factory methods `List::of` and `List::copyOf`.
+The main drawback of this array‑based design appears when **inserting or removing elements
+at arbitrary positions**. Such operations may require shifting subsequent elements to maintain
+contiguous storage, resulting in linear‑time complexity (`O(n)`).
 
-The properties of the members of this family are described in the Javadoc for List:
-- They are unmodifiable - elements cannot be added or removed.
-  Calling any mutator method will always cause an `UnsupportedOperationException` to be thrown.
-- They are null-hostile. Attempts to create them with null elements will result in `NullPointerException`.
-- The lists and their `subList` views implement the RandomAccess interface.
+</details>
 
-### Lists for multithreaded context
+### What considerations should be taken into account when using `LinkedList`?
+<details><summary>Show answer</summary>
 
-- If so, you should use [`CopyOnWriteArrayList`](#copyonwritearraylist), 
-  if you can - that is, if writes to the list will be relatively infrequent.
-- If not, you will have to use a synchronized wrapper around `ArrayList` or `LinkedList`.
+There is rarely a good reason to choose `LinkedList` as a `List` implementation.
 
-### `CopyOnWriteArrayList`
+- Because a linked list must **traverse nodes sequentially** to reach a given position, positional
+  operations such as `add(int, E)` and `remove(int)` have **linear time complexity** on average.
 
-Pros:
-This combination of thread safety with fast read access is useful in some concurrent programs, 
-especially when a collection of observer objects needs to receive frequent event notifications.
+- Compared to a circular, array‑based structure like `ArrayDeque`, `LinkedList` is superior only
+  when inserting or removing elements at the **beginning or end** of the list, where it can operate
+  in constant time.
 
-Cons:
-The cost is that the array that backs the collection has to be treated as immutable, 
-so a new copy is created whenever any changes are made to the collection. 
-This cost may be acceptable if changes to the set of observers occur only rarely.
+- However, this advantage is usually outweighed by the **higher memory overhead** and poorer cache
+  locality of linked lists, making `LinkedList` a less efficient general‑purpose `List` than
+  array‑backed alternatives.
 
-### Comparing List Implementations
+</details>
+
+### What is `UnmodifiableList`, and how is it intended to be used?
+<details><summary>Show answer</summary>
+
+Unmodifiable lists can be created using the factory methods `List.of` and `List.copyOf`.
+
+- **They are unmodifiable**: elements cannot be added, removed, or replaced.  
+  Any attempt to call a mutator method results in an `UnsupportedOperationException`.
+
+- **They are null‑hostile**: attempts to create an unmodifiable list containing `null`
+  elements result in a `NullPointerException`.
+
+- **They support efficient random access**: the lists themselves, as well as their
+  `subList` views, implement the `RandomAccess` interface.
+
+These characteristics make unmodifiable lists a safe and efficient choice for exposing read‑only collections.
+
+</details>
+
+### What are the options for working with lists in multithreaded applications?
+<details><summary>Show answer</summary>
+
+When working with lists in a multithreaded context, the choice of implementation depends on the expected access pattern:
+
+- If **writes are infrequent**, prefer `CopyOnWriteArrayList`.  
+  It provides thread safety without external synchronization and offers excellent read performance by allowing concurrent, lock‑free reads.
+
+- If **writes are frequent**, use a **synchronized wrapper** around a mutable list such as `ArrayList` or `LinkedList`
+  (for example, via `Collections.synchronizedList`).  
+  This ensures thread safety but requires careful external synchronization when iterating.
+
+</details>
+
+### What is `CopyOnWriteArrayList`, and how does it work?`
+<details><summary>Show answer</summary>
+
+**Pros**
+`CopyOnWriteArrayList` combines **thread safety with very fast read access**, making it well suited for
+concurrent scenarios where reads greatly outnumber writes. A typical example is a collection of
+observer or listener objects that need to receive frequent notifications without blocking.
+
+**Cons**  
+The backing array is treated as **immutable**. Every mutating operation (such as `add` or `remove`)
+creates a **new copy of the entire array**, which is a costly operation in terms of time and memory.
+This overhead is acceptable only when modifications are **rare** compared to reads; otherwise,
+performance degrades significantly.
+
+</details>
+
+### What are the differences between `List` implementations?
+<details><summary>Show answer</summary>
+
 
 |                        | get  | add   | add(int,e) | contains | iterator.next | remove(0) | iterator.remove                 |
 |:-----------------------|:-----|:------|:-----------|:---------|:--------------|:----------|:--------------------------------|
@@ -186,31 +245,72 @@ This cost may be acceptable if changes to the set of observers occur only rarely
 should be understood in the context of the `O(N)` complexity of the operation needed to locate the site 
 of the addition or removal.
 
-### List implementation choice
+</details>
 
-As always, if in doubt, measure your application's performance with each implementation.
+### What factors should influence the choice of a List implementation?
+<details><summary>Show answer</summary>
 
-#### Whether your application requires thread safety. 
-If so, you should use `CopyOnWriteArrayList`, if you can - that is, if writes to the list will be relatively infrequent. 
-If not, you will have to use a synchronized wrapper around `ArrayList` or `LinkedList`.
+When choosing a `List` implementation, an important factor to consider is 
+**whether the list will be used in a multithreaded context**.
 
-### ArrayList vs LinkedList
+- If **thread safety is not required**, prefer non‑synchronized implementations such as `ArrayList`,
+  which offer better performance and lower overhead.
 
-- ArrayList is better for random access and scenarios where you mostly read elements.
-- LinkedList is better for frequent insertions/deletions in the middle of the list. 
-  In practice, however, this is rarely the case.
+- If the list **must be shared between multiple threads**, choose the implementation based on usage patterns:
+  - If **reads are frequent and writes are rare**, `CopyOnWriteArrayList` is a good choice due to its
+    thread‑safe, lock‑free read operations.
+  - If **writes are frequent**, use a synchronized list (for example, via
+    `Collections.synchronizedList`) and ensure proper external synchronization during iteration.
 
-### Using LinkedList instead of ArrayList if the insertions and removals are at the start of the list
+Selecting the appropriate implementation helps balance correctness, performance, and scalability
+in concurrent applications.
 
-If you only:
-- need fast insertions/removals at both ends (complexity - O(1) amortized) and 
-- don’t need random access, ArrayDeque is usually better.
-It’s implemented as a resizable array, optimized for queue operations.
+</details>
 
-Lower memory overhead compared to LinkedList.
+### What are the differences between `ArrayList` and `LinkedList`?
+<details><summary>Show answer</summary>
 
-### Using `ArrayDeque` for random access
+- **`ArrayList`** is generally the better choice for **random access** and scenarios where
+  the list is **read frequently**. Accessing elements by index is fast, and iteration
+  benefits from contiguous memory layout and good CPU cache locality.
 
-For relatively infrequent random access, use:
-- an iterator, or
-- copy the `ArrayDeque` elements into an array using `toArray`. 
+- **`LinkedList`** can be more suitable for **frequent insertions or deletions in the middle
+  of the list**, as these operations do not require shifting elements.
+  However, each element is stored in a separate node, which leads to **poor cache locality**
+  and reduced iteration performance. In practice, this memory and cache inefficiency often
+  outweighs its advantages, making `LinkedList` a less optimal choice in most real‑world cases.
+
+</details>
+
+### What should be considered when choosing `LinkedList` over `ArrayList` for frequent insertions and removals at the beginning?
+<details><summary>Show answer</summary>
+
+If you only need **fast insertions and removals at both ends of the list** and **do not require random access**, 
+using **`ArrayDeque` is usually a better option**.
+
+- **`ArrayDeque`** provides **amortized `O(1)`** performance for insertions and removals at both the head and the tail.
+- It is implemented as a **resizable circular array**, optimized specifically for queue and deque operations.
+- Compared to `LinkedList`, it has **lower memory overhead** and significantly **better cache locality**, 
+  which leads to improved performance in practice.
+
+In such scenarios, `ArrayDeque` is generally preferable to both `ArrayList` and `LinkedList`.
+
+</details>
+
+### What are the limitations and considerations of using `ArrayDeque`?
+<details><summary>Show answer</summary>
+
+`ArrayDeque` does **not support direct random access** by index. 
+If occasional access to its elements is required, there are two practical approaches:
+
+- Use an **iterator** to traverse the deque and access elements sequentially.  
+  This is suitable when access is infrequent and order‑based processing is acceptable.
+
+- Convert the deque to an **array using `toArray`**, then access elements by index on the resulting array.  
+  This approach incurs a one‑time copy cost but allows efficient indexed access afterward.
+
+For workloads that require **frequent random access**, 
+a list implementation such as `ArrayList` is typically a better choice.
+
+</details>
+
