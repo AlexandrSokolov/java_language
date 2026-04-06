@@ -392,3 +392,53 @@ problem obvious and preventing incorrect behavior.
 
 ---
 
+### Describe a code snippet #08
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```java
+@Override public int hashCode() { return 42; }
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+If `hashCode()` returns `42` for all elements in a set, then every element ends up in the same bucket
+of the underlying hash table. The set will still work correctly because duplicates are ultimately detected using
+`equals()`, but all operations degrade to linear time.
+Adding, searching, and removing elements becomes `O(N)` instead of `O(1)` because the set must scan
+through the entire list of elements stored in that single bucket.
+
+</details>
+
+</details>
+
+---
+
+### Describe a code snippet #09
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```java
+static Comparator<Object> hashCodeOrder = new Comparator<>() {
+  public int compare(Object o1, Object o2) {
+    return o1.hashCode() - o2.hashCode();
+  }
+};
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+Using `hashCode()` for ordering violates the comparator contract and results in arbitrary, unstable, and error‑prone 
+behavior that can break sorted collections in subtle ways.
+
+</details>
+
+</details>
+
+---
