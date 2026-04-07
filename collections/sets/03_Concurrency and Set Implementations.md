@@ -167,7 +167,8 @@ They all are thread-safe sets.
 
 - `ConcurrentSkipListSet` - sorted set with `O(log n)` operations, 
   backed by a skip list and supporting navigable order operations
-- `CopyOnWriteArraySet` - optimized for frequent iteration and rare updates, using copy‑on‑write snapshots
+- `CopyOnWriteArraySet` - optimized for frequent iteration and rare updates and rare searches, 
+  using copy‑on‑write snapshots
 - Concurrent set backed by `ConcurrentHashMap` - a high‑performance, thread‑safe set 
   with fast **`O(1)` `add`, `remove`, and `contains`**, 
   and **the default choice** when you need a general‑purpose concurrent set
