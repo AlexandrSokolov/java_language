@@ -303,3 +303,12 @@ The iterators are **weakly consistent**,
 meaning they are safe for concurrent use but do not provide a snapshot view of the deque.
 
 </details>
+
+### Why is ArrayDeque recommended for Deque, while LinkedBlockingDeque is preferred for BlockingDeque?
+<details><summary>Show answer</summary>
+
+- `ArrayDeque` is optimized for **single-threaded or non-blocking use**, where dynamic resizing is cheap and simple.
+- `BlockingDeque` must support **capacity bounds, blocking semantics, and fine-grained concurrency**, 
+  which are much easier and safer to implement using a linked structure.
+
+</details>
