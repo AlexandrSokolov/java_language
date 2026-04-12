@@ -173,13 +173,12 @@ There is rarely a good reason to choose `LinkedList` as a `List` implementation.
 - Because a linked list must **traverse nodes sequentially** to reach a given position, positional
   operations such as `add(int, E)` and `remove(int)` have **linear time complexity** on average.
 
-- Compared to a circular, array‑based structure like `ArrayDeque`, `LinkedList` is superior only
-  when inserting or removing elements at the **beginning or end** of the list, where it can operate
-  in constant time.
+- Inserting or removing elements at the beginning or end of a `LinkedList` can be done in
+  constant time. However, array‑based deque implementations such as `ArrayDeque` provide the
+  same asymptotic guarantees for these operations.
 
-- However, this advantage is usually outweighed by the **higher memory overhead** and poorer cache
-  locality of linked lists, making `LinkedList` a less efficient general‑purpose `List` than
-  array‑backed alternatives.
+- For most use cases, especially when indexed access (in the case of List) or efficient iteration is required, 
+  array‑backed alternatives such as `ArrayList` and `ArrayDeque` outperform `LinkedList`.
 
 </details>
 

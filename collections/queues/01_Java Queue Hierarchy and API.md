@@ -321,16 +321,8 @@ than both of its children or because it has reached a leaf position**.
 ### What data structure is used to implement ConcurrentLinkedQueue?
 <details><summary>Show answer</summary>
 
-**`ConcurrentLinkedQueue` is implemented using a linked‑node structure**, 
-similar to the linked lists used for overflow chaining in hash tables 
-and as the foundation of skip lists in `ConcurrentSkipListSet`.
-
-
-**A key advantage of linked structures is that insertion and removal can be performed 
-by simple pointer updates, which take constant time.** 
-This makes them particularly well suited for FIFO queue implementations, 
-where elements are always added at the tail and removed from the head.
-
+`ConcurrentLinkedQueue` uses a **lock‑free linked list** because FIFO queues need fast append/remove 
+by simple pointer updates, which take constant time.
 
 **Because these operations act only on the ends of the structure, there is no need to traverse the list**, 
 avoiding the linear search costs that would otherwise be associated with linked data structures.
