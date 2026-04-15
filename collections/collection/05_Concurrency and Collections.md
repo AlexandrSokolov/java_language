@@ -56,7 +56,7 @@ and all its mutable elements are accessed and modified exclusively by the owning
 
 Different libraries and documents use different terminology to describe immutability in collections, 
 which can be confusing:
-- **Guava** and **Eclipse Collections** distinguish between deep immutability (the entire object graph cannot change) 
+- **Guava** and **Eclipse Collections** distinguish between **deep immutability** (the entire object graph cannot change) 
   and **shallow immutability** (the collection itself cannot be modified, but its elements may be).
 - The **Java Collections Framework** uses **immutability** to mean **deep immutability**
   and calls shallow immutability **unmodifiability**.
