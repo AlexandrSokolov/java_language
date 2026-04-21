@@ -83,9 +83,21 @@ each element of the set is stored as a key in the map, with a dummy Boolean valu
 as a modern alternative to balanced binary search trees.
 
 
-A skip list consists of multiple levels of linked lists: the bottom level contains all elements in sorted order, 
-while higher levels provide “express lanes” that allow faster traversal. 
-Each node stores a value and references to the next nodes at one or more levels.
+A skip list is a layered structure that *conceptually* appears as multiple linked lists.
+The bottom level contains all elements in sorted order, while higher levels act as sparse
+“express lanes” to speed up traversal. These higher levels are logical views, not separate
+data structures.
+
+
+Physically, there is only one set of nodes. Each node stores a value and an array of forward
+references, one for each level it participates in. Every node appears at level 0, while
+participation in higher levels is determined randomly at insertion time.
+
+
+When searching, moving to a lower level does not require vertical pointers: the algorithm
+remains on the same node and simply switches to a lower index in its forward‑reference array.
+Following all forward references at a given level forms an implicit linked list for that
+level, making skip‑list “levels” logical or pseudo‑lists rather than independent lists.
 
 
 Insertion and removal are performed by rearranging pointers in the affected lists, 
@@ -101,27 +113,6 @@ Iterators produced by `ConcurrentSkipListSet` are weakly consistent:
 
 ### How does searching work in a skip list?
 <details><summary>Show answer</summary>
-
-In a skip list, each node stores one forward (“next”) reference for every level it participates in, 
-implemented as an array of forward pointers. 
-Every node always appears at level 0 and therefore has at least one forward reference, 
-while higher‑level participation is determined randomly at insertion time. 
-When searching, “dropping down” does not require following a separate vertical pointer: 
-the algorithm stays on the same node and simply switches to a lower index in the node’s forward‑pointer array. 
-This design allows constant‑time movement between levels, keeps memory usage linear on average, 
-and is the key mechanism that enables efficient O(log n) search without maintaining explicit up or down links.
-
-
-Conceptually, a skip list looks like multiple linked lists stacked on top of each other, 
-but physically there is only one set of nodes. There are no separate list objects per level. 
-Instead, each node stores multiple “next” references, one per tier (level) it participates in. 
-When you follow all next references at level k, you can view that as a linked list for level k, 
-but that list is implicit, not a standalone structure. 
-It exists only as a projection of the same nodes using a particular index in their forward‑pointer arrays. 
-So the “multiple lists” are really just different views over the same nodes, 
-created by choosing different `next[level]` references, 
-which is why we often call them logical or pseudo‑lists rather than actual lists.
-
 
 Consider a skip list consisting of three levels, labeled 0, 1, and 2.
 
