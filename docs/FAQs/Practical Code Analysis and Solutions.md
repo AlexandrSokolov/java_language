@@ -442,3 +442,190 @@ behavior that can break sorted collections in subtle ways.
 </details>
 
 ---
+
+### Describe a code snippet #10
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```java
+public static void main(String[] args) {
+  List<String> strings = new ArrayList<>();
+  unsafeAdd(strings, Integer.valueOf(42));String s = strings.get(0); // Has compiler-generated cast
+}
+private static void unsafeAdd(List list, Object o) {
+  list.add(o);
+}
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+This program compiles, but because it uses the raw type List, you get a
+warning:
+
+
+Test.java:10: warning: [unchecked] unchecked call to add(E) as a
+member of the raw type List
+list.add(o);
+
+And indeed, if you run the program, you get a ClassCastException when
+the program tries to cast the result of the invocation strings.get(0), which
+is an Integer, to a String. This is a compiler-generated cast, so it’s
+normally guaranteed to succeed, but in this case we ignored a compiler warning
+and paid the price.
+
+If you replace the raw type List with the parameterized type
+List<Object> in the unsafeAdd declaration and try to recompile the
+program, you’ll find that it no longer compiles but emits the error message:
+
+Test.java:5: error: incompatible types: List<String> cannot be
+converted to List<Object>
+unsafeAdd(strings, Integer.valueOf(42));
+
+</details>
+
+</details>
+
+---
+
+### Describe a code snippet #11
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```java
+static int numElementsInCommon(Set s1, Set s2) {
+  int result = 0;
+  for (Object o1 : s1)
+    if (s2.contains(o1))
+      result++;
+  return result;
+}
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+This method works but it uses raw types, which are dangerous. The safealternative is to use unbounded wildcard types. If you want to use a generic type
+but you don’t know or care what the actual type parameter is, you can use a
+question mark instead. For example, the unbounded wildcard type for the
+generic type Set<E> is Set<?> (read “set of some type”). It is the most
+general parameterized Set type, capable of holding any set. Here is how the
+numElementsInCommon declaration looks with unbounded wildcard types:
+Click here to view code image
+// Uses unbounded wildcard type - typesafe and flexible
+static int numElementsInCommon(Set<?> s1, Set<?> s2) { ... }
+
+</details>
+
+</details>
+
+---
+
+### Describe a code snippet #X
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```javascript
+example();
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+Your explanation goes here.
+
+</details>
+
+</details>
+
+---
+
+### Describe a code snippet #X
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```javascript
+example();
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+Your explanation goes here.
+
+</details>
+
+</details>
+
+---
+
+### Describe a code snippet #X
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```javascript
+example();
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+Your explanation goes here.
+
+</details>
+
+</details>
+
+---
+
+### Describe a code snippet #X
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```javascript
+example();
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+Your explanation goes here.
+
+</details>
+
+</details>
+
+---
+
+### Describe a code snippet #X
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```javascript
+example();
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+Your explanation goes here.
+
+</details>
+
+</details>
+
+---
