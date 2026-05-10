@@ -530,15 +530,34 @@ static int numElementsInCommon(Set<?> s1, Set<?> s2) { ... }
 
 <details><summary>Show code</summary>
 
-```javascript
-example();
+```java
+List<String> strings = new ArrayList<>();
+strings.add("Java");
+
+List rawList = strings; // Assigning parameterized to raw
+rawList.add(10);        // Compiler allows this (with a warning)
+
+for (String s : strings) {
+  System.out.println(s); // What happens here?
+}
 ```
 
 </details>
 
 <details><summary>Show answer</summary>
 
-Your explanation goes here.
+The code will compile (with an "unchecked call" warning) but will throw a ClassCastException at
+runtime during the enhanced for-loop.
+
+Reasoning:
+
+Assignment: A List<String> can be assigned to a raw List because of backward compatibility.
+
+Pollution: The raw list allows adding an Integer because it ignores type parameters. This is
+known as Heap Pollution.
+
+Failure: When iterating over the original strings list, the JVM attempts to cast the Integer
+to a String, causing the crash.
 
 </details>
 
@@ -551,15 +570,30 @@ Your explanation goes here.
 
 <details><summary>Show code</summary>
 
-```javascript
-example();
+```java
+// Legacy method (Pre-Java 5 style)
+void processData(List items) {
+  for (Object item : items) {
+    System.out.println(item);
+  }
+}
+
+// Modern call
+List<String> modernList = Arrays.asList("Alpha", "Beta");
+processData(modernList); // Passing parameterized to raw
 ```
 
 </details>
 
 <details><summary>Show answer</summary>
 
-Your explanation goes here.
+This code is perfectly legal due to migration compatibility.
+
+Mechanism: Because of type erasure, the JVM sees List<String> and the raw List as the
+same type at runtime.
+
+Result: This allows a seamless transition where new generic-based libraries can still
+work with older infrastructure without requiring a complete rewrite of the legacy codebase.
 
 </details>
 
