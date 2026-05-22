@@ -451,9 +451,11 @@ behavior that can break sorted collections in subtle ways.
 ```java
 public static void main(String[] args) {
   List<String> strings = new ArrayList<>();
-  unsafeAdd(strings, Integer.valueOf(42));String s = strings.get(0); // Has compiler-generated cast
+  add(strings, Integer.valueOf(42));
+  String s = strings.get(0);
 }
-private static void unsafeAdd(List list, Object o) {
+
+private static void add(List list, Object o) {
   list.add(o);
 }
 ```
@@ -462,27 +464,31 @@ private static void unsafeAdd(List list, Object o) {
 
 <details><summary>Show answer</summary>
 
-This program compiles, but because it uses the raw type List, you get a
-warning:
+This program compiles, but because it uses the raw type `List`, you get a warning:
+
+> Test.java:10: warning: [unchecked] unchecked call to add(E) as a
+> member of the raw type List
+> list.add(o);
+
+If you run the program, you get a `ClassCastException` when the program tries to cast 
+the result of the invocation `strings.get(0)`, which is an `Integer`, to a `String`. 
+This is a compiler-generated cast, so it’s normally guaranteed to succeed, 
+but in this case we ignored a compiler warning and paid the price.
 
 
-Test.java:10: warning: [unchecked] unchecked call to add(E) as a
-member of the raw type List
-list.add(o);
+If you replace the raw type `List` with the parameterized type `List<Object>`:
 
-And indeed, if you run the program, you get a ClassCastException when
-the program tries to cast the result of the invocation strings.get(0), which
-is an Integer, to a String. This is a compiler-generated cast, so it’s
-normally guaranteed to succeed, but in this case we ignored a compiler warning
-and paid the price.
+```java
+private static void add(List<Object> list, Object o) {
+  list.add(o);
+}
+```
 
-If you replace the raw type List with the parameterized type
-List<Object> in the unsafeAdd declaration and try to recompile the
-program, you’ll find that it no longer compiles but emits the error message:
+and try to recompile the program, you’ll find that it no longer compiles but emits the error message:
 
-Test.java:5: error: incompatible types: List<String> cannot be
-converted to List<Object>
-unsafeAdd(strings, Integer.valueOf(42));
+> Test.java:5: error: incompatible types:
+> List<String> cannot be converted to List<Object&gt;</br>
+> add(strings, Integer.valueOf(42));
 
 </details>
 
@@ -509,15 +515,24 @@ static int numElementsInCommon(Set s1, Set s2) {
 
 <details><summary>Show answer</summary>
 
-This method works but it uses raw types, which are dangerous. The safealternative is to use unbounded wildcard types. If you want to use a generic type
-but you don’t know or care what the actual type parameter is, you can use a
-question mark instead. For example, the unbounded wildcard type for the
-generic type Set<E> is Set<?> (read “set of some type”). It is the most
-general parameterized Set type, capable of holding any set. Here is how the
-numElementsInCommon declaration looks with unbounded wildcard types:
-Click here to view code image
-// Uses unbounded wildcard type - typesafe and flexible
-static int numElementsInCommon(Set<?> s1, Set<?> s2) { ... }
+
+- This method works, but it uses raw types, which are dangerous and produces a warning.
+  The safe alternative is to use unbounded wildcard types. If you want to use a generic type 
+  but don't know or care about the actual type parameter, you can use a question mark (?) as a placeholder.
+  ```java
+  // Uses unbounded wildcard type - typesafe and flexible
+  static int numElementsInCommon(Set<?> s1, Set<?> s2) { ... }
+  ```
+- The logic itself is correct but the method could simply be replaced by:
+  ```java
+  s1.stream().filter(s2::contains).count();
+  ```
+- Or even more directly using the Java Collections API:
+  ```java
+  Set<?> intersection = new HashSet<>(s1);
+  intersection.retainAll(s2);
+  return intersection.size();
+  ```
 
 </details>
 
@@ -525,7 +540,7 @@ static int numElementsInCommon(Set<?> s1, Set<?> s2) { ... }
 
 ---
 
-### Describe a code snippet #X
+### Describe a code snippet 12
 <details><summary><strong>Show details</strong></summary>
 
 <details><summary>Show code</summary>
@@ -534,8 +549,8 @@ static int numElementsInCommon(Set<?> s1, Set<?> s2) { ... }
 List<String> strings = new ArrayList<>();
 strings.add("Java");
 
-List rawList = strings; // Assigning parameterized to raw
-rawList.add(10);        // Compiler allows this (with a warning)
+List list = strings; 
+list.add(10);
 
 for (String s : strings) {
   System.out.println(s); // What happens here?
@@ -546,18 +561,12 @@ for (String s : strings) {
 
 <details><summary>Show answer</summary>
 
-The code will compile (with an "unchecked call" warning) but will throw a ClassCastException at
-runtime during the enhanced for-loop.
-
-Reasoning:
-
-Assignment: A List<String> can be assigned to a raw List because of backward compatibility.
-
-Pollution: The raw list allows adding an Integer because it ignores type parameters. This is
-known as Heap Pollution.
-
-Failure: When iterating over the original strings list, the JVM attempts to cast the Integer
-to a String, causing the crash.
+- `List list = strings;` - assigning parameterized to raw
+- `list.add(10);`        
+  - the compiler produces an unchecked warning here, but does not prevent it.
+  - no `ClassCastException` here
+  - The raw list allows adding an Integer because it ignores type parameters. This is known as **Heap Pollution**.
+- `System.out.println(s);` - throw a `ClassCastException` at runtime during the enhanced for-loop.
 
 </details>
 
@@ -565,74 +574,50 @@ to a String, causing the crash.
 
 ---
 
-### Describe a code snippet #X
+### Describe a code snippet 13
 <details><summary><strong>Show details</strong></summary>
 
 <details><summary>Show code</summary>
 
 ```java
-// Legacy method (Pre-Java 5 style)
-void processData(List items) {
-  for (Object item : items) {
-    System.out.println(item);
-  }
-}
-
-// Modern call
-List<String> modernList = Arrays.asList("Alpha", "Beta");
-processData(modernList); // Passing parameterized to raw
-```
-
-</details>
-
-<details><summary>Show answer</summary>
-
-This code is perfectly legal due to migration compatibility.
-
-Mechanism: Because of type erasure, the JVM sees List<String> and the raw List as the
-same type at runtime.
-
-Result: This allows a seamless transition where new generic-based libraries can still
-work with older infrastructure without requiring a complete rewrite of the legacy codebase.
-
-</details>
-
-</details>
-
----
-
-### Describe a code snippet #X
-<details><summary><strong>Show details</strong></summary>
-
-<details><summary>Show code</summary>
-
-```java
-// Why generic array creation is illegal - won't compile!
 List<String>[] stringLists = new List<String>[1]; // (1)
-List<Integer> intList = List.of(42); // (2)
-Object[] objects = stringLists; // (3)
-objects[0] = intList; // (4)
-String s = stringLists[0].get(0); // (5)
+List<Integer> intList = List.of(42);              // (2)
+Object[] objects = stringLists;                   // (3)
+objects[0] = intList;                             // (4)
+String s = stringLists[0].get(0);                 // (5)
 ```
 
 </details>
 
 <details><summary>Show answer</summary>
 
-Let’s pretend that line 1, which creates a generic array, is legal. Line 2 creates
-and initializes a List<Integer> containing a single element. Line 3 stores
-the List<String> array into an Object array variable, which is legal
-because arrays are covariant. Line 4 stores the List<Integer> into the sole
-element of the Object array, which succeeds because generics are implemented
-by erasure: the runtime type of a List<Integer> instance is simply List,
-and the runtime type of a List<String>[] instance is List[], so this
-assignment doesn’t generate an ArrayStoreException. Now we’re in
-trouble. We’ve stored a List<Integer> instance into an array that is declared
-to hold only List<String> instances. In line 5, we retrieve the sole element
-from the sole list in this array. The compiler automatically casts the retrieved
-element to String, but it’s an Integer, so we get a
-ClassCastException at runtime. In order to prevent this from happening,
-line 1 (which creates a generic array) must generate a compile-time error.
+**Line (1)** — `List<String>[] stringLists = new List<String>[1];`
+- Hypothetically allocates a generic array; assume it compiles for the sake of the argument.
+- In real Java this is a compile-time error — the whole snippet exists to justify *why* it must be.
+- The language forbids it explicitly — JLS §15.10.1 lists *generic array creation* among the compile-time errors,
+  producing the diagnostic **"generic array creation"**.
+
+**Line (2)** — `List<Integer> intList = List.of(42);`
+- Creates an immutable `List<Integer>` holding the single boxed value `42`.
+- Sets up a payload whose element type is incompatible with `List<String>`.
+
+**Line (3)** — `Object[] objects = stringLists;`
+- Widens the reference from `List<String>[]` to `Object[]`.
+- Legal because arrays are **covariant**: `T[]` is a subtype of `Object[]` for any reference `T`.
+
+**Line (4)** — `objects[0] = intList;`
+- Stores a `List<Integer>` into a slot declared to hold `List<String>`.
+- No `ArrayStoreException` is thrown — at runtime erasure has collapsed both sides to the raw type `List`,
+  so the array's component check (`List[]` expects `List`) sees a match.
+- The type system has now been silently corrupted: heap pollution.
+
+**Line (5)** — `String s = stringLists[0].get(0);`
+- Reads the sole element from the sole list; the compiler inserts an implicit cast to `String`.
+- The actual object is an `Integer`, so the cast fails with `ClassCastException` at runtime.
+- The error surfaces far from its true cause (line 1), which is exactly the failure mode generics aim to prevent.
+
+**Conclusion** — for the implicit cast in (5) to remain trustworthy, the chain must be broken at its weakest link.
+That link is (1): generic array creation is therefore a compile-time error.
 
 </details>
 
@@ -645,7 +630,7 @@ line 1 (which creates a generic array) must generate a compile-time error.
 
 <details><summary>Show code</summary>
 
-```javascript
+```java
 example();
 ```
 
@@ -666,7 +651,7 @@ Your explanation goes here.
 
 <details><summary>Show code</summary>
 
-```javascript
+```java
 example();
 ```
 
