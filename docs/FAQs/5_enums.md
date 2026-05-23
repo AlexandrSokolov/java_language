@@ -313,4 +313,363 @@ switch that ignored it — exactly the failure you want, at the right moment.
 
 </details>
 
-### TODO p.192 Item 35: Use instance fields instead of ordinals
+### How should you associate an integer value with an enum constant, and what options exist?
+<details><summary>Show answer</summary>
+
+When you need to link a distinct integer value to an enum constant (such as a database status code), 
+you must choose a deliberate implementation path.
+
+**The Core Difference:**
+The choice comes down to whether you let the compiler guess the value implicitly based on the code's physical sequence, 
+or if you define the value explicitly as isolated object data inside the constant itself.
+
+**The Options Available:**
+1. **The `ordinal()` Method:** 
+   You derive the integer value implicitly by relying on the zero-based sequential position of the constant 
+   within the enum declaration block.
+2. **An Instance Field:** 
+   You explicitly declare a dedicated field inside the enum class to store and retrieve the associated integer directly.
+
+**The Golden Rule:**
+Never let the physical order of your text lines dictate your application's underlying business logic values.
+
+</details>
+
+### What is the enum `ordinal()` method, and what architectural issues does its use introduce?
+<details><summary>Show answer</summary>
+
+The `ordinal()` method is a built-in Java tool 
+that returns the numerical position of an enum constant in its declaration order, starting at 0.
+
+**The Core Difference:**
+Using an instance field permanently binds a specific value to a constant, 
+whereas `ordinal()` forces your domain values to automatically shift whenever the lines in your Java file are rearranged.
+
+**The Dangers of Using Ordinals:**
+1. **Extreme Maintenance Fragility:** 
+   If you reorder constants, insert a new one, or delete an old one, subsequent ordinal values change silently, 
+   instantly corrupting existing database records or serialized data streams.
+2. **Inflexible Value Gaps:** 
+   Ordinals are strictly sequential numbers. 
+  You cannot assign duplicate values to different constants, 
+  nor can you map non-contiguous integer intervals (e.g., status codes like 10, 20, 30).
+
+**Code Example (The Fragility Failure):**
+```java
+public enum Ensemble {
+    SOLO, DUET, TRIO; // Ordinals: 0, 1, 2
+    
+    // DANGEROUS: Inserting 'QUARTET' before 'TRIO' silently 
+    // changes the returned value of TRIO from 3 to 4.
+    public int numberOfMusicians() {
+        return ordinal() + 1; 
+    }
+}
+```
+
+**The Golden Rule:**
+The Java documentation explicitly states that `ordinal()` is designed solely for internal use 
+by sophisticated enum-based structures like `EnumSet` and `EnumMap`. 
+Application developers should almost never call it directly.
+
+</details>
+
+### How do you correctly attach an integer value to an enum constant using an instance field?
+<details><summary>Show answer</summary>
+
+The correct pattern is to pass the integer value directly into an enum constructor and 
+map it securely inside the object instance.
+
+**The Core Difference:**
+Instead of deriving a value implicitly from source code layout coordinates, 
+you treat the associated integer as explicit, immutable instance data permanently assigned to that choice.
+
+**The Advantages of Instance Fields:**
+1. **Immunity to Layout Changes:** 
+   You can safely rearrange, add, or delete constants anywhere in the file without altering 
+   or breaking the values explicitly assigned to the remaining choices.
+2. **Support for Custom Intervals:** 
+   You are completely free to map duplicate integer values, custom non-sequential codes, 
+   or distinct gaps (e.g., mapping HTTP codes like 200, 404, 500).
+
+**Code Example (The Robust Pattern):**
+```java
+public enum Ensemble {
+    SOLO(1), DUET(2), TRIO(3), QUARTET(4);
+
+    private final int numberOfMusicians;
+
+    Ensemble(int numberOfMusicians) {
+        this.numberOfMusicians = numberOfMusicians;
+    }
+
+    public int getNumberOfMusicians() {
+        return numberOfMusicians;
+    }
+}
+```
+
+**The Golden Rule:**
+Always declare fields storing enum-associated data as `private final` to guarantee strict immutability and ensure they are assigned explicitly at construction time.
+
+</details>
+
+### How do you represent a combination of multiple optional attributes for a single entity, and what options exist?
+<details><summary>Show answer</summary>
+
+When an entity can possess a combination of multiple binary traits simultaneously—such as a piece of text being both bold and italic—you must choose a structured approach to group these attributes into a set.
+
+**The Core Difference:**
+The choice comes down to whether you store the grouped traits inside a primitive primitive primitive primitive primitive primitive number using low-level bit operations, or manipulate them cleanly as a strongly-typed collection of distinct object constants.
+
+**The Options Available:**
+1. **The Bit Field Pattern:** You assign a distinct power of 2 to each constant and combine multiple choices into a single primitive integer using the bitwise OR operator.
+2. **The EnumSet Class:** You declare the choices as modern enum constants and aggregate them using Java's specialized, high-performance `EnumSet` collection framework.
+
+**The Golden Rule:**
+Always separate the internal bit-level representation of a collection from the expressive, type-safe interface exposed to your application logic.
+
+</details>
+
+---
+
+### What is the legacy Bit Field pattern, what problem does it solve, and what are its structural flaws?
+<details><summary>Show answer</summary>
+
+The bit field pattern is an obsolete idiom where individual binary flags are assigned numeric bit masks ($1, 2, 4, 8...$) so that multiple attributes can be packed into a single integer.
+
+**The Core Difference:**
+Bit fields prioritize low-level hardware memory savings by exposing raw integer bits, whereas modern object-oriented design hides bit-level optimizations behind abstract, safe interfaces.
+
+**The Dangers of Bit Fields:**
+1. **Zero Type Safety:** Because the input parameter is a primitive integer, the compiler cannot validate the arguments. A method designed for text styles will gladly accept an unrelated integer representing file permissions without error.
+2. **Abysmal Debug Readability:** Printing a packed bit field to an application log or debugger outputs a single raw number (like `3`). It is impossible to tell which attributes are active without manually reversing the binary math.
+3. **Brittle Evolution and Limitations:** There is no clean way to loop through active bits, count the enabled traits, or dynamically predict the size of the set when adding new constants.
+
+**Code Example (The Obsolete Bit Field Pattern):**
+```java
+public class Text {
+    public static final int STYLE_BOLD          = 1 << 0; // 1
+    public static final int STYLE_ITALIC        = 1 << 1; // 2
+    public static final int STYLE_UNDERLINE     = 1 << 2; // 4
+    public static final int STYLE_STRIKETHROUGH = 1 << 3; // 8
+
+    // FLAW: Accepts any integer value, offering no compile-time verification
+    public void applyStyles(int styles) {
+        // Complex, unreadable bitwise logic (styles & STYLE_BOLD)
+    }
+}
+```
+
+**The Modern Alternative:**
+The primitive integer parameter should be completely replaced by Java's standard `Set<Style>` interface, specifically utilizing the `java.util.EnumSet` class as the underlying engine.
+
+**The Golden Rule:**
+Do not use integer bit fields to represent groups of flags. They force your application code to deal with unreadable binary mechanics and strip away all compiler protections.
+
+</details>
+
+---
+
+### How do you correctly implement a type-safe collection of optional attributes using `EnumSet`?
+<details><summary>Show answer</summary>
+
+just because an enumerated type will be used in sets, there is
+no reason to represent it with bit fields. The EnumSet class combines the
+conciseness and performance of bit fields with all the many advantages of enum
+types
+
+The modern standard is to declare your individual choices inside a regular Java enum, and pass them into a method that accepts a standard `Set` collection initialized via `EnumSet`.
+
+**The Core Difference:**
+`EnumSet` provides the rich interface, type safety, and interoperability of a standard Java `Set`, while maintaining the exact performance profile and low memory footprint of a hardware-level bit field.
+
+**The Advantages of EnumSet:**
+1. **Absolute Type Safety:** The compiler guarantees that only valid, recognized enum constants can ever be passed into the collection, making illegal inputs physically impossible.
+2. **Hardware-Level Performance:** Internally, `EnumSet` is represented as a single `long` bit mask. Operations like `add()`, `remove()`, or `contains()` are compiled down to lightning-fast, low-level bitwise operations behind the scenes.
+3. **Clean Standard Interoperability:** Because it implements the full `java.util.Set` interface, it integrates perfectly with standard streams, collections, generics, and lambdas without manual conversion logic.
+
+**Code Example (The Type-Safe Pattern):**
+```java
+import java.util.Set;
+import java.util.EnumSet;
+
+public class Text {
+    public enum Style { BOLD, ITALIC, UNDERLINE, STRIKETHROUGH }
+
+    // ROBUST: Accepts a clean, strongly-typed Set interface
+    public void applyStyles(Set<Style> styles) {
+        if (styles.contains(Style.BOLD)) {
+            // Execution logic is readable and safe
+        }
+    }
+}
+
+// Client usage: Clear, expressive, and type-safe
+// text.applyStyles(EnumSet.of(Text.Style.BOLD, Text.Style.ITALIC));
+```
+
+**The Golden Rule:**
+Just because an option set is represented as a bit mask internally does not mean you should expose it to your clients. Always use `EnumSet` to combine multiple optional traits seamlessly.
+
+</details>
+
+### How do you group data by an enum key without the safety hazards of ordinal array indexing?
+<details><summary>Show answer</summary>
+
+When you need to aggregate or categorize data using an enum type as the index (such as grouping a list of items by a status or type), relying on a traditional array indexed by `constant.ordinal()` creates severe structural flaws.
+
+**The Core Difference:**
+Ordinal array indexing forces you to use raw, non-type-safe primitive array structures where indices have no compiler-enforced meaning. An `EnumMap` delivers a highly optimized, specialized `Map` implementation where the keys are explicitly validated enum constants.
+
+**The Traps of Ordinal Array Indexing:**
+1. **Generic Array Creation Failures:** Java does not allow the clean creation of arrays containing generic collections (such as `Set<Item>[]`). Overriding this restriction requires an unsafe cast, which generates compiler warnings and introduces vulnerabilities to your runtime memory.
+2. **Silent Data Mismatches:** A standard array possesses no intrinsic connection to your enum class. If you pass an incorrect integer index or modify the enum layout order, the application will silently assign data to the wrong categories or crash with an `ArrayIndexOutOfBoundsException`.
+3. **Uninformative Data Output:** Because standard arrays cannot dynamically map indices back to text labels, printing the array structure directly to logs outputs a raw stream of values without displaying which enum category belongs to which dataset.
+
+**Code Example (The Robust EnumMap Pattern):**
+```java
+public class PlantCatalog {
+    public enum LifeCycle { ANNUAL, PERENNIAL, BIENNIAL }
+
+    public static void categorizePlants(List<Plant> garden) {
+        // ROBUST: Fully type-safe initialization with zero unsafe casts
+        Map<LifeCycle, Set<Plant>> plantsByLifeCycle = new EnumMap<>(LifeCycle.class);
+        
+        for (LifeCycle lc : LifeCycle.values()) {
+            plantsByLifeCycle.put(lc, new HashSet<>());
+        }
+        
+        for (Plant p : garden) {
+            plantsByLifeCycle.get(p.getLifeCycle()).add(p);
+        }
+        
+        // Clear Output: Prints beautifully with explicit enum keys automatically
+        System.out.println(plantsByLifeCycle);
+    }
+}
+```
+
+**The Golden Rule:**
+Never use arrays indexed by enum ordinals to map or partition collections. Always choose `EnumMap`, which combines the lightning-fast performance of a raw primitive array with the complete type safety and descriptive output of the Java Collections Framework.
+
+</details>
+
+### Why does `EnumMap` uniquely require an explicit class token during initialization, and how does this trap developers familiar with standard collections?
+<details><summary>Show answer</summary>
+
+When initializing standard Java collections like a `HashMap`, you rely entirely on the diamond operator (`<>`) because Java uses generic type erasure. However, trying to instantiate an `EnumMap` the exact same way results in an immediate compilation failure.
+
+**The Core Difference:**
+Standard maps suffer from complete type erasure, meaning their generic type information is permanently stripped away by the compiler and is entirely missing at runtime. An `EnumMap` explicitly defeats type erasure by demanding a bounded type token (`Class<K>`) in its constructor, preserving its specific generic type details at runtime.
+
+**The Mechanics of the Initialization Trap:**
+1. **The Compilation Failure:** You cannot write `Map<Key, Value> map = new EnumMap<>();`. Because `EnumMap` relies on an internal primitive array for performance, it must know the exact size of the enum universe at runtime. Without the class token, type erasure makes this calculations physically impossible for the JVM.
+2. **The Bounded Type Token:** Passing `Key.class` acts as a runtime security pass. It provides the hidden generic information back to the JVM after compilation, ensuring that the map can safely allocate its internal structure and validate keys during execution.
+3. **Array Type-Safety Enforcement:** Because the map holds a runtime reference to the key's class, it guarantees that no raw-type casting or illegal cross-contamination of different enum types can ever corrupt the underlying performance engine.
+
+**Code Example (The Token Pattern):**
+```java
+public class MapInitialization {
+    public enum Priority { LOW, MEDIUM, HIGH }
+
+    public static void main(String[] args) {
+        // STANDARD: Type erasure clears 'Priority' at runtime; perfectly fine for HashMap
+        Map<Priority, String> standardMap = new HashMap<>();
+
+        // TRAPPED: This line will fail to compile!
+        // Map<Priority, String> brokenEnumMap = new EnumMap<>(); 
+
+        // CORRECT: The .class token bypasses type erasure, providing runtime generic info
+        Map<Priority, String> secureEnumMap = new EnumMap<>(Priority.class);
+        
+        secureEnumMap.put(Priority.HIGH, "Critical Alert");
+    }
+}
+```
+
+**The Golden Rule:**
+Never view the `EnumMap(Class<K> keyType)` constructor argument as unnecessary boilerplate. Treat it as a mandatory runtime anchor that bridges the gap left behind by Java's generic type erasure.
+
+</details>
+
+### How do you collect a Java Stream into an optimized `EnumMap` instead of a standard `HashMap`?
+<details><summary>Show answer</summary>
+
+When processing a pipeline of objects using Java Streams, aggregating those objects by an enum property requires careful configuration of the collector to ensure the resulting map remains highly optimized.
+
+**The Core Difference:**
+The standard `Collectors.groupingBy(classifier)` utility automatically instantiates a standard `HashMap` behind the scenes, losing all enum-specific memory optimizations. To preserve performance, you must use the overloaded three-argument variant of `groupingBy` to explicitly inject an `EnumMap` supplier into the stream lifecycle.
+
+**The Mechanics of Stream Collection:**
+1. **The Classifier (First Argument):** Extracts the target enum property from each incoming stream element to serve as the map's lookup key.
+2. **The Map Factory (Second Argument):** Overrides the default collection logic by supplying a custom constructor lambda (`() -> new EnumMap<>(Key.class)`) containing the necessary bounded type token.
+3. **The Downstream Collector (Third Argument):** Defines the underlying collection container (such as a `toSet()` or `toList()`) where values sharing the same enum key will accumulate.
+
+**Code Example (The Stream Integration):**
+```java
+import java.util.Arrays;
+import java.util.EnumMap;
+import java.util.stream.Collectors.*;
+
+public class StreamCollector {
+    public static void runCatalog(Plant[] garden) {
+        // Using a stream and an EnumMap to associate data with an enum
+        System.out.println(Arrays.stream(garden)
+            .collect(groupingBy(p -> p.lifeCycle,
+                () -> new EnumMap<>(LifeCycle.class), toSet())));
+    }
+}
+```
+
+**The Golden Rule:**
+When collecting data grouped by an enum key inside a stream pipeline, never settle for the single-argument `groupingBy` function. Always pass an explicit `EnumMap` constructor supplier to keep your functional pipelines clean and hardware-optimized.
+
+</details>
+
+### What structural limitations do enums have regarding extensibility, and how can you circumvent them?
+<details><summary>Show answer</summary>
+
+Item 38: Emulate extensible enums with interfaces, p. 200.
+
+While enums are ideal for representing fixed, closed sets of choices, they present a significant architectural challenge when you need an API's constant options to be open-ended or customizable by third parties.
+
+**The Core Difference:**
+Standard object-oriented classes support inheritance hierarchies natively through subclassing. Enums, however, are strictly bound by the JVM language specification to be non-extensible, requiring you to shift from type-inheritance to interface-implementation to achieve polymorphic expansion.
+
+**The Limitations of Standard Enums:**
+1. **Implicit Finality:** Every enum implicitly extends `java.lang.Enum` under the hood. Because Java does not support multiple class inheritance, and because the compiler marks all enums as implicitly `final`, you cannot physically write an enum that inherits from another enum to append new constants.
+2. **Monolithic API Restrictions:** If a library declares an enum for operations (such as basic math operators), there is no native language feature that allows a client application using that library to dynamically append custom specialized operators to that exact same enum type.
+
+**The Modern Workaround:**
+To overcome these limitations, you can **emulate extensible enums with interfaces**. You define an abstraction layer using a standard Java interface to represent the operation or behavior, and then write separate, discrete enum classes that implement this shared interface.
+
+**Code Example (Emulated Extensibility):**
+```java
+public interface Operation {
+    double apply(double x, double y);
+}
+
+// 1. Base operations bundled directly with the core library
+public enum BasicOperation implements Operation {
+    PLUS("+")   { public double apply(double x, double y) { return x + y; } },
+    MINUS("-")  { public double apply(double x, double y) { return x - y; } };
+
+    private final String symbol;
+    BasicOperation(String symbol) { this.symbol = symbol; }
+}
+
+// 2. Extended operations defined later by a third-party application
+public enum ExtendedOperation implements Operation {
+    EXPONENTIAL("^") { public double apply(double x, double y) { return Math.pow(x, y); } },
+    REMAINDER("%")   { public double apply(double x, double y) { return x % y; } };
+
+    private final String symbol;
+    ExtendedOperation(String symbol) { this.symbol = symbol; }
+}
+```
+
+**The Golden Rule:**
+While you cannot extend an enum class itself, you can write APIs that accept an interface type rather than an enum type. Always use this pattern when designing constants meant to represent modular, extensible behaviors or plugin components.
+
+</details>
