@@ -15,6 +15,11 @@ Ben Evans took over this legendary O'Reilly series from David Flanagan
 ### "Modern Java in Action"
 Authors: Raoul-Gabriel Urma, Mario Fusco, and Alan Mycroft (Manning)
 
+### Data-Oriented Programming in Java (September 2026) by Chris Kiehl
+
+While it isn’t labeled with the literal "In Action" branding on the cover, conceptually and spiritually, 
+Data-Oriented Programming in Java is absolutely the direct successor that picks up where Modern Java in Action left off.
+
 ### Brian Goetz whitepapers
 
 official Oracle whitepapers, specifically:
