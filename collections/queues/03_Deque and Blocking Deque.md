@@ -149,6 +149,16 @@ throw an exception for a full deque:
 - `void push(E e)` insert e at the head if there is enough space (a synonym for `Deque.addFirst` provided for stack use)
 - `E pop()` retrieve and remove the first element (a synonym for `Deque.removeFirst` provided for stack use)
 
+```
+push(A) → [A]
+push(B) → [B, A]
+push(C) → [C, B, A]
+
+pop()   → returns C → [B, A]
+pop()   → returns B → [A]
+```
+LIFO semantics — last in, first out. Classic stack behavior on top of a double-ended structure.
+
 #### Methods that return elements in revers order:
 - `Iterator<E> descendingIterator()` get an iterator, returning deque elements in reverse order
 - `Deque<E> reversed()` return a reverse-ordered view of this `Deque` -
