@@ -1,3 +1,41 @@
+---
+
+## 📝 TODO: Future Extension Plan - Modernizing with Sealed Classes
+
+> **Note to future self & AI context:** This section outlines a planned expansion of this document. 
+When prompted to "execute the extension plan," use the blueprint below to generate new Q&A blocks comparing Enums and Sealed Classes.
+
+### 🎯 The "Why": Rationale for Extension
+Currently, this document is a comprehensive guide to **Java Enums**, 
+detailing how they restrict a variable to one of a few known alternatives. 
+It briefly mentions **Sealed interfaces or classes (Java 17+)** as a way to create a closed hierarchy of permitted subtypes. 
+
+To make this a complete guide on **"Modeling Restricted Alternatives in Modern Java,"** the document must be expanded. 
+Enums and Sealed Classes are two sides of the same architectural coin. This file needs to document how to choose between them, as relying purely on enums forces awkward workarounds when data shapes need to vary.
+
+### 🏗️ The "What": Planned Q&A Blocks to Add
+Draft new Q&A sections (matching the existing `<details><summary>` format) covering the following three core topics:
+
+* **Topic 1: The Shared Architectural Goal**
+  * **Concept:** Both Enums and Sealed Classes solve the exact same domain problem: 
+  restricting a variable to a closed, exhaustive set of known alternatives.
+  * **Focus:** Explain how they both eliminate "illegal states" at compile time.
+* **Topic 2: The Core Difference (Instances vs. Types)**
+  * **Concept:** Enums restrict *instances* (every choice has the exact same fields/shape). 
+  Sealed Classes restrict *subtypes* (each choice can have entirely different fields, shapes, and behaviors).
+  * **Example to include:** Contrast an enum of `SubscriptionPlan` (where all plans just have a `price` field) 
+  with a sealed interface of `NetworkResult` (where a `Success` record holds a JSON string, but an `Error` record holds an HTTP code and an Exception).
+* **Topic 3: Pattern Matching and Switch Exhaustiveness**
+  * **Concept:** How the compiler leverages both features for safety.
+  * **Focus:** Explain that because the compiler knows the full universe of both an Enum and a Sealed Class, 
+  you can write an exhaustive `switch` expression that handles every case without needing a dangerous, silent `default` branch.
+
+### 📍 The "Where": Placement Strategy
+* **Target Location:** Insert these new Q&A blocks immediately following the current section titled: 
+*"What structural limitations do enums have regarding extensibility, and how can you circumvent them?"*
+* **Reasoning:** The document ends by discussing how enums struggle with extensibility and require interface emulation. 
+Introducing Sealed Classes right after this creates a perfect, natural transition into modern Java's native solution for closed, typed hierarchies.
+
 ### How to model a variable restricted to one of a few known alternatives?
 <details><summary>Show answer</summary>
 
