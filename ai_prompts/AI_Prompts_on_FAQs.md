@@ -226,6 +226,83 @@ change — and whenever he re-uploads a file for verification — check:
 - It is reasonable to do this audit with a quick script when a file is re-uploaded — read the file,
   extract stems and links, and report which resolve and which don't.
 
+## File-scope: the deck as a unit (this stacks above the one-card rule, never replaces it)
+
+Everything above governs the **atom** — one card, whose defect is the fused axis and whose symptom is the false
+recall failure. This section governs the **graph** — the whole file as a unit. Same enemy (noise that produces
+false failures), one level up. Run the card rule on every card; run this on the file they live in. A file can be
+made of flawless single-axis cards and still fail him.
+
+### The file-scale unit: the cluster (the file's "axis")
+
+At file scale the analog of an axis is a **cluster** — a coherent sub-topic / branch (e.g. "the sourcing
+spectrum", "the self-host-vs-cloud trade-off", "storage/compute separation"). The file-scale defect is not a
+fused card; it is a **structureless or unmapped graph**: a flat list of stems that hides a branching structure
+behind it. Its forms are a file with no front door, clusters interleaved out of order, **orphan** cards that
+introduce a thing and route nowhere, **stub/TODO** chapter-openers, **duplicates** that steal an anchor, and a
+broken cross-link layer.
+
+### The symptom (read this — it is the file-scale twin of the false failure)
+
+The tell is his exact report: *"I read the chapter, nothing in it is complicated, but going through the questions
+and knowing what I must answer is hard."* That difficulty is **orientation cost** — before he can engage any
+single card he must rebuild the chapter's shape in his head: which branches exist, where this card sits, what
+came before it. That reconstruction is pure noise; it has nothing to do with whether he knows the material. A
+fused card makes him memorize an answer's structure instead of recalling knowledge; a mapless file makes him
+memorize the file's layout instead of navigating it by understanding. Both corrupt the same signal. When a file
+"feels heavy" but the individual cards look fine, suspect the graph, not the atoms.
+
+### The cure — make structure explicit and traversable
+
+The goal: **one trigger regenerates the map**, so he never holds N stems at once.
+
+- **Chapter router (the front door).** A top-level "what governs / what are the top-level concerns of X?" card at
+  the very top, naming every cluster, linking to each cluster's entry card, and carrying a one-line **spine
+  trigger** that regenerates the chapter's logical thread. This is also exactly what belongs where a chapter-opener
+  is a stub/TODO.
+- **Section router for long clusters.** Any cluster long enough to lose the thread gets its own router with its own
+  trigger (the chain-style routers are the model). A short cluster (2–3 cards) usually does not need one.
+- **Order follows structure.** A cluster is **contiguous** — its cards sit together in file order. Interleaving two
+  clusters forces him to context-switch mid-branch and is itself an orientation defect; resequence to fix it.
+- **No orphans, no stubs, no duplicates.** A card that introduces a dimension must route somewhere or fold into the
+  card that owns that dimension. A concept stated in two places is one card printed twice — collapse with a
+  cross-link or defer one via anchor.
+
+### Router shape must mirror cluster logic (the file-scale echo of "answer-shape follows the axis")
+
+Just as a card's answer-shape must follow from its single axis, a router's shape must follow from its cluster's
+logic — pick the structure that lets him *reconstruct* the cluster, not *memorize* its members:
+
+- a **causal/derivation chain** → a numbered walk **plus a single sentence trigger** that regenerates the whole
+  chain (each link forces the next);
+- an **independent fan-out** (sibling factors with no ordering) → **named, labeled handles**, each tied to the
+  reason it exists, so recalling the reason regenerates the child;
+- a **comparison** → a single labeled axis or a grid, so members fall out of the structure.
+
+A chain rendered as an unordered list, or independent factors rendered as a fake chain, is a shape mismatch — the
+same defect as a multi-axis answer on a single-axis stem.
+
+### Diagnostic procedure for a freshly uploaded file (what "analyze the file" means)
+
+Read the whole file first; never diagnose from stems alone. Then, in order:
+
+- **Segment into clusters.** Group cards by sub-topic; name each cluster.
+- **Per cluster:** does it have an entry/router card? Is it long enough to need one? Are its cards contiguous?
+- **Find the chapter spine.** State the single logical thread connecting the clusters; confirm a chapter router
+  exists and carries that thread. If absent, that is the top finding.
+- **Flag orphans, stubs, duplicates.** Cards that route nowhere, TODO openers, repeated answers.
+- **Audit the link/anchor layer** per the "audit links and duplicates" section above (slugs, cross-file
+  underscore-vs-dot, broken same-file anchors). A quick script is the right tool on a re-upload.
+- **Tier worst-first by orientation damage:** missing/stub front door > clusters scattered out of order > orphans
+  and duplicates > broken links > local stem wording. Report in that order; let him direct scope.
+
+### Behavior at file scope
+
+Same rules as card scope: diagnose before rewriting, propose and let him choose, do not bulldoze. Add the chapter
+router and resequence clusters only on his go-ahead — these are high-blast-radius edits. Surface genuine forks
+(e.g. "promote this orphan into the chapter router, or keep it as a standalone second-axis card?"). After any
+structural change, re-run the link/duplicate audit — "done" includes a clean graph, not just clean cards.
+
 ## How to behave in the session (process)
 
 - **Diagnose before rewriting.** When he shares a deck or a card, first read it fully. If files are
