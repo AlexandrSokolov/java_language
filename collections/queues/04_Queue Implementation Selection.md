@@ -17,96 +17,101 @@
 
 </details>
 
-### What is the first question to ask when choosing the right Queue implementation?
+### How do you choose a Queue implementation?
 <details><summary>Show answer</summary>
 
-The first question to ask is whether the chosen implementation needs to support concurrent access.
+- [Thread safety needed?](#do-you-need-thread-safety)
+  - No → [Which ordering?](#which-ordering-without-thread-safety) *(last gate)*
+  - Yes → [Blocking behaviour needed?](#do-you-need-blocking-behaviour)
+    - No → [Which ordering?](#which-non-blocking-concurrent-ordering) *(last gate)*
+    - Yes → [Direct handoff wanted?](#do-you-want-direct-handoff)
+      - Handoff → handoff-only vs handoff-plus-async — two implementations, no ordering choice
+      - No → [Which ordering?](#which-ordering-for-decoupled-blocking)
+        - FIFO → [Bounded or unbounded?](#linkedblockingqueue-vs-arrayblockingqueue) *(only FIFO forks again)*
+        
+        For the next one implementation each, no further choice:
+        - LIFO  
+        - time 
+        - sorted
 
 </details>
 
-### Which Queue implementations do not require concurrent access?
+### Do you need thread safety?
 <details><summary>Show answer</summary>
 
-- `ArrayDeque` - for FIFO ordering
-- `PriorityQueue` - for priority ordering
+- No → stay with plain implementations, only [ordering](#which-ordering-without-thread-safety) is left to decide.
+- Yes → enter the concurrent family, then ask about [blocking behaviour](#do-you-need-blocking-behaviour).
 
 </details>
 
-### If thread safety is required, what is the next question you should ask when choosing a Queue implementation?
+### Which ordering without thread safety?
 <details><summary>Show answer</summary>
 
-After deciding that thread safety is required, there are two independent concerns you must consider next:
-- [What ordering semantics are required?](#which-threadsafe-queue-implementations-support-different-ordering-guarantees)
-- Is blocking behavior needed?
+- FIFO → `ArrayDeque`
+- LIFO (stack) → `ArrayDeque`
+- Sorted → `PriorityQueue`
 
 </details>
 
-### Which thread‑safe Queue implementations support different ordering guarantees?
+### Do you need blocking behaviour?
 <details><summary>Show answer</summary>
 
-- `ConcurrentLinkedQueue` - FIFO ordering without blocking
-- `PriorityBlockingQueue` - blocking priority ordering
-- `DelayQueue` - blocking delay ordering
+- No → [which non-blocking concurrent ordering?](#which-non-blocking-concurrent-ordering)
+- Yes → [do you want direct handoff?](#do-you-want-direct-handoff)
 
 </details>
 
-### Which thread‑safe Queue implementations support non-blocking behavior?
+### Which non-blocking concurrent ordering?
 <details><summary>Show answer</summary>
 
-- `ConcurrentLinkedQueue` - FIFO ordering without blocking
+- FIFO → `ConcurrentLinkedQueue`
+- LIFO → **`ConcurrentLinkedDeque`** *(lock-free deque, Java 7 — the easily-forgotten one)*
+
+No sorted option here: sorted concurrent ordering only exists as a blocking queue (`PriorityBlockingQueue`).
 
 </details>
 
-### Which queue implementations provide thread‑safe blocking behavior?
+### Do you want direct handoff?
 <details><summary>Show answer</summary>
 
-- `LinkedBlockingQueue` and `ArrayBlockingQueue` - for classic producer–consumer scenarios
-- `SynchronousQueue` - blocking queue with no internal capacity, providing **direct handoff** between producer and consumer
-- `LinkedTransferQueue` - supports both asynchronous enqueuing and synchronous handoff
+Handoff means an insert waits until another thread takes the element — no element is ever stored.
+
+- Handoff only → `SynchronousQueue` (zero internal capacity, pure handoff)
+- Handoff **and** normal async queuing → `LinkedTransferQueue` (the only `TransferQueue`)
+- Neither — fully decoupled queuing → [which ordering for decoupled blocking?](#which-ordering-for-decoupled-blocking)
+
+Both handoff choices are single classes with no ordering question. Ordering only reappears once you drop handoff.
+
+</details>
+
+### Which ordering for decoupled blocking?
+<details><summary>Show answer</summary>
+
+- FIFO → `LinkedBlockingQueue` or `ArrayBlockingQueue` → [bounded or unbounded?](#linkedblockingqueue-vs-arrayblockingqueue)
+- LIFO → `LinkedBlockingDeque`
+- Time-based → `DelayQueue`
+- Sorted → `PriorityBlockingQueue`
 
 </details>
 
 ### `LinkedBlockingQueue` vs `ArrayBlockingQueue`
 <details><summary>Show answer</summary>
 
-If you **cannot define a realistic upper bound** for the queue size, `LinkedBlockingQueue` is the only viable choice, 
-since `ArrayBlockingQueue` is always bounded and requires its capacity to be fixed at construction time.
+Both are FIFO blocking queues. Decide in two steps.
 
+**Gate — can you bound the size?**
+- No realistic upper bound → `LinkedBlockingQueue` is the only option (grows dynamically).
+- `ArrayBlockingQueue` is always bounded; capacity is fixed at construction and cannot change.
 
-When a bounded queue is acceptable, the choice between the two is primarily driven by performance and memory trade‑offs, 
-especially under concurrent load. While both queues provide constant‑time insertion and removal in theory, 
-their behavior differs significantly in practice due to design choices.
+**If both are viable, weigh three trade-offs:**
+- *Locking* — `LinkedBlockingQueue` uses separate put/take locks, so producers and consumers barely contend. 
+  `ArrayBlockingQueue` uses one lock for both, so they contend under concurrent load.
+- *Memory* — `ArrayBlockingQueue` preallocates its array: fixed, predictable, no per-insert allocation.
+  `LinkedBlockingQueue` allocates a node per element: dynamic size, but ongoing GC pressure.
+- *Cache* — the array gives good locality; the linked nodes cause pointer-chasing and cache misses.
 
-
-Several factors influence their relative performance:
-- **Locking strategy**
-  - `LinkedBlockingQueue` uses separate locks for enqueueing and dequeueing, 
-    allowing producers and consumers to operate concurrently with minimal contention.
-  - `ArrayBlockingQueue`, by contrast, uses a single lock, 
-    which can increase contention when producers and consumers are active simultaneously.
-- **Memory allocation behavior**
-  - `ArrayBlockingQueue` **preallocates all required storage upfront**, resulting in fixed and predictable 
-    memory usage and avoiding any allocation during runtime. Because elements are stored in a reusable array, 
-    insertions do not require creating new objects, which can improve performance under high throughput.
-  - `LinkedBlockingQueue`, in contrast, allocates a new node for each inserted element. 
-    This allows memory usage to grow and shrink dynamically with the queue size, 
-    but it comes at the cost of ongoing object allocation and garbage collection overhead, 
-    which can negatively impact performance under heavy load.
-- **Cache locality**
-  - Array‑based structures like `ArrayBlockingQueue` typically exhibit better cache locality than linked structures.
-  - Linked structures such as `LinkedBlockingQueue` are more prone to cache misses due to pointer chasing, 
-    which can become a dominant performance factor on modern CPUs.
-
-
-**Practical guidance**
-
-* Prefer LinkedBlockingQueue when:
-  - the maximum queue size is unknown or difficult to estimate
-  - minimizing producer–consumer contention is important
-  - adaptability matters more than raw memory predictability
-* Prefer ArrayBlockingQueue when:
-  - a fixed capacity is acceptable or desired
-  - predictable memory usage is important
-  - high throughput and cache efficiency are priorities
+**Verdict:** 
+- `LinkedBlockingQueue` usually wins throughput under heavy producer/consumer concurrency (less lock contention); 
+- `ArrayBlockingQueue` wins on predictable memory and cache efficiency.
 
 </details>
