@@ -1,8 +1,8 @@
-
 ### Which t-shirt properties belong to every shirt vs one kind?
 <details><summary>Show answer</summary>
 
-A t-shirt comes in two kinds — `CrewNeck` and `Polo`:
+**Draft answer — answers only the narrow question, not yet correct OOP.** 
+It shows the typical first instinct: put shared state on the parent, branch state on the branch.
 
 ```java
 class TShirt { Size size; Color color; }              // every shirt
@@ -11,24 +11,86 @@ class Polo     extends TShirt { int buttonCount; }     // only this branch
 ```
 
 - `size` (S/M/L), `color` — every shirt has them, picked freely → **belong to every type** → on the parent.
-- `buttonCount` — exists only on `Polo`; a crew-neck has no button count at all → **branch-local** → on the
-  branch.
+- `buttonCount` — exists only on `Polo`; a crew-neck has no button count at all → **branch-local** → on the branch.
 
-The cut: a property either applies to *every* object (parent) or to *only one branch* and is meaningless on the
-others (that branch).
-[→ parent or branch?](3.4_classes_and_interfaces.md#what-decides-whether-a-property-belongs-to-the-parent-or-a-branch)
+**Why this draft is not the final design:**
+
+- **`equals` contract.** Adding a value field (`buttonCount`) to a branch of an *instantiable* parent that has a
+  reasonable `equals` cannot preserve the contract: a `TShirt` and a `Polo` can never be equal both ways without
+  breaking symmetry or transitivity.
+- **Composition is not the fix here.** "Favor composition over inheritance" targets `has-a`. A `Polo` *is-a*
+  `TShirt` and is fully substitutable for one — it does **not** contain a t-shirt. This is a real subtype, so
+  inheritance is the correct tool; the defect is the *shape of the base*, not the use of inheritance.
+- **A concrete `TShirt` is wrong for this domain.** A bare `TShirt` would be a shirt that is neither crew-neck nor
+  polo — no such object exists in reality; every real shirt is one specific kind. A concrete parent also invites
+  `new TShirt(...)`, producing a meaningless half-object, and is a concrete class being extended without being
+  designed for it.
+
+**Correct design:** make `TShirt`:
+- **`abstract`** so no bare shirt can exist. Abstract also removes the `equals` problem: 
+  with no instantiable parent, there is no cross-boundary comparison to break.
+- **`sealed`** so the set of kinds is closed and compiler-checked. 
+
+```java
+sealed abstract class TShirt permits CrewNeck, Polo {   // closed set — only these two kinds
+    Size size; Color color;                             // every shirt has these
+}
+final class CrewNeck extends TShirt {}                  // adds no state of its own
+final class Polo extends TShirt {
+    int buttonCount;                                    // only this branch has buttons
+}
+```
+
+**Alternative design (record-based, for immutability):** a `record` is implicitly `final`, so it cannot be a
+parent — but it *can* implement a `sealed interface`. The base becomes an interface; each kind is a record.
+
+```java
+sealed interface TShirt permits CrewNeck, Polo {        // closed set, but carries no state
+    Size size();                                        // shared accessors only — no fields to inherit
+    Color color();
+}
+record CrewNeck(Size size, Color color) implements TShirt {}          // immutable, free equals/hashCode
+record Polo(Size size, Color color, int buttonCount) implements TShirt {}  // re-declares shared components
+```
+
+- **Buys:** immutability and correct `equals`/`hashCode` for free — a `CrewNeck` and a `Polo` are different types
+  and never compare equal.
+- **Costs:** an interface holds no state, so `size`/`color` cannot be declared once — every record repeats them.
+  Fine at two shared fields; painful if the shared part is large.
+
+You only truly choose between: **shared state implemented once** (abstract class) vs **free immutability + value
+semantics** (records on a sealed interface). For a small closed domain like this, the record-based version is the
+modern default.
 
 </details>
 
 ### Property: `teamSize` on a manager — parent or branch?
 <details><summary>Show answer</summary>
 
-**Branch-local data.** `teamSize` only means something inside the Manager branch; a non-manager has no team size, so
-it can't sit on the parent.
+**Branch-local.** `teamSize` means something only for a manager; a non-manager has no team size, so it cannot sit
+on the shared base.
 
-Adding it as a field in `Manager` is ordinary specialization — a subtype is expected to carry more state than its
-parent. One value on one branch, no multiplication.
-[→ parent or branch?](3.4_classes_and_interfaces.md#what-decides-whether-a-property-belongs-to-the-parent-or-a-branch)
+But it cannot simply be added as a field on a `Manager` that extends a concrete `Employee` — that repeats the
+defect covered in full on the [t-shirt card](#which-t-shirt-properties-belong-to-every-shirt-vs-one-kind): a value
+field on a branch of an instantiable parent breaks `equals`, and a bare `Employee` is a meaningless half-object.
+
+The trap specific to this domain: it is tempting to let the base `Employee` *double as* the non-manager, with
+`Manager` as its subtype. Don't — the base must never be one of the variants. Force **"non-manager" to become its
+own named type** (`IndividualContributor`), and force the base to be **`abstract` + `sealed`**, so no bare employee
+can exist and the set of kinds is closed and compiler-checked.
+
+```java
+sealed interface Employee permits Manager, IndividualContributor {   // closed set — no bare employee
+    String name();
+    int id();                                                        // shared accessors only
+}
+record Manager(String name, int id, int teamSize) implements Employee {}    // teamSize lives only here
+record IndividualContributor(String name, int id) implements Employee {}    // the former "non-manager"
+```
+
+Now `teamSize` sits on exactly the branch it has meaning for, records give correct `equals`/`hashCode` for free, and
+no instantiable parent exists to break the contract. The t-shirt card carries the detailed reasoning for each of
+these moves.
 
 </details>
 
@@ -39,9 +101,8 @@ parent. One value on one branch, no multiplication.
 Engineer can be salaried or hourly, and the role never fixes the choice. Every (role, payType) pairing is valid.
 
 Model it by subclassing and you get `SalariedManager`, `HourlyEngineer`, … = role × payType subclasses → explosion.
-The free combination across every branch is the signal: it belongs to every type, so it rides on the type as a field,
-not in the tree.
-[→ explosion on varying state](3.4_classes_and_interfaces.md#how-does-subclassing-explode-on-varying-state)
+[The free combination across every branch](3.4_classes_and_interfaces.md#how-does-subclassing-explode-on-varying-state)
+is the signal: it belongs to every type, so it rides on the type as a field, not in the tree.
 
 </details>
 
@@ -57,7 +118,56 @@ not in the tree.
 
 The name "bonusFormula" tells you nothing. Only the combination rule does. The trap: "every employee has *a* bonus
 formula" feels like it applies to all — but applies-to-all is not the test; **free combination** is.
-[→ parent or branch?](3.4_classes_and_interfaces.md#what-decides-whether-a-property-belongs-to-the-parent-or-a-branch)
+
+</details>
+
+### Does "every object has one" put it on the base?
+<details><summary>Show answer</summary>
+
+**No — universal presence is necessary but not sufficient.** Two independent tests hide behind "it applies to all":
+
+- **Presence** — does every object have some value (never null)? This is about *existence*, not placement.
+- **Independence from type** — can the value vary while the object's type stays fixed, with every pairing still a
+  legal object? This is the real placement test.
+
+A property can be universally present yet have its value *pinned by the type*. Presence being universal tells you
+nothing about placement; only the second test does.
+
+**Cause (present-but-type-fixed → not a base field):** every employee has a bonus formula, but the formula is fixed
+by role — a Manager always gets the manager formula, an IC the IC formula, and "senior-manager formula on an entry
+IC" is not a legal object. Presence is universal; the value is a function of the type. So every type *answers* for
+the property, but each supplies its **own fixed value** — it is not a slot the caller fills.
+
+```java
+sealed interface Employee permits Manager, IndividualContributor {
+    BonusFormula bonusFormula();                 // every type answers this — value is fixed per type
+}
+record Manager(String name, int id) implements Employee {
+    public BonusFormula bonusFormula() { return BonusFormula.MANAGER; }   // pinned, not passed in
+}
+record IndividualContributor(String name, int id) implements Employee {
+    public BonusFormula bonusFormula() { return BonusFormula.IC; }        // pinned
+}
+```
+
+**Contrast (present-and-free → base field):** every employee has a bonus formula, and HR may attach *any* formula to
+*any* employee — manager on the flat one, IC on the tiered one, all legal. Presence is universal *and* the value is
+independent of type, so it becomes a real slot the caller sets, declared once as a shared component.
+
+```java
+sealed interface Employee permits Manager, IndividualContributor {
+    BonusFormula bonusFormula();                 // real slot — the value is chosen, not pinned
+}
+record Manager(String name, int id, BonusFormula bonusFormula) implements Employee {}              // caller chooses
+record IndividualContributor(String name, int id, BonusFormula bonusFormula) implements Employee {} // caller chooses
+```
+
+Both cases expose `bonusFormula()` on every type — the difference is upstream: **who decides the value.** Type-fixed
+→ the type pins it (constant per branch). Free → the caller sets it (a shared field). "Belongs on the base" means a
+freely-set slot, not merely "appears on all types."
+
+**Diagnostic:** hold the type fixed and try to vary the property. If it still varies freely → base. If varying it
+forces a different type or yields an impossible object → type-fixed.
 
 </details>
 
@@ -68,9 +178,8 @@ formula" feels like it applies to all — but applies-to-all is not the test; **
 - Rule: *any role can be assigned either shift.* → the value combines freely with every branch → **field on the
   type**.
 
-Identical property, opposite verdict, decided only by whether the domain permits free combination. The sharpest proof
-that placement lives in the domain rules, never in the property name.
-[→ parent or branch?](3.4_classes_and_interfaces.md#what-decides-whether-a-property-belongs-to-the-parent-or-a-branch)
+Identical property, opposite verdict, decided only by whether the domain permits free combination. 
+The sharpest proof that placement lives in the domain rules, never in the property name.
 
 </details>
 
@@ -98,7 +207,6 @@ class Push  extends Notification { ... }
 
 One tree, one grouping (kind). Everything we add from here, we place by asking: **field on the parent, field on a
 branch, or a second tree?** — and a second tree is the thing we must avoid.
-[→ what rules out subclassing](3.4_classes_and_interfaces.md#what-rules-out-subclassing-as-a-modeling-tool)
 
 </details>
 
@@ -192,33 +300,37 @@ We need to add a `subject` to notifications. Where does it go in the existing `N
 
 <details><summary>Show answer</summary>
 
-**First ask the domain question — does *every* kind have a subject, or only some?** Placement depends entirely on the
-answer; the property name alone can't decide it.
-[→ parent or branch?](3.4_classes_and_interfaces.md#what-decides-whether-a-property-belongs-to-the-parent-or-a-branch)
+**The property name can't decide it. Ask two things — not just "does every kind have one?"** Universal presence
+alone is not the test; the value must also be freely set, independent of the notification type.
+[→ does "every object has one" put it on the base?](#does-every-object-has-one-put-it-on-the-base)
 
 **Case A — only Email has a subject (the usual rule).** SMS and push have none, so `subject` is **branch-local** and
-lives on the `Email` subclass.
+lives on the `Email` subclass. This is safe *because `Notification` is `abstract`* — no one can create a bare
+`Notification`, so there is no instantiable parent whose `equals` a value field on `Email` could break.
+[→ why the base must be abstract](#which-t-shirt-properties-belong-to-every-shirt-vs-one-kind)
 
 ```java
 class Email extends Notification {
-    String subject;             // branch-local — only Email
+    String subject;             // branch-local — only Email, safe because the base is abstract
     ...
 }
 class Sms  extends Notification { ... }   // no subject
 class Push extends Notification { ... }   // no subject
 ```
 
-**Case B — every kind carries a subject** (e.g. your system shows one in the SMS/push title). Then it applies to all
-objects → it goes on the **parent**.
+**Case B — every kind carries a subject, and the value is free.** Presence is universal *and* the subject is a
+free-text string the caller sets on any kind — no type pins its value. That is the real base-field condition, so it
+goes on the **parent**.
 
 ```java
 abstract class Notification {
-    String subject;             // on the base — every kind has one
+    String subject;             // on the base — present on every kind AND freely set, independent of type
 }
 ```
 
-The deciding test is "does it exist on *every* object, or only one branch?" — every type → parent; one branch →
-that subclass. Either way it's still just a **field**: no new tree, no multiplication.
+`subject` is always a plain **field** either way — free text has no fixed set to switch on, so it can never drive
+control flow; `send()` reading it is *use*, not branching. No strategy, no new tree. The only open question is
+placement, and placement turns on **presence + independence from type**, not presence alone.
 
 </details>
 
@@ -239,23 +351,25 @@ platform. Where does this go in the existing `Notification` hierarchy?
 Two things arrive together — separate them.
 
 **The token itself is branch-local to Push.** Email and SMS have no device token, so it lives on the `Push`
-subclass, not the parent — same as any one-branch property.
-[→ parent or branch?](3.4_classes_and_interfaces.md#what-decides-whether-a-property-belongs-to-the-parent-or-a-branch)
+subclass, not the parent — same as any one-branch property, and safe because the base is abstract (no bare
+`Notification` exists to break `equals`).
 
 **Platform (Android / iOS) must not become a tree.** Platform only exists where the token does — inside the Push
-branch — so the free-combination test runs *within Push*, not across the whole hierarchy. There it is free: format
-varies independently of anything else Push carries. It's tempting to split `AndroidPush` / `IosPush` because the
-format differs, but a platform tree under Push would cross Push's own grouping and start the same multiplication a
-branch deep → `AndroidPush`, `IosPush`, repeated for every later Push variation → explosion, just scoped to a branch.
-[→ what rules out subclassing](3.4_classes_and_interfaces.md#what-rules-out-subclassing-as-a-modeling-tool)
+branch — so the free-combination test runs *within Push*, not across the whole hierarchy. There it is free: the
+platform value varies independently of anything else Push carries. It's tempting to split `AndroidPush` / `IosPush`
+because the format differs, but a platform tree under Push would cross Push's own grouping and start the same
+multiplication a branch deep → `AndroidPush`, `IosPush`, repeated for every later Push variation → explosion, just
+scoped to a branch.
 
-Keep platform as a **field**, and if the format genuinely needs different behavior, hold that behavior as a strategy
-object — still a field, still no second tree.
+Keep platform as a **field**. The token *format* is not free — it is **pinned by the platform value** (Android
+format for `ANDROID`, iOS format for `IOS`); a value decided by another value, not freely set. Handle that with a
+strategy keyed off `platform` — still a field, still no second tree.
+[→ value decided by type/value vs freely set](#does-every-object-has-one-put-it-on-the-base)
 
 ```java
 class Push extends Notification {
-    String   deviceToken;       // branch-local to Push
-    Platform platform;          // ANDROID / IOS — a field, NOT a subclass split
+    String   deviceToken;       // branch-local to Push, safe because Notification is abstract
+    Platform platform;          // ANDROID / IOS — a free field, NOT a subclass split
     ...
 }
 enum Platform { ANDROID, IOS }
@@ -263,7 +377,6 @@ enum Platform { ANDROID, IOS }
 
 The format difference is real, but it's handled by the field's value (or a strategy keyed off it), never by a second
 tree.
-[→ how to extend without subclassing](3.4_classes_and_interfaces.md#how-do-you-extend-a-type-without-subclassing)
 
 </details>
 
@@ -284,12 +397,12 @@ This applies to email, SMS, and push alike. Where does this go in the existing `
 
 This is a **second, freely-combining behavior** — *category* (transactional / marketing) — and it cuts across
 *every* kind: any kind can be either, freely combined. That free combination is the warning sign.
-[→ explosion on varying behavior](3.4_classes_and_interfaces.md#how-does-subclassing-explode-on-varying-behavior)
+- [→ present on every kind AND freely set](#does-every-object-has-one-put-it-on-the-base)
+- [→ explosion on varying behavior](3.4_classes_and_interfaces.md#how-does-subclassing-explode-on-varying-behavior)
 
 **A subclass tree is wrong** — it would cross the kind tree and multiply: `TransactionalEmail`, `MarketingEmail`,
 `TransactionalSms`, `MarketingSms`, `TransactionalPush`, `MarketingPush` = kind × category. Two trees, the classic
 explosion.
-[→ what rules out subclassing](3.4_classes_and_interfaces.md#what-rules-out-subclassing-as-a-modeling-tool)
 
 **A plain enum field is not enough either** — the categories carry *different behavior* (honor unsubscribe + quiet
 hours, or skip both), not just a label. A bare `category` field would push that logic into `if`/`switch` branches
