@@ -353,6 +353,9 @@ reserve the full five for when he's deliberately choosing a question's framing.)
 - Answer: synthesized in own words — never copy-pasted from source.
 - Line length: 120 characters — use the full width.
 - Code examples inside the card retain their language identifier (e.g. ` ```java `).
+- **Multiple cards in one response go in ONE fenced block**, separated by a blank line — never one block per
+    card. The block is what he copies; splitting it forces N copy operations instead of one.
+- Java code in cards uses **2-space indentation**, not 4.
 
 Correct format:
 
