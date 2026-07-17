@@ -1,4 +1,4 @@
-## Classes and Interfaces - Inheritance Design Challenges
+## Classes and Interfaces - Inheritance Design Challenges #2
 
 ### Design: Square reusing Rectangle's code
 <details><summary><strong>Show details</strong></summary>
@@ -36,7 +36,7 @@ void grow(Rectangle r) { r.setWidth(r.area() == 0 ? 1 : r.width + 1); }  // misb
 **Why it breaks:** the parent's mutators promise "set one side, the other is untouched." The override silently revokes
 that invariant, so code written against `Rectangle` is now wrong when handed a `Square`. This is a substitutability
 (LSP) violation — the subtype alters base behavior.
-[→ how a subtype violates substitutability (LSP)](3.3_classes_and_interfaces.md#how-does-a-subtype-violate-substitutability-lsp)
+[→ how a subtype violates substitutability (LSP)](../FAQs/3.3_classes_and_interfaces.md#how-does-a-subtype-violate-substitutability-lsp)
 
 **Fix — the conflict is the mutability, not the geometry.** The contract that breaks is a *setter* contract; remove
 the setters and it vanishes. Model both as **immutable** values, and the "set width without touching height" promise
@@ -76,7 +76,7 @@ storage, lookup, and iteration. Reuse it. Model `Properties`.
 
 **Wrong instinct: `class Properties extends Hashtable`.** A `Properties` *isn't* a general hashtable — it *has* one.
 The is-a is false; it was reached for as a shortcut to reuse storage. This is the actual JDK mistake.
-[→ JDK class where inheritance violated the subclass's own invariants](3.3_classes_and_interfaces.md#a-jdk-class-where-inheritance-violated-the-subclasss-own-invariants)
+[→ JDK class where inheritance violated the subclass's own invariants](../FAQs/3.3_classes_and_interfaces.md#a-jdk-class-where-inheritance-violated-the-subclasss-own-invariants)
 
 **Why it breaks:** inheriting exposes the *whole* `Hashtable` surface, which fights the type's own rules:
 
@@ -131,7 +131,7 @@ new CountingSet<String>().addAll(List.of("a", "b", "c"));   // added == ?
 `addAll`, then again by the overridden `add` that `addAll` triggers. The double-count comes from **self-use** — an
 implementation detail of `HashSet` that isn't in its public contract and can change between versions. The subclass is
 coupled to *how* the parent is built, not just what it promises.
-[→ relationship between inheritance and encapsulation](3.3_classes_and_interfaces.md#what-is-the-relationship-between-inheritance-and-encapsulation)
+[→ relationship between inheritance and encapsulation](../FAQs/3.3_classes_and_interfaces.md#what-is-the-relationship-between-inheritance-and-encapsulation)
 
 **Fix — composition (a forwarding wrapper).** Hold a `Set`, forward to it, and control your own call graph so no
 hidden self-use exists. The wrapper depends only on the `Set` public contract.
@@ -147,7 +147,7 @@ final class CountingSet<E> {
 
 The only safe way to extend by inheritance instead would be a base that **documents its self-use** — and `HashSet`
 doesn't.
-[→ JDK class whose undocumented self-use breaks subclasses](3.5_classes_and_interfaces.md#a-jdk-class-whose-undocumented-self-use-breaks-subclasses)
+[→ JDK class whose undocumented self-use breaks subclasses](../FAQs/3.5_classes_and_interfaces.md#a-jdk-class-whose-undocumented-self-use-breaks-subclasses)
 
 </details>
 
@@ -184,7 +184,7 @@ class Shape {
 **Wrong instinct: add `TRIANGLE` to the enum and another `case` to every `switch`.** That extends the smell instead of
 removing it. A tagged class is **a subtype hierarchy emulated badly with a field** — the tag hand-rolls at runtime the
 subtyping the language gives for free, paying with branching and fields that apply to only some kinds.
-[→ why tagged classes are a design smell](3.7_classes_and_interfaces.md#why-are-tagged-classes-considered-a-design-smell)
+[→ why tagged classes are a design smell](../FAQs/3.7_classes_and_interfaces.md#why-are-tagged-classes-considered-a-design-smell)
 
 **Why it breaks:** every new variant means editing every `switch`, the per-kind fields pile up unused on every
 instance, and the compiler can't tell you when you've missed a branch. One class is carrying several concepts.
@@ -208,7 +208,7 @@ double area(Shape s) {
 ```
 
 Open-ended variants → a plain subclass hierarchy instead; a fixed small set carrying data → an enum with behavior.
-[→ what to use instead of a tagged class](3.7_classes_and_interfaces.md#what-should-you-use-instead-of-a-tagged-class)
+[→ what to use instead of a tagged class](../FAQs/3.7_classes_and_interfaces.md#what-should-you-use-instead-of-a-tagged-class)
 
 </details>
 
@@ -230,7 +230,7 @@ want. Extending it gives you the two methods for free. Do it?
 **Wrong instinct: `class InvoiceExporter extends ReportGenerator`.** This is inheritance reached for **code reuse
 only**, with no real is-a and no intent to use an exporter *as* a report generator. That's accidental, semantically
 wrong inheritance — the classic warning sign of "extending a class to reuse half of it."
-[→ when inheritance should be used cautiously or avoided](3.3_classes_and_interfaces.md#when-should-inheritance-be-used-cautiously-or-avoided)
+[→ when inheritance should be used cautiously or avoided](../FAQs/3.3_classes_and_interfaces.md#when-should-inheritance-be-used-cautiously-or-avoided)
 
 **Why it breaks:**
 
@@ -295,7 +295,7 @@ it with checks like "if this is a Loan, ignore the buffer."
 distinction **times** the existing kind. The capability cuts *across* the existing tree instead of nesting under it,
 so it can't be one branch; it forces a class per (kind × hasOverdraft) pairing. That's the explosion from 3.8, here
 triggered by a subset.
-[→ explosion on varying behavior](3.4_classes_and_interfaces.md#how-does-subclassing-explode-on-varying-behavior)
+[→ explosion on varying behavior](../FAQs/3.4_classes_and_interfaces.md#how-does-subclassing-explode-on-varying-behavior)
 
 **Insert an intermediate type between `Account` and the applicable branches → works once, then collapses.** You could
 slot `OverdraftCapableAccount` between `Account` and {`Checking`, `Savings`}, and `Loan` extends `Account` directly.
@@ -331,10 +331,151 @@ Now overdraft is an **interface the applicable subtypes implement** (delegating 
 object), `Loan` just doesn't implement it, and a second capability (`InterestBearing`) is **another independent
 interface** applied to *its* own subset — no layering, no multiplication. Each crosscut is its own capability;
 membership is "implements it or not," not "sits at this depth in the tree."
-[→ what is composition, and what does it solve?](3.4_classes_and_interfaces.md#what-is-composition-and-what-does-it-solve)
+[→ what is composition, and what does it solve?](../FAQs/3.4_classes_and_interfaces.md#what-is-composition-and-what-does-it-solve)
 
 The takeaway worth memorizing: **base = all, branch = exactly one, subset across branches = capability (interface +
 composition), never a base field, a new branch, or an intermediate layer.**
+
+</details>
+
+</details>
+
+
+### Design: a base with hooks for subclasses
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show question</summary>
+
+You own an import pipeline: read a file, parse rows, validate, write to DB. Every step is the same for all sources
+except *parse* — CSV parses one way, XML another. You put the fixed sequence in a base class and leave `parse()`
+abstract for subclasses to fill. It works. Now a second requirement lands: validation also varies — some sources need
+strict validation, some lenient — and any source may need either. Model it.
+
+```java
+abstract class Importer {
+    final void run(Path p) {                 // fixed sequence, subclasses cannot reorder
+        var raw  = read(p);
+        var rows = parse(raw);               // the hole subclasses fill
+        validate(rows);
+        write(rows);
+    }
+    protected abstract List<Row> parse(String raw);
+    protected void validate(List<Row> rows) { /* default */ }
+}
+class CsvImporter extends Importer { protected List<Row> parse(String raw) { ... } }
+class XmlImporter extends Importer { protected List<Row> parse(String raw) { ... } }
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+**Wrong instinct: make `validate()` a second abstract hook and let subclasses override it.** The first hook was fine —
+one varying step, one tree. The second hook is where it collapses.
+
+**Why it breaks:** a hook binds its variation to the *class*, so two hooks force the class to fix both choices at
+once. Strict CSV, lenient CSV, strict XML, lenient XML → `StrictCsvImporter`, `LenientCsvImporter`, … = parse ×
+validate subclasses. The two steps vary independently, but the tree has only one dimension to spend, and it is already
+spent on parse.
+[→ a feature that fits some subtypes, not all](3_9_classes_and_interfaces.md#design-a-feature-that-fits-some-subtypes-not-all)
+
+The deeper reason: **a hook is a strategy whose slot is filled by inheritance instead of by a field.** One hook hides
+that — inheritance can supply one implementation for free. Two hooks expose it: you cannot supply two independent
+implementations from one `extends`.
+
+**Fix — the fixed sequence stays; the varying steps become injected collaborators, not overridden methods.**
+
+```java
+final class Importer {                                   // no longer abstract, no longer extended
+    private final Parser    parser;                      // was a hook — now a field
+    private final Validator validator;                   // second variation, second field, no multiplication
+    Importer(Parser parser, Validator validator) { this.parser = parser; this.validator = validator; }
+
+    void run(Path p) {                                   // same fixed sequence — the template survives
+        var rows = parser.parse(read(p));
+        validator.validate(rows);
+        write(rows);
+    }
+}
+interface Parser    { List<Row> parse(String raw); }      // Csv, Xml — independent axis
+interface Validator { void validate(List<Row> rows); }    // Strict, Lenient — independent axis
+new Importer(new CsvParser(), new LenientValidator());    // any combination, zero new classes
+```
+
+**Where template method is still right:** exactly one varying step, and the base and subclasses ship together in one
+module you own. The moment a second independent step varies — or the base is published for outside extension — the
+hooks must become fields.
+
+The discriminator: **one hole, closed set, same codebase → template method; two or more independent holes → strategy
+fields.** Hooks multiply; fields add.
+[→ when is strategy the right tool?](3_4_classes_and_interfaces.md#when-is-strategy-the-right-tool)
+
+</details>
+
+</details>
+
+### Design: a base constructor that calls an override
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show question</summary>
+
+A base class wants each subclass to contribute its own initial data, so the base constructor calls an overridable
+method to fetch it. A subclass overrides that method and reads one of its own fields. Predict the output.
+
+```java
+class Base {
+    Base() { init(); }                                   // base ctor calls an overridable method
+    void init() { }
+}
+class Child extends Base {
+    private final int limit = 10;
+    private List<String> items = new ArrayList<>();
+    @Override void init() { items.add("row-" + limit); } // reads Child's own state
+}
+new Child();                                             // what happens?
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+**Wrong instinct: assume the override sees the subclass's fields.** It throws `NullPointerException` — `items` is
+still `null` when `init()` runs. (`limit` reads as `0` if it were non-final; a `final` primitive constant may be
+inlined, which makes the bug even more confusing to read.)
+
+**Why it breaks — construction order:** the `Child` constructor first calls `super()`, which runs `Base()`, which
+calls `init()`. Java dispatches that call **dynamically to `Child.init`** — but `Child`'s field initializers and
+constructor body have not run yet. So the override executes against a half-built object: its fields are at their
+default values.
+
+**The general rule: a constructor must never call an overridable method.** Same for `clone()` and `readObject()` —
+they also produce an object before the subclass's own initialization has completed.
+
+**Fix — make the call non-overridable, or move the work out of construction.**
+
+```java
+class Base {
+    Base() { init(); }
+    private void init() { }                              // private → not overridable → safely callable
+}
+```
+
+```java
+abstract class Base {                                    // or: don't ask the subclass during construction
+    protected Base(List<String> seed) { this.items = new ArrayList<>(seed); }   // subclass PASSES the data up
+    private final List<String> items;
+}
+class Child extends Base {
+    Child() { super(List.of("row-10")); }                // fully-formed value handed to the base, no callback
+}
+```
+
+The choices, in order of preference: **make the method `private`/`final`/`static`; pass the value into the base
+constructor instead of calling back for it; or give the class a factory method that constructs, then initializes.**
+
+This is a specific instance of the general fragility of inheritance — the subclass is coupled to *when* the base calls
+what, not to what the base promises.
+[→ relationship between inheritance and encapsulation](3_3_classes_and_interfaces.md#what-is-the-relationship-between-inheritance-and-encapsulation)
 
 </details>
 

@@ -1,3 +1,5 @@
+## Classes and Interfaces - Inheritance Design Challenges #1
+
 ### Which t-shirt properties belong to every shirt vs one kind?
 <details><summary>Show answer</summary>
 
@@ -101,7 +103,7 @@ these moves.
 Engineer can be salaried or hourly, and the role never fixes the choice. Every (role, payType) pairing is valid.
 
 Model it by subclassing and you get `SalariedManager`, `HourlyEngineer`, … = role × payType subclasses → explosion.
-[The free combination across every branch](3.4_classes_and_interfaces.md#how-does-subclassing-explode-on-varying-state)
+[The free combination across every branch](../FAQs/3.4_classes_and_interfaces.md#how-does-subclassing-explode-on-varying-state)
 is the signal: it belongs to every type, so it rides on the type as a field, not in the tree.
 
 </details>
@@ -227,7 +229,7 @@ Model it for the existing `Notification` hierarchy.
 `priority` combines freely with every kind — any kind can be any priority — so it belongs to every type and rides on
 the type, never a tree. But *how* you hold it splits on one question: **does `send()` itself branch on the value, or
 does only the surrounding system read it?**
-[→ parent or branch?](3.4_classes_and_interfaces.md#what-decides-whether-a-property-belongs-to-the-parent-or-a-branch)
+[→ parent or branch?](../FAQs/3.4_classes_and_interfaces.md#what-decides-whether-a-property-belongs-to-the-parent-or-a-branch)
 
 **Case A — passive data: `send()` ignores it, the invoker reads it.** This is the usual case. The notification just
 carries the value; the infrastructure around it reads `priority` to order, schedule, or drop — sorting/comparison
@@ -281,7 +283,7 @@ interface DeliveryPolicy { int maxAttempts(); Duration backoff(); }
 
 The value is always a field; only its *behavior* moves. 
 - Read by others for ordering → Case A. 
-  [→ when is strategy the right tool?](3.4_classes_and_interfaces.md#when-is-strategy-the-right-tool) 
+  [→ when is strategy the right tool?](../FAQs/3.4_classes_and_interfaces.md#when-is-strategy-the-right-tool) 
 - Drives send-time behavior → Case B, strategy field. 
   [→ category as a strategy field (#4)](#notification-design-4--transactional-vs-marketing)
 
@@ -398,7 +400,7 @@ This applies to email, SMS, and push alike. Where does this go in the existing `
 This is a **second, freely-combining behavior** — *category* (transactional / marketing) — and it cuts across
 *every* kind: any kind can be either, freely combined. That free combination is the warning sign.
 - [→ present on every kind AND freely set](#does-every-object-has-one-put-it-on-the-base)
-- [→ explosion on varying behavior](3.4_classes_and_interfaces.md#how-does-subclassing-explode-on-varying-behavior)
+- [→ explosion on varying behavior](../FAQs/3.4_classes_and_interfaces.md#how-does-subclassing-explode-on-varying-behavior)
 
 **A subclass tree is wrong** — it would cross the kind tree and multiply: `TransactionalEmail`, `MarketingEmail`,
 `TransactionalSms`, `MarketingSms`, `TransactionalPush`, `MarketingPush` = kind × category. Two trees, the classic
@@ -423,7 +425,7 @@ class MarketingPolicy     implements SendPolicy { ... }     // enforces both
 
 Now kind stays the one tree, category is a field holding behavior, and the two compose: any kind × any policy with no
 new classes. The general fix — a freely-combining behavior becomes a **strategy field**.
-[→ when is strategy the right tool?](3.4_classes_and_interfaces.md#when-is-strategy-the-right-tool)
+[→ when is strategy the right tool?](../FAQs/3.4_classes_and_interfaces.md#when-is-strategy-the-right-tool)
 
 </details>
 
@@ -447,12 +449,12 @@ active at once**. The clue is the shape: not *one* choice from alternatives, but
 
 **A subclass tree is wrong** — transforms combine, so a tree gives a class per subset: `FooterEmail`,
 `FooterRedactedEmail`, `FooterRedactedSignedEmail`, … = the powerset, far worse than the product in #4.
-[→ what rules out subclassing](3.4_classes_and_interfaces.md#what-rules-out-subclassing-as-a-modeling-tool)
+[→ what rules out subclassing](../FAQs/3.4_classes_and_interfaces.md#what-rules-out-subclassing-as-a-modeling-tool)
 
 **A strategy field is wrong too** — a strategy swaps *one* behavior for another, one active per slot (the `SendPolicy`
 in #4 was exactly one policy at a time). Here the transforms are not alternatives; footer **and** redact **and** sign
 all run together. Picking one would lose the rest.
-[→ when is strategy the right tool?](3.4_classes_and_interfaces.md#when-is-strategy-the-right-tool)
+[→ when is strategy the right tool?](../FAQs/3.4_classes_and_interfaces.md#when-is-strategy-the-right-tool)
 
 **So stack them as decorators** — each transform wraps the content step and delegates the rest, so any subset layers
 in any order with no class per combination:
@@ -483,8 +485,8 @@ decorator class, never a new combination. Kind stays the one tree; transforms ri
 
 The discriminator across #4 and #5: **one behavior chosen from alternatives → strategy; many behaviors combining at
 once → decorator.**
-[→ when is decorator the right tool?](3.4_classes_and_interfaces.md#when-is-decorator-the-right-tool)
-[→ strategy or decorator — which fits?](3.4_classes_and_interfaces.md#strategy-or-decorator--which-fits)
+[→ when is decorator the right tool?](../FAQs/3.4_classes_and_interfaces.md#when-is-decorator-the-right-tool)
+[→ strategy or decorator — which fits?](../FAQs/3.4_classes_and_interfaces.md#strategy-or-decorator--which-fits)
 
 </details>
 
