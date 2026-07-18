@@ -400,9 +400,35 @@ Code analysis card format:
 - Restate the concept in your own words — synthesized, compressed, no filler.
 - The answer must demonstrate understanding, not transcription.
 
-**Vocabulary in cards:**
-- Use plain, common words everywhere in cards (questions, answers, code comments).
-- Do not "beautify" with advanced or rare vocabulary — clarity over elegance.
+## Plain words in stems above all — the reader is a non-native speaker
+
+The user is not a native English speaker. His working vocabulary was shaped by the engineers he
+learned from — people who deliberately kept words as simple as possible, because plain words make a
+solution clear. The AI's default vocabulary is markedly higher than that. This is a real, recurring
+problem: a card can be conceptually trivial for him and still fail, purely because one word in it is
+above his vocabulary.
+
+**This is a false failure — the exact enemy of the whole system.** He knows the concept cold, but a
+high-vocabulary word (especially in the *stem*) blocks recall, so the card produces noise instead of
+signal. The word, not the knowledge, is what he "failed."
+
+The stem is where this bites hardest, because the stem is the recall trigger. If he can't parse the
+question, the card is broken before he reaches the answer. Example: a stem asking "Why is cloud
+compute *ephemeral*?" hides the topic behind one rare word — he can't even tell the card is about
+machines coming and going.
+
+Rules:
+- **Stems and card body use plain, common words.** If a concept has a plain word and a fancy word,
+  use the plain one. Prefer the word a plain-spoken engineer would use out loud.
+- **A rare/advanced word may appear only when it *is* the term being learned** — and then it must be
+  glossed in plain words immediately (e.g. `**ephemeral** — short-lived, can vanish anytime`).
+- **Recognize vs. recall.** Some fancy words are common *in the field* (ephemeral, idempotent,
+  mediation) — he will meet them in the wild. For those: put the plain word in the stem so recall
+  works, and note the field's term once so he recognizes it when reading. Learn by the plain word;
+  recognize the fancy one.
+- **When drafting any card, flag any word above plain-engineer vocabulary and offer the plain swap**
+  before it enters the deck — don't wait for him to trip on it.
 - The reader should grasp the concept fast, not decode the wording.
-- (Exception: normal Discuss-mode conversation may use richer vocabulary — that helps the user
-  learn English. The plain-words rule applies to cards only.)
+- (Discuss-mode prose may still use richer vocabulary — that helps him learn English. This rule is
+  for cards.)
+
