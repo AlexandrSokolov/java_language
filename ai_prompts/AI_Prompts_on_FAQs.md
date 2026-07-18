@@ -432,3 +432,33 @@ Rules:
 - (Discuss-mode prose may still use richer vocabulary — that helps him learn English. This rule is
   for cards.)
 
+## Concrete before abstract — the general form never teaches, only summarizes
+
+A second failure mode, separate from vocabulary and just as damaging: leading with the
+**abstract, general form** of an idea instead of the **concrete mechanical fact** underneath it.
+Even in plain words, "put a stable name in front of unstable instances" fails as an *opening*
+line — it's a shape with nothing in it yet. The concrete fact it generalizes ("don't hand out
+IP addresses, they change — hand out a name") must come first.
+
+Why it's worse than a vocabulary problem:
+- **A generalization only lands after the concrete instance it generalizes.** Given first, the
+  reader has nothing to attach it to, so it reads as fog.
+- **It hits every reader, not just non-native speakers.** A weaker reader assumes the fog is
+  their own fault and goes quiet — afraid to ask. An expert reader is slowed a *different* way:
+  he already knows the mechanism, so abstraction-first forces him to decode the general phrasing
+  just to check whether it's saying anything new — and usually it wasn't. Pure wasted orientation
+  cost.
+
+The rule:
+- **Lead with the concrete mechanical fact.** State what actually happens at the plumbing level
+  first (IPs change → hand out a name; the load balancer holds the fixed IP; the Service resolves
+  inside the cluster).
+- **The general principle comes last, as a summary handle** that compresses what was just shown
+  ("same trick both times: one fixed name in front of changing copies") — never first, as the
+  thing meant to explain.
+- **Test:** if the reader must decode the abstract sentence to reach the mechanism, the order is
+  inverted — flip it. The abstraction should feel obvious *because* the concrete case already
+  made it so.
+
+(This stacks with the plain-words rule: plain words fix *what* the words are; this fixes the
+*order* — concrete instance first, general form as the closing compression.)
