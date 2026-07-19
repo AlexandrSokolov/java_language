@@ -86,11 +86,11 @@ Without overitten `equals` in ColourPoint the color information is ignored in eq
 While this does not violate the equals contract, it is clearly unacceptable.
 
 
-[It is not possible to extend a **concrete, instantiable class** and **add a new value component**](2.1_methods_common_to_all_objects.md#what-should-you-consider-regarding-the-equality-contract-when-creating-subclasses)
+[It is not possible to extend a **concrete, instantiable class** and **add a new value component**](../FAQs/2.1_methods_common_to_all_objects.md#what-should-you-consider-regarding-the-equality-contract-when-creating-subclasses)
 while fully preserving all requirements of the equals contract (in particular, symmetry and transitivity).
 
 
-In such cases, you should [favor composition over inheritance](2.1_methods_common_to_all_objects.md#how-should-valuesubclass-equality-problems-be-handled).
+In such cases, you should [favor composition over inheritance](../FAQs/2.1_methods_common_to_all_objects.md#how-should-valuesubclass-equality-problems-be-handled).
 
 </details>
 
@@ -147,11 +147,11 @@ ColorPoint cp = new ColorPoint(1, 2, Color.RED);
 Then `p.equals(cp)` returns true, while `cp.equals(p)` returns false.
 
 
-[It is not possible to extend a **concrete, instantiable class** and **add a new value component**](2.1_methods_common_to_all_objects.md#what-should-you-consider-regarding-the-equality-contract-when-creating-subclasses)
+[It is not possible to extend a **concrete, instantiable class** and **add a new value component**](../FAQs/2.1_methods_common_to_all_objects.md#what-should-you-consider-regarding-the-equality-contract-when-creating-subclasses)
 while fully preserving all requirements of the equals contract (in particular, symmetry and transitivity).
 
 
-In such cases, you should [favor composition over inheritance](2.1_methods_common_to_all_objects.md#how-should-valuesubclass-equality-problems-be-handled).
+In such cases, you should [favor composition over inheritance](../FAQs/2.1_methods_common_to_all_objects.md#how-should-valuesubclass-equality-problems-be-handled).
 
 </details>
 
@@ -213,11 +213,11 @@ Now `p1.equals(p2)` and `p2.equals(p3)` return true, while `p1.equals(p3)` retur
 
 The first two comparisons are “color-blind,” while the third takes color into account.
 
-[It is not possible to extend a **concrete, instantiable class** and **add a new value component**](2.1_methods_common_to_all_objects.md#what-should-you-consider-regarding-the-equality-contract-when-creating-subclasses)
+[It is not possible to extend a **concrete, instantiable class** and **add a new value component**](../FAQs/2.1_methods_common_to_all_objects.md#what-should-you-consider-regarding-the-equality-contract-when-creating-subclasses)
 while fully preserving all requirements of the equals contract (in particular, symmetry and transitivity).
 
 
-In such cases, you should [favor composition over inheritance](2.1_methods_common_to_all_objects.md#how-should-valuesubclass-equality-problems-be-handled).
+In such cases, you should [favor composition over inheritance](../FAQs/2.1_methods_common_to_all_objects.md#how-should-valuesubclass-equality-problems-be-handled).
 
 </details>
 
