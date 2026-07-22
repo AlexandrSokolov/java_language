@@ -19,13 +19,10 @@ single-use: one terminal operation consumes it, and the pipeline object cannot b
 Fix — build a fresh stream from the source each time, or materialize once and reuse the collection:
 
 ```java
-long count = orderList.size();                                        // the source already knows
-List<Order> big = orderList.stream().filter(o -> o.total() > 100).toList();
+List<Order> all = orderList.stream().toList();    // materialize once
+long count = all.size();
+List<Order> big = all.stream().filter(o -> o.total() > 100).toList();
 ```
-
-There is no need to materialize anything here — `orderList` is already the collection, so the stream in the first
-line bought nothing even before it was reused. Materializing is only the answer when the source is a stream you
-cannot re-derive, and then note that `toList()` returns an unmodifiable list.
 
 The rule: a `Stream` is not a reusable collection; treat it as a one-shot pipeline. Store the source, not the stream.
 
@@ -81,27 +78,19 @@ long n = files.stream()
 
 <details><summary>Show answer</summary>
 
-`upload` may never run. Since Java 9, `count()` returns the size without walking the elements when two things hold:
-the source reports `SIZED` (a `List`, an array, a range) and no stage upstream can change the element count. `peek`
-and `map` cannot change it; `filter` and `flatMap` can. Here both hold, so the pipeline skips traversal and `peek`
-with it. The count is correct; the uploads silently don't happen.
+`upload` may never run. Since Java 9, `count()` can compute the size without walking the elements when the stream's
+size is already known, so the pipeline skips traversal — and `peek` with it. The count is correct; the uploads
+silently don't happen.
 
-Second, `peek` is the wrong place for work that must happen even when it does run. Its javadoc scopes it to
-debugging. Any element the pipeline can shortcut past — `count()` here, `limit`, `findFirst`, `anyMatch` elsewhere —
-is an element `peek` never sees.
-
-Fix — put the real work in a terminal that must consume every element:
+Fix — put the real work in a terminal that must consume every element, not in `peek`:
 
 ```java
-files.forEach(this::upload);                       // no count needed
-long n = files.size();                             // the number was already known
+files.forEach(this::upload);                       // if the count isn't needed
+long n = files.stream().filter(this::uploadReturningTrue).count();   // or make the work observable
 ```
 
-If the count must come from the pipeline, make the work part of a stage the terminal cannot skip — `map` feeding a
-`collect`, or a `forEach` that counts as it goes.
-
-Note: had the pipeline been `files.stream().filter(f -> f.size() > 0).peek(f -> upload(f)).count()`, `filter` hides
-the size and `peek` runs for every surviving element. The defect is not visible from the `peek` line alone.
+`peek` is for debugging only. Any element the pipeline can shortcut past is an element `peek` never sees — never rely
+on it for effects that must happen.
 
 </details>
 
@@ -121,21 +110,16 @@ Map<Integer, String> byLength = Stream.of("bat", "cat", "dog")   // all length 3
 
 <details><summary>Show answer</summary>
 
-Throws `IllegalStateException` naming the duplicate key. The two-argument `toMap` assumes keys are unique; the moment
-two elements map to the same key it aborts — no silent overwrite. (The exact message text is not part of the spec,
-so do not match on it.)
+Throws `IllegalStateException: Duplicate key 3 (attempted merging values bat and cat)`. The two-argument `toMap`
+assumes keys are unique; the moment two elements map to the same key it aborts — no silent overwrite.
 
 Fix — supply a merge function that decides what to do on collision:
 
 ```java
+// keep first, or combine, or last-wins:
 Stream.of("bat", "cat", "dog")
-    .collect(Collectors.toMap(String::length, w -> w, (a, b) -> a + "," + b));
+    .collect(Collectors.toMap(String::length, w -> w, (a, b) -> a + "," + b));   // 3 -> "bat,cat,dog"
 ```
-
-The merge function runs once per collision, so with three same-length words it runs twice. On a sequential stream
-that gives `bat,cat,dog`; under `parallel` the chunks merge in an unspecified order, so a non-commutative merge like
-string concatenation can produce a different arrangement. Use one that does not care about order, or keep the stream
-sequential.
 
 If the key really should be unique, the exception is doing its job — it caught a wrong assumption. If duplicates are
 expected, `groupingBy(String::length)` giving a `Map<Integer, List<String>>` is usually the honest shape.
@@ -162,21 +146,13 @@ If any `cache.get(p)` returns `null`, this throws `NullPointerException` — eve
 null)` is legal. `Collectors.toMap` is backed by `merge`, which forbids null values, so the collector is stricter
 than the map it builds.
 
-Fix — drop the nulls before collecting:
+Fix — filter the nulls out first, or replace them with a sentinel before collecting:
 
 ```java
 paths.stream()
-    .map(p -> Map.entry(p, cache.get(p)))          // one lookup per path
-    .filter(e -> e.getValue() != null)
-    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    .filter(p -> cache.get(p) != null)
+    .collect(Collectors.toMap(p -> p, cache::get));
 ```
-
-The obvious shorter version — `.filter(p -> cache.get(p) != null)` then `toMap(p -> p, cache::get)` — calls
-`cache.get` twice per path. Harmless for a map lookup, a real cost if the lookup goes anywhere. It is also a race if
-the cache can be written concurrently: the value can turn null between the two calls, and the `NPE` comes back.
-
-Note `Map.entry` rejects a null key, so this shape assumes paths are non-null. If the key expression can also produce
-null, filter that separately — `toMap` forbids null keys too.
 
 The trap is that it looks like map insertion but isn't — the collector's null rule is the one that applies, not the
 map's.
@@ -201,15 +177,9 @@ int total = Stream.of(values)          // build a stream over the numbers?
 
 <details><summary>Show answer</summary>
 
-The root cause is `Stream.of(values)`: given an `int[]`, it produces a `Stream<int[]>` with **one** element — the
-whole array — not a stream of three ints. `Stream.of` only spreads a `T...`, and `int[]` isn't `Integer[]`, so the
-array is treated as a single object.
-
-The compiler stops at the next line, not this one: `mapToInt(Integer::intValue)` cannot apply `Integer::intValue` to
-an `int[]`. So the error points at the wrong stage — the defect is one line above the red squiggle.
-
-Note the same code with `Integer[] values` compiles and works, because `Stream.of` then spreads it into three
-elements. The trap is specific to primitive arrays.
+It does not compile the way intended, and the root cause is `Stream.of(values)`: given an `int[]`, it produces a
+`Stream<int[]>` with **one** element — the whole array — not a stream of three ints. `Stream.of` only spreads a
+`T...`, and `int[]` isn't `Integer[]`, so the array is treated as a single object.
 
 Fix — use `Arrays.stream`, which has an `int[]` overload returning an `IntStream`:
 
@@ -240,12 +210,8 @@ List<Item> allItems = orders.stream()
 
 <details><summary>Show answer</summary>
 
-This does not compile. `map(Order::items)` turns each order into its *list* of items, so the stream is
-`Stream<List<Item>>` and `collect(toList())` produces a `List<List<Item>>`, which will not assign to `List<Item>`.
-Flattening never happened; the nesting is still there.
-
-Worth knowing because the compiler does not always save you: assign it to `var`, or pass it to something taking
-`Collection<?>`, and the wrong shape flows on silently until something downstream fails.
+`allItems` is not `List<Item>` — it's `List<List<Item>>`. `map(Order::items)` turns each order into its *list* of
+items, so the stream is `Stream<List<Item>>`. Flattening never happened; the nesting is still there.
 
 Fix — `flatMap` opens each inner list into the stream instead of keeping it as one element:
 
@@ -281,10 +247,6 @@ List<Point> sorted = points.stream()
 It compiles but throws `ClassCastException` at runtime the moment two elements are compared. The no-argument
 `sorted()` casts elements to `Comparable`; `Point` doesn't implement it, so the cast fails during execution, not at
 compile time.
-
-The throw is not certain, though — it needs a comparison to happen. An empty or one-element stream sorts without
-comparing anything and returns normally. So the bug can sit in production until the day a second element shows up,
-and a unit test with one element passes.
 
 Fix — pass an explicit comparator so the ordering is defined:
 
@@ -332,10 +294,6 @@ User admin = users.stream().filter(User::isAdmin).findFirst()
 `orElseThrow` with a message beats a bare `get()`: same failure when it's truly unexpected, but the error says what
 was missing and where. Reach for `get()` almost never.
 
-Two notes on the operation itself. `findFirst` means the first in encounter order, which costs coordination under
-`parallel` — use `findAny` when any match will do. And "first admin" is only meaningful if `users` has a defined
-order; from a `HashSet` the result is whichever one iteration happens to reach.
-
 </details>
 
 </details>
@@ -369,17 +327,8 @@ ids.stream()
     .toList();
 ```
 
-Reordering is only free when the cheap predicate can be decided from the id alone. If it needs the looked-up value,
-it cannot move ahead of the map — there is nothing to test yet. The card's `worthLookingUp` exists precisely because
-that split was possible here; it is not always.
-
-Two more things the reorder changes, both easy to miss. `expensiveLookup` now runs for fewer ids, so any side effect
-it has — cache warming, an audit row, a rate-limit counter — stops happening for the filtered-out ones. And if the
-lookup throws for a bad id, the exception no longer fires, which is a behaviour change even though the returned list
-is identical.
-
-The rule: put the cheapest, most-eliminating stage first — after checking that the stage really is independent of
-what comes after it.
+The order of `filter`/`map` never changes the answer here, but it changes how many expensive operations run. Put the
+cheapest, most-eliminating stage first.
 
 </details>
 
@@ -411,16 +360,8 @@ long total = orders.stream()
     .sum();
 ```
 
-`mapToLong` widens the `int` to `long` for free, which also removes an overflow the original had: `Integer::sum`
-accumulates in `int`, so a total above ~2.1 billion cents wraps silently. The declared `long total` hides that — the
-overflow happens inside the reduce, before the widening conversion on assignment.
-
-Scope note: the boxing itself is often not worth changing. Small `Integer` values come from a cache, and the JIT can
-remove short-lived boxes. The overflow is the finding that matters here; the allocation only shows up at large
-element counts.
-
-Rule: when a pipeline ends in numeric aggregation, use `IntStream`/`LongStream`/`DoubleStream` — and pick the width
-that fits the total, not the element.
+Rule: when a pipeline ends in numeric aggregation, use `IntStream`/`LongStream`/`DoubleStream`. The boxed
+`Stream<Integer>` is for when you genuinely need object elements, not for counting money.
 
 </details>
 
@@ -451,12 +392,6 @@ Fix — give `groupingBy` a downstream collector that computes the number direct
 Map<Dept, Long> headcount = employees.stream()
     .collect(Collectors.groupingBy(Employee::dept, Collectors.counting()));
 ```
-
-Second defect in the original, independent of memory: `byDept.get(SALES)` returns null when no employee is in sales,
-so `.size()` throws `NullPointerException`. `groupingBy` only creates keys it sees — an empty bucket does not exist.
-The fixed version has the same hole; `headcount.getOrDefault(SALES, 0L)` closes it.
-
-Note `counting()` returns `Long`, not `int`, so the variable type changes with the fix.
 
 The lesson: `groupingBy`'s second argument reshapes each bucket. `counting()`, `summingInt(...)`, `mapping(...)`,
 `averagingDouble(...)` let you collect the summary you actually need instead of the raw list.
@@ -490,6 +425,41 @@ Second, `handle` may now run on ForkJoinPool threads while the database cursor b
 calling thread. If the connection closes when the caller returns, the worker threads are still reading from it.
 
 Fix: drop the parallel flag — pass `false`.
+
+</details>
+
+</details>
+
+### Parallel flag on an iterator source
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```java
+Iterable<Order> orders = repository.streamAll();
+StreamSupport.stream(orders.spliterator(), true)
+             .forEach(this::handle);
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+The `true` asks for parallel, but the spliterator built from a plain `Iterable` only knows `hasNext` / `next`. It
+reports no size and offers no index, so it cannot hand a range to another thread. All it can do is pull elements one
+at a time and copy them into small arrays for other threads to consume — the pulling itself stays single-threaded and
+now carries extra copying.
+
+The database cursor behind `streamAll` also stays single-threaded, and `handle` may now run on ForkJoinPool threads
+while the cursor lives on the calling thread — a lifetime problem if the connection closes when the caller returns.
+
+Fix: keep it sequential, or read into a list first and parallelize that:
+
+```java
+List<Order> orders = repository.findAll();
+orders.parallelStream()
+      .forEach(this::handle);
+```
 
 </details>
 
@@ -531,15 +501,13 @@ element's position, so the result holds either way.
 
 ```java
 List<String> numbered = IntStream.range(0, input.size())
+        .parallel()
         .mapToObj(i -> (i + 1) + ":" + input.get(i))
         .toList();
 ```
 
-This shape is also safe to parallelize if the work ever grows, because the index carries the position — but
-`input.get(i)` only works on a random-access list; on a `LinkedList` it turns the pass into O(n²).
-
-Separately, `parallel` did not belong here anyway — eight elements and one concatenation each. Parallel pays only
-when the per-element work is heavy enough to cover splitting and merging.
+Separately, `parallel` did not belong here anyway — eight elements and one concatenation each. 
+Parallel pays only when the per-element work is heavy enough to cover splitting and merging.
 
 </details>
 
@@ -566,10 +534,9 @@ merges the partial results in whatever order the tree unwinds, so regrouping the
 
 There is a second defect in the same line. With the two-argument `reduce`, the identity doubles as the starting value
 for **every chunk**, and the spec requires `f(identity, x) == x`. Here 200 is not an identity for subtraction, so
-each chunk starts from 200 and subtracts its own elements. Sequential gives `200-100-20-5-3 = 72`. Split into two
-chunks it works out as `(200-100-20) - (200-5-3) = -112`. That number is one possible chunking, not *the* wrong
-answer — the framework decides how many chunks to make, based on the core count and the data size, so the result
-moves between machines. It can pass on a laptop and fail in production.
+each chunk starts from 200 and subtracts its own elements. Sequential gives `200-100-20-5-3 = 72`; two chunks give
+`(200-100-20) - (200-5-3) = -112`. The result therefore depends on how many chunks the framework makes, 
+which changes with the machine and the data size — so it can pass on a laptop and fail in production.
 
 
 Sequential hides both: one chunk means no regrouping and only one application of the identity, so the answer is
@@ -587,7 +554,7 @@ and 0 satisfies `0 + x == x`; the starting value is applied once, outside the st
 
 ```java
 int remaining = 200 - prices.stream()
-        .reduce(0, Integer::sum);
+                            .reduce(0, Integer::sum);
 ```
 
 Fix 1 leaves an illegal lambda in the code and only works because nothing splits it — the next reader who adds
@@ -628,11 +595,6 @@ List<String> mutable   = new ArrayList<>(names.stream().toList());   // if you m
 List<String> immutable = names.stream().toList();                    // if you want it frozen
 ```
 
-Two more differences worth having. `Stream.toList()` allows null elements; `Collectors.toUnmodifiableList()` and
-`List.copyOf` reject them, so those are not drop-in replacements for a stream that can produce nulls. And
-"unmodifiable" is not "immutable" — the list cannot be changed through this reference, but the elements inside it
-still can be, so a mutable element type leaves the contents open.
-
 The trap bites when refactoring one call into the other and a later `add`/`sort`/`remove` suddenly breaks. Pick by
 whether the result must be modifiable, not by which is shorter to type.
 
@@ -670,14 +632,8 @@ class Config {
 }
 ```
 
-Two of those three costs are conditional. `Serializable` only matters if the class is actually serialized, and the
-allocation only matters at high instance counts. The one that always holds is the third: an `Optional` field can
-itself be null, so every reader still needs a null check *and* an `isPresent` check — two states where there was one.
-
-The same applies to a record component. `record Config(Optional<String> region)` compiles, but the canonical
-constructor will accept `null` for it, so the component carries the same double state.
-
-The rule: `Optional` in method returns, not in fields, parameters, or collections.
+The rule: `Optional` in method returns, not in fields, parameters, or collections. As a field it costs more than the
+null check it replaces.
 
 </details>
 
@@ -699,13 +655,9 @@ List<Integer> squares = Stream.iterate(1, n -> n + 1)
 
 <details><summary>Show answer</summary>
 
-It never returns. `Stream.iterate(1, n -> n + 1)` is an infinite source, and `filter` does not short-circuit — it
-keeps pulling forever while `collect` keeps accumulating. Nothing tells the pipeline to stop, so it ends in
-`OutOfMemoryError`.
-
-Before that, a quieter defect: `n * n` on `int` overflows at n = 46341 and starts producing negative values. The
-filter keeps testing `n % 2 == 0`, which still passes for half of them, so the list fills with wrong numbers for a
-long time before memory runs out. `mapToLong` first, or `Math.multiplyExact` to make the overflow throw.
+It never returns — it runs until it exhausts memory or hangs. `Stream.iterate(1, n -> n + 1)` is an infinite source,
+and `filter` is not a short-circuiting operation: it happily keeps pulling forever, and `collect` keeps accumulating.
+Nothing tells the pipeline to stop.
 
 Fix — bound an infinite source with a short-circuiting stage before the terminal:
 
@@ -741,18 +693,9 @@ tasks.stream()
 
 <details><summary>Show answer</summary>
 
-This throws `ConcurrentModificationException`. The `forEach` is still reading `tasks` through the stream while
-`tasks::remove` structurally changes that same list.
-
-Do not read that as a rule. `CME` is documented as best-effort — the spliterator records `modCount` when it starts
-and compares it at points in the traversal, not per element, so the elements keep being delivered and the check fires
-at the end. It is a bug report, not a guard: nothing was prevented, you were just told. Change the shape a little and
-you are not told at all. `tasks.set(i, other)` does not touch `modCount`, so no exception and an unspecified mix of
-old and new values. `CopyOnWriteArrayList` and the concurrent collections never throw. Under `parallel` the timing
-shifts and a wrong result is as likely as an exception.
-
-So the defect is not "it throws". The defect is that modifying the source of a live stream is undefined behaviour,
-and this particular source happened to notice.
+It throws `ConcurrentModificationException`. The `forEach` is still reading `tasks` through the stream while
+`tasks::remove` structurally changes that same list — modifying the source of a live stream is illegal, and fail-fast
+collections detect it and throw.
 
 Fix — separate the read from the write: collect what to remove, then remove it (or use `removeIf`, built for exactly
 this):
