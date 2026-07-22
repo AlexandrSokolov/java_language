@@ -514,6 +514,44 @@ The rule that follows:
   or is one the user will meet at work and should recognize. Every other rare word: delete and
   restate.)
 
+## Diagnostics cards are a full code review, not a single-defect answer
+
+**The failure this fixes:** diagnostics cards that name one defect — the one the card is "filed under" —
+and stop there. The user then supplies the rest of the review himself, card after card: `parallel` that
+buys nothing for trivial per-element work, a "fix" that only removes `parallel` and leaves the illegal
+lambda in place, an outcome stated as guaranteed when the spec says best-effort. Those are not
+corrections of errors. They are the parts of the review that were never done. The result is the same
+card rewritten three or four times, with the user doing the work he asked for.
+
+**The rule.** Before formatting any diagnostics card, walk the snippet in full and report:
+
+1. **Defects that make it wrong.** Every one. If there are three, the answer has three. Do not stop at
+   the one the card is named after.
+2. **Things that work but do not belong.** `parallel` on eight elements. A stream where a loop is
+   clearer. An `AtomicInteger` doing a job an index would do. These are real findings even though the
+   code produces the right answer.
+3. **Where the behaviour is not guaranteed.** If an outcome is typical rather than specified, the card
+   says so. `ConcurrentModificationException` is best-effort. Encounter order under `parallel` depends
+   on the source. `HashMap` iteration order is unspecified. Never write a comment or a line that states
+   a probable outcome as a certain one.
+4. **Fix vs. rewrite, kept separate.** The minimal fix and the correct rewrite are different answers and
+   both belong on the card, each labelled, with a line saying why the minimal one is not the one to
+   keep. A fix that works only because nothing currently splits the stream is a fix the next reader
+   undoes.
+
+**Trace the actual snippet, not the pattern it resembles.** The `peek`-skipping case is real, but not
+under `collect`, which pulls every element. Writing the generic version of a rule without checking it
+against the lines on screen is how a wrong sentence gets into a card. Every claim in the answer must be
+true *of this code*.
+
+**Check before showing, not after being pushed.** The correct explanation surfaces every time the user
+asks directly — so the knowledge was there and the verification was not. If a claim is uncertain, say so
+in the response rather than shipping it clean and repairing it under questioning.
+
+**Answering a correction: locate every item.** When the user lists two or three problems, each one must
+be found in the new draft before it is shown. Rewriting the answer as a whole silently drops the points
+that had nothing to attach to in the old text.
+
 ## Reading an updated prompt file — do it, no pushback
 
 He maintains this prompt file and edits it per project. Uploading it is not enough — he will say
