@@ -30,6 +30,39 @@ The rule: a `Stream` is not a reusable collection; treat it as a one-shot pipeli
 
 </details>
 
+### parallel on an iterate chain
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```java
+Stream.iterate(BigInteger.ONE, n -> n.multiply(BigInteger.TWO))
+      .parallel()
+      .limit(500_000)
+      .forEach(System.out::println);
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+Two problems.
+
+The source has no known size and no cut point: `iterate` produces element N by applying the function to element N-1,
+so no thread can start anywhere but the beginning. `limit` then makes the framework guess how far to go, so it
+produces elements past 500,000 and throws them away. Each `BigInteger` is twice the size of the one before, so every
+wasted element costs more than all the earlier ones together. The run pins every core and never finishes.
+
+Even with a source that split cleanly, parallel would not pay here. It needs both a large element count and enough
+work per element to cover the cost of splitting and merging. The count is there, the work is not — the terminal
+operation only prints. Printing is also serialized on the output stream, so the threads queue behind each other.
+
+Fix: drop `parallel()`.
+
+</details>
+
+</details>
+
 ### peek for real work — count case
 <details><summary><strong>Show details</strong></summary>
 
@@ -362,6 +395,173 @@ Map<Dept, Long> headcount = employees.stream()
 
 The lesson: `groupingBy`'s second argument reshapes each bucket. `counting()`, `summingInt(...)`, `mapping(...)`,
 `averagingDouble(...)` let you collect the summary you actually need instead of the raw list.
+
+</details>
+
+</details>
+
+### Parallel flag on an iterator source
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```java
+Iterable<Order> orders = repository.streamAll();
+StreamSupport.stream(orders.spliterator(), true)
+             .forEach(this::handle);
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+Two problems.
+
+The source has no known size and no cut point: a spliterator built from a plain `Iterable` only knows `hasNext` /
+`next`, so it cannot hand a range to another thread. All it can do is pull elements one at a time and copy them into
+small arrays for other threads to consume — the pulling stays single-threaded and now carries extra copying on top.
+
+Second, `handle` may now run on ForkJoinPool threads while the database cursor behind `streamAll` lives on the
+calling thread. If the connection closes when the caller returns, the worker threads are still reading from it.
+
+Fix: drop the parallel flag — pass `false`.
+
+</details>
+
+</details>
+
+### Parallel flag on an iterator source
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```java
+Iterable<Order> orders = repository.streamAll();
+StreamSupport.stream(orders.spliterator(), true)
+             .forEach(this::handle);
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+The `true` asks for parallel, but the spliterator built from a plain `Iterable` only knows `hasNext` / `next`. It
+reports no size and offers no index, so it cannot hand a range to another thread. All it can do is pull elements one
+at a time and copy them into small arrays for other threads to consume — the pulling itself stays single-threaded and
+now carries extra copying.
+
+The database cursor behind `streamAll` also stays single-threaded, and `handle` may now run on ForkJoinPool threads
+while the cursor lives on the calling thread — a lifetime problem if the connection closes when the caller returns.
+
+Fix: keep it sequential, or read into a list first and parallelize that:
+
+```java
+List<Order> orders = repository.findAll();
+orders.parallelStream()
+      .forEach(this::handle);
+```
+
+</details>
+
+</details>
+
+### Stateful lambda in a pipeline
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```java
+List<String> input = List.of("a", "b", "c", "d", "e", "f", "g", "h");
+
+AtomicInteger position = new AtomicInteger();
+List<String> numbered = input.parallelStream()
+        .map(s -> position.incrementAndGet() + ":" + s)
+        .toList();
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+The lambda keeps state outside itself: the number it produces for an element depends on how many elements were
+mapped before it. The `Stream` spec requires `map`'s function to be stateless — the result for an element must depend
+on that element alone.
+
+
+`AtomicInteger` stops the counter from losing increments, so every number 1..8 appears exactly once and no exception
+is thrown. What it cannot fix is *which* element gets which number: the workers run in an unspecified order, so `"a"`
+may come out as `5:a`. The list order is still correct — `toList` on an ordered stream keeps encounter order — so the
+result looks plausible and is wrong.
+
+
+Dropping `parallel` makes the output right — one thread increments in encounter order — but the lambda is still
+illegal, and the next reader who parallelizes it gets the bug back. Fix the lambda: derive the number from the
+element's position, so the result holds either way.
+
+
+```java
+List<String> numbered = IntStream.range(0, input.size())
+        .parallel()
+        .mapToObj(i -> (i + 1) + ":" + input.get(i))
+        .toList();
+```
+
+Separately, `parallel` did not belong here anyway — eight elements and one concatenation each. 
+Parallel pays only when the per-element work is heavy enough to cover splitting and merging.
+
+</details>
+
+</details>
+
+### reduce with a non-associative op
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```java
+List<Integer> prices = List.of(100, 20, 5, 3);
+
+int remaining = prices.parallelStream()
+        .reduce(200, (a, b) -> a - b);
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+Subtraction is not associative: `(a - b) - c` is not `a - (b - c)`. `reduce` splits the elements into chunks and
+merges the partial results in whatever order the tree unwinds, so regrouping the operands changes the answer.
+
+There is a second defect in the same line. With the two-argument `reduce`, the identity doubles as the starting value
+for **every chunk**, and the spec requires `f(identity, x) == x`. Here 200 is not an identity for subtraction, so
+each chunk starts from 200 and subtracts its own elements. Sequential gives `200-100-20-5-3 = 72`; two chunks give
+`(200-100-20) - (200-5-3) = -112`. The result therefore depends on how many chunks the framework makes, 
+which changes with the machine and the data size — so it can pass on a laptop and fail in production.
+
+
+Sequential hides both: one chunk means no regrouping and only one application of the identity, so the answer is
+always 72 and nothing flags the bug.
+
+Fix 1 — drop `parallel`. One chunk, so neither defect can fire:
+
+```java
+int remaining = prices.stream()
+        .reduce(200, (a, b) -> a - b);
+```
+
+Fix 2 — make the lambda legal, so the result holds whether or not anyone parallelizes it later. `+` is associative
+and 0 satisfies `0 + x == x`; the starting value is applied once, outside the stream:
+
+```java
+int remaining = 200 - prices.stream()
+                            .reduce(0, Integer::sum);
+```
+
+Fix 1 leaves an illegal lambda in the code and only works because nothing splits it — the next reader who adds
+`parallel` gets the bug back. Fix 2 is a rewrite of the calculation, and it is the one to keep.
+
+Separately, `parallel` did not belong here anyway — four numbers and one subtraction each. Parallel pays only when
+the per-element work is heavy enough to cover splitting and merging.
 
 </details>
 
