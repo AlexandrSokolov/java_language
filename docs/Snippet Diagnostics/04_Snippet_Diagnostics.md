@@ -640,6 +640,108 @@ whether the result must be modifiable, not by which is shorter to type.
 
 </details>
 
+### Counting matching lines in a file
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```java
+try (BufferedReader reader = Files.newBufferedReader(path)) {
+  long errors = reader.lines()
+                      .parallel()
+                      .filter(line -> line.contains("ERROR"))
+                      .count();
+  System.out.println(errors);
+}
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+The parallel flag buys nothing here and costs coordination.
+
+`BufferedReader.lines()` reads forward through the file. Its spliterator reports no size and has no index, so
+no worker can start at line N without every earlier line already being read. Splitting can only hand out batches
+of lines that one thread has already pulled — the reading stays serial, and the other threads wait on it.
+
+The per-line work is one `contains` call, so even a source that split cleanly would not pay. Parallel needs both a
+large element count and enough work per element to cover the split-and-merge cost.
+
+Fix: drop `parallel()`.
+
+```java
+try (BufferedReader reader = Files.newBufferedReader(path)) {
+  long errors = reader.lines()
+                      .filter(line -> line.contains("ERROR"))
+                      .count();
+}
+```
+
+Rewrite if the file is large and the per-line work is real: read into a `List` first, or use `Files.lines` on a
+memory-mapped source, so the source has a size and an index before you parallelize. Parallelizing the read itself
+is not available from this API.
+
+</details>
+
+</details>
+
+### Summing into a map by parity
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```java
+List<Integer> numbers = IntStream.rangeClosed(1, 10_000).boxed().toList();
+Map<Boolean, Integer> shared = new ConcurrentHashMap<>();
+
+Map<Boolean, Integer> result =
+    numbers.parallelStream()
+           .reduce(shared,
+                   (acc, n) -> { acc.merge(n % 2 == 0, n, Integer::sum); return acc; },
+                   (a, b) -> { b.forEach((k, v) -> a.merge(k, v, Integer::sum)); return a; });
+
+System.out.println(result);
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+Prints wrong sums — one run gave `{false=2600, true=15360}` where the answer is `{false=25000000, true=25010000}`.
+Two contract breaks, both in `reduce`.
+
+**The identity is one instance, not a value.** `reduce(identity, acc, comb)` requires `comb(identity, x)` to equal
+`x`, which only holds if the identity is empty. Here every chunk starts from the same `shared` map, so the "empty"
+starting value already holds what other chunks wrote. There is no empty state after the first element.
+
+**The accumulator mutates and returns the same reference.** `reduce` promises the accumulator produces a new value
+and leaves its input alone. This one writes into `acc` and hands the same object back.
+
+Together those make `a` and `b` the same object in every combiner call. `combine(m, m)` walks the map and sums each
+value into itself, so every combiner call doubles both buckets. How many calls run depends on how the source split,
+so the printed number changes between runs — and on a small list the pool may not split at all and the code looks
+correct.
+
+`ConcurrentHashMap` hides nothing here and fixes nothing. It keeps the map structurally intact under concurrent
+writes, so no entry is lost and nothing throws — which is why the failure is silent.
+
+**Fix:** `reduce` cannot express mutable accumulation. It takes one identity *value*; a `Collector` takes a
+*supplier*, so each chunk gets a fresh container and the combiner always receives two different maps.
+
+```java
+Map<Boolean, Integer> result =
+    numbers.parallelStream()
+           .collect(Collectors.partitioningBy(n -> n % 2 == 0,
+                                              Collectors.summingInt(n -> n)));
+```
+
+`reduce` is for values — `sum`, `min`, `max`. Building a collection is `collect`.
+
+</details>
+
+</details>
+
 ### Optional as a field
 <details><summary><strong>Show details</strong></summary>
 
