@@ -106,7 +106,7 @@ where it cannot yet be "sensibly initialized."
 
 </details>
 
-### Walking a collection — which loop form?
+### Iterating a collection — loop options?
 <details><summary>Show answer</summary>
 
 The for-each form, for both arrays and collections. It is the only one of the three that says nothing but
@@ -345,25 +345,33 @@ Handle: `String` documents nothing and blocks nothing — a named type is where 
 ### What to consider when joining strings?
 <details><summary>Show answer</summary>
 
-`String` is immutable, so `a + b` can't modify either operand — it allocates a new `String` holding the result. 
-Join a fixed few and that one allocation is fine; it reads best:
+`String` is immutable, so `a + b` can't modify either operand — it produces a new `String` holding the result.
+Join a fixed few and that one result is fine; it reads best:
 
 ```java
 String name = first + " " + last;
 ```
 
-The cost only shows up when you repeat `+` in a loop:
+You don't build the `StringBuilder` yourself here — the compiler already handles one `+` expression for you.
+On JDK 9+, javac compiles a single concatenation to an `invokedynamic` call into `StringConcatFactory`, which
+picks a concatenation strategy at runtime. On JDK 8 and earlier it inlined a `StringBuilder append` sequence.
+Either way, one straight-line `+` expression is optimized for you.
+
+What the compiler does NOT do is carry that buffer across a loop:
 
 ```java
 String result = "";
 for (String line : lines)
-  result += line;             // new String every iteration
+  result += line;             // each pass: a fresh concat of (result + line), buffer thrown away
 ```
 
-Concatenating `n` strings with `+` in a loop is O(n²): 
-each `+` copies the whole result so far into a new object, so the growing prefix is recopied on every step.
+Each iteration is its own concatenation of the whole `result` so far plus one line — a new buffer built and
+discarded every pass. It can't be reused across iterations because `result` is a visible value between them, so
+the compiler can't prove reuse is safe. That makes joining `n` strings this way O(n²): the growing prefix is
+recopied on every step.
 
-The fix is `StringBuilder`: a mutable buffer you `append` to, producing the final `String` once at the end:
+The fix is to lift one `StringBuilder` out of the loop yourself — a mutable buffer you `append` to, turning it
+into a `String` once at the end:
 
 ```java
 StringBuilder sb = new StringBuilder();
@@ -372,10 +380,11 @@ for (String line : lines)
 String result = sb.toString();
 ```
 
-This is the standard pattern for an immutable type — pair it with a mutable companion (here `String` /
-`StringBuilder`) so bulk building happens in one place instead of allocating at every step.
+This is the standard pattern for an immutable type — pair it with a mutable companion (`String` /
+`StringBuilder`) so bulk building happens in one buffer instead of a new one per step.
 
-Handle: `+` for a fixed few, `StringBuilder` for a loop — immutability makes repeated `+` quietly quadratic.
+Handle: the compiler optimizes ONE `+` expression, never across a loop — so `+` for a fixed few,
+`StringBuilder` for a loop, or repeated `+` goes quietly quadratic.
 
 </details>
 
