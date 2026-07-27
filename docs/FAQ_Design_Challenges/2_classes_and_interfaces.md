@@ -36,7 +36,7 @@ void grow(Rectangle r) { r.setWidth(r.area() == 0 ? 1 : r.width + 1); }  // misb
 **Why it breaks:** the parent's mutators promise "set one side, the other is untouched." The override silently revokes
 that invariant, so code written against `Rectangle` is now wrong when handed a `Square`. This is a substitutability
 (LSP) violation — the subtype alters base behavior.
-[→ how a subtype violates substitutability (LSP)](../FAQs/3.3_classes_and_interfaces.md#how-does-a-subtype-violate-substitutability-lsp)
+[→ how a subtype violates substitutability (LSP)](../FAQs/04_Classes_&_Interfaces/3.3_classes_and_interfaces.md#how-does-a-subtype-violate-substitutability-lsp)
 
 **Fix — the conflict is the mutability, not the geometry.** The contract that breaks is a *setter* contract; remove
 the setters and it vanishes. Model both as **immutable** values, and the "set width without touching height" promise
@@ -76,7 +76,7 @@ storage, lookup, and iteration. Reuse it. Model `Properties`.
 
 **Wrong instinct: `class Properties extends Hashtable`.** A `Properties` *isn't* a general hashtable — it *has* one.
 The is-a is false; it was reached for as a shortcut to reuse storage. This is the actual JDK mistake.
-[→ JDK class where inheritance violated the subclass's own invariants](../FAQs/3.3_classes_and_interfaces.md#a-jdk-class-where-inheritance-violated-the-subclasss-own-invariants)
+[→ JDK class where inheritance violated the subclass's own invariants](../FAQs/04_Classes_&_Interfaces/3.3_classes_and_interfaces.md#a-jdk-class-where-inheritance-violated-the-subclasss-own-invariants)
 
 **Why it breaks:** inheriting exposes the *whole* `Hashtable` surface, which fights the type's own rules:
 
@@ -131,7 +131,7 @@ new CountingSet<String>().addAll(List.of("a", "b", "c"));   // added == ?
 `addAll`, then again by the overridden `add` that `addAll` triggers. The double-count comes from **self-use** — an
 implementation detail of `HashSet` that isn't in its public contract and can change between versions. The subclass is
 coupled to *how* the parent is built, not just what it promises.
-[→ relationship between inheritance and encapsulation](../FAQs/3.3_classes_and_interfaces.md#what-is-the-relationship-between-inheritance-and-encapsulation)
+[→ relationship between inheritance and encapsulation](../FAQs/04_Classes_&_Interfaces/3.3_classes_and_interfaces.md#what-is-the-relationship-between-inheritance-and-encapsulation)
 
 **Fix — composition (a forwarding wrapper).** Hold a `Set`, forward to it, and control your own call graph so no
 hidden self-use exists. The wrapper depends only on the `Set` public contract.
@@ -147,7 +147,7 @@ final class CountingSet<E> {
 
 The only safe way to extend by inheritance instead would be a base that **documents its self-use** — and `HashSet`
 doesn't.
-[→ JDK class whose undocumented self-use breaks subclasses](../FAQs/3.5_classes_and_interfaces.md#a-jdk-class-whose-undocumented-self-use-breaks-subclasses)
+[→ JDK class whose undocumented self-use breaks subclasses](../FAQs/04_Classes_&_Interfaces/3.5_classes_and_interfaces.md#a-jdk-class-whose-undocumented-self-use-breaks-subclasses)
 
 </details>
 
@@ -184,7 +184,7 @@ class Shape {
 **Wrong instinct: add `TRIANGLE` to the enum and another `case` to every `switch`.** That extends the smell instead of
 removing it. A tagged class is **a subtype hierarchy emulated badly with a field** — the tag hand-rolls at runtime the
 subtyping the language gives for free, paying with branching and fields that apply to only some kinds.
-[→ why tagged classes are a design smell](../FAQs/3.7_classes_and_interfaces.md#why-are-tagged-classes-considered-a-design-smell)
+[→ why tagged classes are a design smell](../FAQs/04_Classes_&_Interfaces/3.7_classes_and_interfaces.md#why-are-tagged-classes-considered-a-design-smell)
 
 **Why it breaks:** every new variant means editing every `switch`, the per-kind fields pile up unused on every
 instance, and the compiler can't tell you when you've missed a branch. One class is carrying several concepts.
@@ -208,7 +208,7 @@ double area(Shape s) {
 ```
 
 Open-ended variants → a plain subclass hierarchy instead; a fixed small set carrying data → an enum with behavior.
-[→ what to use instead of a tagged class](../FAQs/3.7_classes_and_interfaces.md#what-should-you-use-instead-of-a-tagged-class)
+[→ what to use instead of a tagged class](../FAQs/04_Classes_&_Interfaces/3.7_classes_and_interfaces.md#what-should-you-use-instead-of-a-tagged-class)
 
 </details>
 
@@ -230,7 +230,7 @@ want. Extending it gives you the two methods for free. Do it?
 **Wrong instinct: `class InvoiceExporter extends ReportGenerator`.** This is inheritance reached for **code reuse
 only**, with no real is-a and no intent to use an exporter *as* a report generator. That's accidental, semantically
 wrong inheritance — the classic warning sign of "extending a class to reuse half of it."
-[→ when inheritance should be used cautiously or avoided](../FAQs/3.3_classes_and_interfaces.md#when-should-inheritance-be-used-cautiously-or-avoided)
+[→ when inheritance should be used cautiously or avoided](../FAQs/04_Classes_&_Interfaces/3.3_classes_and_interfaces.md#when-should-inheritance-be-used-cautiously-or-avoided)
 
 **Why it breaks:**
 
@@ -295,7 +295,7 @@ it with checks like "if this is a Loan, ignore the buffer."
 distinction **times** the existing kind. The capability cuts *across* the existing tree instead of nesting under it,
 so it can't be one branch; it forces a class per (kind × hasOverdraft) pairing. That's the explosion from 3.8, here
 triggered by a subset.
-[→ explosion on varying behavior](../FAQs/3.4_classes_and_interfaces.md#how-does-subclassing-explode-on-varying-behavior)
+[→ explosion on varying behavior](../FAQs/04_Classes_&_Interfaces/3.4_classes_and_interfaces.md#how-does-subclassing-explode-on-varying-behavior)
 
 **Insert an intermediate type between `Account` and the applicable branches → works once, then collapses.** You could
 slot `OverdraftCapableAccount` between `Account` and {`Checking`, `Savings`}, and `Loan` extends `Account` directly.
@@ -331,7 +331,7 @@ Now overdraft is an **interface the applicable subtypes implement** (delegating 
 object), `Loan` just doesn't implement it, and a second capability (`InterestBearing`) is **another independent
 interface** applied to *its* own subset — no layering, no multiplication. Each crosscut is its own capability;
 membership is "implements it or not," not "sits at this depth in the tree."
-[→ what is composition, and what does it solve?](../FAQs/3.4_classes_and_interfaces.md#what-is-composition-and-what-does-it-solve)
+[→ what is composition, and what does it solve?](../FAQs/04_Classes_&_Interfaces/3.4_classes_and_interfaces.md#what-is-composition-and-what-does-it-solve)
 
 The takeaway worth memorizing: **base = all, branch = exactly one, subset across branches = capability (interface +
 composition), never a base field, a new branch, or an intermediate layer.**
