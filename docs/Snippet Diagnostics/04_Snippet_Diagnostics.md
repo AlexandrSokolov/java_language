@@ -159,27 +159,42 @@ Map<Path, String> texts = paths.stream()
 <details><summary>Show answer</summary>
 
 If any `cache.get(p)` returns `null`, this throws `NullPointerException` — even though a plain `HashMap.put(key,
-null)` is legal. `Collectors.toMap` is backed by `merge`, which forbids null values, so the collector is stricter
-than the map it builds.
+null)` is legal. `Collectors.toMap` is backed by `Map.merge`, and `merge` uses a null value to mean "remove the key",
+so it forbids null values outright. The collector is stricter than the map it builds.
 
-Fix — drop the nulls before collecting:
+First decide what a null value means here:
+
+**Keep the pair — null value is fine, just avoid the NPE.** Collect by hand with the three-arg `collect`, which uses
+plain `put`. `HashMap.put` accepts a null value, so nothing throws and the key stays in the map with a null value:
+
+```java
+Map<Path, String> texts = paths.stream()
+    .collect(HashMap::new, (m, p) -> m.put(p, cache.get(p)), HashMap::putAll);  // put allows null value
+```
+
+**Drop the pair — no key when the value is null.** Filter the nulls out before collecting. The natural shape is to
+pair each path with its value first, but a wrong turn hides here:
 
 ```java
 paths.stream()
-    .map(p -> Map.entry(p, cache.get(p)))          // one lookup per path
+    .map(p -> Map.entry(p, cache.get(p)))          // WRONG: Map.entry rejects a null value too
     .filter(e -> e.getValue() != null)
     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 ```
 
-The obvious shorter version — `.filter(p -> cache.get(p) != null)` then `toMap(p -> p, cache::get)` — calls
-`cache.get` twice per path. Harmless for a map lookup, a real cost if the lookup goes anywhere. It is also a race if
-the cache can be written concurrently: the value can turn null between the two calls, and the `NPE` comes back.
+This throws the same `NullPointerException`, now at the `map` step instead of the collector — `Map.entry` forbids a
+null key and a null value, so the pair blows up before the filter can remove it. Use `AbstractMap.SimpleEntry`, which
+allows nulls:
 
-Note `Map.entry` rejects a null key, so this shape assumes paths are non-null. If the key expression can also produce
-null, filter that separately — `toMap` forbids null keys too.
+```java
+paths.stream()
+    .map(p -> new AbstractMap.SimpleEntry<>(p, cache.get(p)))   // allows null value
+    .filter(e -> e.getValue() != null)
+    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+```
 
-The trap is that it looks like map insertion but isn't — the collector's null rule is the one that applies, not the
-map's.
+The trap is that the first line looks like map insertion but isn't — the collector's rule is `merge`'s rule (no null
+values), not `HashMap.put`'s.
 
 </details>
 
@@ -230,9 +245,9 @@ loose list of arguments.
 <details><summary>Show code</summary>
 
 ```java
-List<Order> orders = ...;                          // each Order has List<Item> items()
+List<Order> orders = ...;
 List<Item> allItems = orders.stream()
-    .map(Order::items)                             // want every item across all orders
+    .map(Order::items)                             // Order::items returns List<Item>
     .collect(Collectors.toList());                 // what type is this really?
 ```
 
@@ -247,16 +262,73 @@ Flattening never happened; the nesting is still there.
 Worth knowing because the compiler does not always save you: assign it to `var`, or pass it to something taking
 `Collection<?>`, and the wrong shape flows on silently until something downstream fails.
 
-Fix — `flatMap` opens each inner list into the stream instead of keeping it as one element:
+Fix — `flatMap` opens each inner list into the stream instead of keeping it as one element. Two valid shapes:
 
 ```java
+// one step: element is an Order, so a lambda is needed
 List<Item> allItems = orders.stream()
-    .flatMap(o -> o.items().stream())              // each order contributes its items individually
-    .collect(Collectors.toList());
+    .flatMap(o -> o.items().stream())
+    .toList();                                     // Java 16+, returns an unmodifiable List
+
+// two steps: get the lists, then flatten them — both method references
+List<Item> allItems = orders.stream()
+    .map(Order::items)                             // Stream<List<Item>>
+    .flatMap(Collection::stream)                   // List -> Stream<Item>
+    .toList();
 ```
+
+Why `Collection::stream` works as a reference but `Order::items` cannot be one here: `flatMap` wants a function
+`T -> Stream`. After `map`, the element is a `List`, and `Collection::stream` is exactly `List -> Stream`. With a
+raw `Order` element, no single method takes `Order -> Stream<Item>`, so the lambda `o -> o.items().stream()` does
+that step by hand.
 
 Rule of thumb: when the per-element function returns a collection or stream and you want the contents merged, that's
 `flatMap`, not `map`. `map` gives one output per input; `flatMap` gives many.
+
+</details>
+
+</details>
+
+### flatMap with a List-returning reference
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```java
+List<Item> allItems = orders.stream()
+    .flatMap(Order::items)                         // Order::items returns List<Item>
+    .toList();
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+This does not compile. `flatMap` wants a function `T -> Stream`, but `Order::items` is `Order -> List<Item>` — a
+`List`, not a `Stream`. The method reference is one step short: nothing turns the list into a stream.
+
+Fix — call `.stream()` on the list inside a lambda:
+
+```java
+List<Item> allItems = orders.stream()
+    .flatMap(o -> o.items().stream())              // Order -> Stream<Item>
+    .toList();
+```
+
+Why no method reference works in one hop here: the element is an `Order`, and no single method on `Order` returns
+`Stream<Item>` directly. `Order::items` stops at `List`. To stay all method-reference, split it — `map` to the list,
+then `flatMap` the list:
+
+```java
+List<Item> allItems = orders.stream()
+    .map(Order::items)                             // Stream<List<Item>>
+    .flatMap(Collection::stream)                   // Collection::stream is List -> Stream, a valid reference
+    .toList();
+```
+
+The tell: a method reference passed to `flatMap` only compiles when that method already returns a `Stream`. If it
+returns a `List` or array, either wrap it in a lambda that calls `.stream()`, or `map` to it first and `flatMap` with
+`Collection::stream`.
 
 </details>
 
@@ -340,52 +412,60 @@ order; from a `HashSet` the result is whichever one iteration happens to reach.
 
 </details>
 
-### map then filter — ordering cost
+### Describe a code snippet #N
 <details><summary><strong>Show details</strong></summary>
 
 <details><summary>Show code</summary>
 
 ```java
 List<Result> out = ids.stream()
-    .map(this::expensiveLookup)                    // network call per id
+    .map(this::expensiveLookup)                    // remote call per id, seconds each
     .filter(r -> r.score() > threshold)
-    .toList();                                     // correctness is fine — what's wasteful?
+    .toList();                                     // correct — what's wasteful?
 ```
 
 </details>
 
 <details><summary>Show answer</summary>
 
-Correct, but it runs `expensiveLookup` for **every** id, then discards the ones that don't pass. If the cheap test
-can be expressed on the id itself, filtering *before* the costly map avoids the wasted calls.
+Correct, but slow, and the waste has two layers.
 
-Fix — move any predicate that doesn't need the mapped value ahead of the expensive stage:
+**Wrong layer to fix it in — the pipeline itself.** The score comes *from* the lookup, so it cannot be tested before
+the call: there is nothing to filter on until the remote value is back. Reordering stages inside the stream buys
+nothing here.
+
+**Best fix — filter at the source, not in the client.** If the server can apply the score criterion, ask it for only
+the ids that already pass. Then the losers are never fetched, never transferred, never filtered locally. This is the
+real reduction: cut the element count before the data reaches the pipeline, not after.
 
 ```java
-ids.stream()
-    .filter(this::worthLookingUp)                  // cheap gate first
-    .map(this::expensiveLookup)                    // only survivors pay the cost
-    .filter(r -> r.score() > threshold)            // this one genuinely needs the result
+List<Result> out = repository.findByScoreAbove(threshold);   // server returns survivors only
+```
+
+**When you must fetch all and filter locally — the cost is N blocking calls, so the lever is concurrency.** Each
+`expensiveLookup` blocks for seconds and the calls are independent, so running them at once collapses wall time from
+N×seconds toward one. This is the case parallel is *for* — not trivial per-element work:
+
+```java
+List<Result> out = ids.parallelStream()
+    .map(this::expensiveLookup)
+    .filter(r -> r.score() > threshold)
     .toList();
 ```
 
-Reordering is only free when the cheap predicate can be decided from the id alone. If it needs the looked-up value,
-it cannot move ahead of the map — there is nothing to test yet. The card's `worthLookingUp` exists precisely because
-that split was possible here; it is not always.
+Caveat that must not be skipped: `parallelStream` runs on the shared common `ForkJoinPool`, sized to CPU count. Many
+blocking I/O calls starve it and stall unrelated parallel work. For blocking calls prefer a bounded pool you control
+— submit the lookups to a sized `ExecutorService`, or a virtual-thread executor on Java 21+, rather than raw
+`parallelStream`.
 
-Two more things the reorder changes, both easy to miss. `expensiveLookup` now runs for fewer ids, so any side effect
-it has — cache warming, an audit row, a rate-limit counter — stops happening for the filtered-out ones. And if the
-lookup throws for a bad id, the exception no longer fires, which is a behaviour change even though the returned list
-is identical.
-
-The rule: put the cheapest, most-eliminating stage first — after checking that the stage really is independent of
-what comes after it.
+The two levers, in order: reduce the element count at the source first; if you can't, attack the wall time with
+controlled concurrency. Stage reordering is not a lever when the filter needs the mapped value.
 
 </details>
 
 </details>
 
-### Boxing in a numeric pipeline
+### Describe a code snippet #N
 <details><summary><strong>Show details</strong></summary>
 
 <details><summary>Show code</summary>
@@ -393,7 +473,7 @@ what comes after it.
 ```java
 long total = orders.stream()
     .map(Order::amountCents)                       // returns int
-    .reduce(0, Integer::sum);                      // what's the hidden cost?
+    .reduce(0, Integer::sum);                      
 ```
 
 </details>
@@ -441,9 +521,10 @@ int headcount = byDept.get(SALES).size();          // only ever need the counts
 
 <details><summary>Show answer</summary>
 
-Works, but it builds a full `List<Employee>` per department just to call `size()` on it — every employee object is
-retained in memory when only a number was wanted. The single-argument `groupingBy` defaults its downstream to
-`toList`.
+Two independent defects.
+
+**Memory.** It builds a full `List<Employee>` per department just to call `size()` on it — every employee object is
+retained when only a number was wanted. Single-argument `groupingBy` defaults its downstream to `toList`.
 
 Fix — give `groupingBy` a downstream collector that computes the number directly:
 
@@ -452,14 +533,29 @@ Map<Dept, Long> headcount = employees.stream()
     .collect(Collectors.groupingBy(Employee::dept, Collectors.counting()));
 ```
 
-Second defect in the original, independent of memory: `byDept.get(SALES)` returns null when no employee is in sales,
-so `.size()` throws `NullPointerException`. `groupingBy` only creates keys it sees — an empty bucket does not exist.
-The fixed version has the same hole; `headcount.getOrDefault(SALES, 0L)` closes it.
+**Absent key — NPE, and it survives the fix in a different form.** `groupingBy` only creates keys it actually sees;
+an empty bucket does not exist. So if no employee is in sales:
 
-Note `counting()` returns `Long`, not `int`, so the variable type changes with the fix.
+- Original: `byDept.get(SALES)` returns `null`, and `null.size()` throws `NullPointerException`.
+- Fixed: `headcount.get(SALES)` returns `null` too — a `Long`. Assigning it to an `int` (or any arithmetic) unboxes
+  it, and unboxing a null `Long` throws `NullPointerException`. Same crash, now hidden inside autoboxing instead of a
+  visible `.size()` call:
 
-The lesson: `groupingBy`'s second argument reshapes each bucket. `counting()`, `summingInt(...)`, `mapping(...)`,
-`averagingDouble(...)` let you collect the summary you actually need instead of the raw list.
+```java
+int count = headcount.get(SALES);                  // null Long -> int: NPE on unbox
+```
+
+Reliable form — never let the map hand back null:
+
+```java
+long count = headcount.getOrDefault(SALES, 0L);    // absent dept -> 0, no unboxing of null
+```
+
+`0L` because `counting()` returns `Long`; the default must match the value type.
+
+The lesson: `groupingBy`'s second argument reshapes each bucket — `counting()`, `summingInt(...)`, `mapping(...)`,
+`averagingDouble(...)` collect the summary you need instead of the raw list. And a missing key returns null in both
+shapes; `getOrDefault` is what makes the read safe.
 
 </details>
 
@@ -607,10 +703,10 @@ the per-element work is heavy enough to cover splitting and merging.
 
 ```java
 List<String> a = names.stream().collect(Collectors.toList());
-a.add("extra");                                    // fine
+a.add("extra");                                    
 
 List<String> b = names.stream().toList();
-b.add("extra");                                    // what happens here?
+b.add("extra");                                    
 ```
 
 </details>
