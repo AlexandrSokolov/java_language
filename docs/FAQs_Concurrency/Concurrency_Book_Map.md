@@ -38,41 +38,41 @@ Read as: the **mechanism** pass. Opens the JVM so the rules become consequences 
 
 ### Chapter 5 — Java concurrency fundamentals
 
-| Section | → Spine theme |
-|---------|---------------|
-| 5.1 Concurrency theory primer (Thread, hardware, Amdahl's law, threading model) | 1 memory model (threading model) · 9 trade-offs (Amdahl) |
-| 5.2 Design concepts — Safety and concurrent type safety | 2 safe sharing |
-| 5.2 Design concepts — Liveness | 6 liveness & performance |
-| 5.2 Design concepts — Performance | 6 liveness & performance |
-| 5.2 Design concepts — Reusability | 4 building blocks (soft; could be 3) |
-| 5.2 Design concepts — How/why the forces conflict | 9 trade-offs |
-| 5.2 Design concepts — Sources of overhead | 9 trade-offs · 6 liveness & performance |
-| 5.3 Block-structured concurrency (synchronization, locks, deadlocks, `volatile`, thread states, immutability) | 2 safe sharing · 6 liveness (deadlocks) |
-| 5.4 The Java Memory Model | 1 memory model |
-| 5.5 Understanding concurrency through bytecode (lost update, sync in bytecode, unsync reads, volatile access) | 1 memory model |
+| Section                                                                                                       | → Spine theme                                            |
+|---------------------------------------------------------------------------------------------------------------|----------------------------------------------------------|
+| 5.1 Concurrency theory primer (Thread, hardware, Amdahl's law, threading model)                               | 1 memory model (threading model) · 9 trade-offs (Amdahl) |
+| 5.2 Design concepts — Safety and concurrent type safety                                                       | 2 safe sharing                                           |
+| 5.2 Design concepts — Liveness                                                                                | 6 liveness & performance                                 |
+| 5.2 Design concepts — Performance                                                                             | 6 liveness & performance                                 |
+| 5.2 Design concepts — Reusability                                                                             | 4 building blocks (soft; could be 3)                     |
+| 5.2 Design concepts — How/why the forces conf<br/>lict                                                             | 9 trade-offs                                             |
+| 5.2 Design concepts — Sources of overhead                                                                     | 9 trade-offs · 6 liveness & performance                  |
+| 5.3 Block-structured concurrency (synchronization, locks, deadlocks, `volatile`, thread states, immutability) | 2 safe sharing · 6 liveness (deadlocks)                  |
+| 5.4 The Java Memory Model                                                                                     | 1 memory model                                           |
+| 5.5 Understanding concurrency through bytecode (lost update, sync in bytecode, unsync reads, volatile access) | 1 memory model                                           |
 
 ### Chapter 6 — JDK concurrency libraries
 
-| Section | → Spine theme |
-|---------|---------------|
-| 6.1 Building blocks for modern concurrent applications | 4 building blocks |
-| 6.2 Atomic classes | 4 building blocks (· 7 advanced for CAS depth) |
-| 6.3 Lock classes (Condition objects) | 4 building blocks (· 7 advanced) |
-| 6.4 `CountDownLatch` | 4 building blocks |
-| 6.5 `ConcurrentHashMap` | 4 building blocks |
-| 6.6 `CopyOnWriteArrayList` | 4 building blocks |
-| 6.7 Blocking queues (`BlockingQueue` APIs, `WorkUnit`) | 4 building blocks (· 5 task execution as producer/consumer) |
-| 6.8 Futures (`CompletableFuture`) | 5 task execution |
-| 6.9 Tasks and execution (modeling tasks, executors, single-thread/fixed/cached pools, `ScheduledThreadPoolExecutor`) | 5 task execution |
+| Section                                                                                                              | → Spine theme                                               |
+|----------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------|
+| 6.1 Building blocks for modern concurrent applications                                                               | 4 building blocks                                           |
+| 6.2 Atomic classes                                                                                                   | 4 building blocks (· 7 advanced for CAS depth)              |
+| 6.3 Lock classes (Condition objects)                                                                                 | 4 building blocks (· 7 advanced)                            |
+| 6.4 `CountDownLatch`                                                                                                 | 4 building blocks                                           |
+| 6.5 `ConcurrentHashMap`                                                                                              | 4 building blocks                                           |
+| 6.6 `CopyOnWriteArrayList`                                                                                           | 4 building blocks                                           |
+| 6.7 Blocking queues (`BlockingQueue` APIs, `WorkUnit`)                                                               | 4 building blocks (· 5 task execution as producer/consumer) |
+| 6.8 Futures (`CompletableFuture`)                                                                                    | 5 task execution                                            |
+| 6.9 Tasks and execution (modeling tasks, executors, single-thread/fixed/cached pools, `ScheduledThreadPoolExecutor`) | 5 task execution                                            |
 
 ### Chapter 16 — Advanced concurrent programming
 
-| Section | → Spine theme |
-|---------|---------------|
-| 16.1 The Fork/Join framework (work-stealing) | 5 task execution · 6 liveness (scalability) |
-| 16.2 Concurrency and functional programming (`CompletableFuture`, parallel streams) | 5 task execution |
-| 16.3 Under the hood with Kotlin coroutines | 8 other models |
-| 16.4 Concurrent Clojure (STM, futures/pcalls, agents) | 8 other models |
+| Section                                                                             | → Spine theme                               |
+|-------------------------------------------------------------------------------------|---------------------------------------------|
+| 16.1 The Fork/Join framework (work-stealing)                                        | 5 task execution · 6 liveness (scalability) |
+| 16.2 Concurrency and functional programming (`CompletableFuture`, parallel streams) | 5 task execution                            |
+| 16.3 Under the hood with Kotlin coroutines                                          | 8 other models                              |
+| 16.4 Concurrent Clojure (STM, futures/pcalls, agents)                               | 8 other models                              |
 
 ---
 

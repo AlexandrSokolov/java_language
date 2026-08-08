@@ -33,6 +33,23 @@ Lighter tools cover one each: `volatile` gives visibility only, an atomic type g
 
 </details>
 
+### Safe sharing vs synchronization?
+<details><summary>Show answer</summary>
+
+Different levels — one is the goal, the other is one way to reach it:
+
+- **Safe sharing** — the goal: many threads use the same mutable data without corruption.
+- **Synchronization** — one mechanism that delivers both, for any block of code.
+
+Synchronization is not the only way to share safely — it is the one that covers both guarantees at once.
+Others cover part or sidestep the need entirely:
+- `volatile` gives visibility only,
+- an atomic type gives both for a single variable.
+
+Reach for synchronization when you must share live mutable state and need both — visibility and atomicity — at once.
+
+</details>
+
 ### Sharing a mutable object without ensuring atomicity or visibility?
 <details><summary>Show answer</summary>
 

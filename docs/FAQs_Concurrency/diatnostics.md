@@ -157,3 +157,144 @@ public static long generateSerialNumber() {
 </details>
 
 </details>
+
+### Describe a code snippet #1
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```java
+private final List<SetObserver<E>> observers = new ArrayList<>();
+
+private void notifyElementAdded(E element) {
+  synchronized (observers) {
+    for (SetObserver<E> observer : observers)
+      observer.added(this, element);        // alien call, inside the lock
+  }
+}
+
+// usage: an observer that removes itself
+set.addObserver(new SetObserver<>() {
+  public void added(ObservableSet<Integer> s, Integer e) {
+    System.out.println(e);
+    if (e == 23)
+      s.removeObserver(this);               // calls observers.remove(...)
+  }
+});
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+Throws `ConcurrentModificationException` after printing 0–23.
+
+`notifyElementAdded` iterates `observers` under the lock. The alien `added` call runs *during* that iteration and
+calls back into `removeObserver`, which does `observers.remove(...)` — modifying the list while the loop is still
+iterating it. That is the illegal modify-during-iteration, caught by the iterator.
+
+- **The `synchronized` block does not help.** It stops *another thread* from modifying the list, but the offending
+  modification comes from the *same thread*, calling back in through the alien method. The lock never guards against
+  self-reentry.
+- **Not guaranteed, but typical.** `ConcurrentModificationException` is best-effort — the iterator raises it when it
+  notices the change, not always.
+
+Fix: make the alien call an [open call](#how-do-you-call-an-alien-method-safely-when-a-lock-is-needed) — snapshot
+the list under the lock, then iterate the copy outside the lock.
+
+</details>
+
+</details>
+
+### Describe a code snippet #2
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```java
+private void notifyElementAdded(E element) {
+  synchronized (observers) {
+    for (SetObserver<E> observer : observers)
+      observer.added(this, element);        // alien call, inside the lock
+  }
+}
+
+// usage: an observer that unsubscribes via a background thread
+set.addObserver(new SetObserver<>() {
+  public void added(ObservableSet<Integer> s, Integer e) {
+    System.out.println(e);
+    if (e == 23) {
+      ExecutorService exec = Executors.newSingleThreadExecutor();
+      try {
+        exec.submit(() -> s.removeObserver(this)).get();   // waits for the removal
+      } catch (ExecutionException | InterruptedException ex) {
+        throw new AssertionError(ex);
+      } finally {
+        exec.shutdown();
+      }
+    }
+  }
+});
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+Deadlocks after printing 0–23.
+
+The main thread holds the lock on `observers` (inside `notifyElementAdded`) and calls the alien `added`. That
+method hands `removeObserver` to a background thread and blocks on `.get()` waiting for it. The background thread
+tries to take the lock on `observers` to do the removal — but the main thread still holds it and is blocked waiting
+on the background thread. Each waits for the other, forever.
+
+- **Reentrancy can't save this one.** In snippet #1 the same thread re-entered and succeeded (reentrant lock). Here
+  the removal runs on a *different* thread, so reentrancy doesn't apply — the second thread genuinely can't get the
+  lock, and it's a true deadlock, not an exception.
+- **The background thread is pointless.** There's no reason to offload the unsubscribe; it's contrived. But the
+  deadlock it exposes is real — alien calls under a lock cause exactly this in real systems.
+
+Fix: [open call](#how-do-you-call-an-alien-method-safely-when-a-lock-is-needed) — don't hold the lock across the
+alien call, so no other thread is ever blocked waiting on a lock you hold while you wait on it.
+
+</details>
+
+</details>
+
+### Describe a code snippet #3
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```java
+private void notifyElementAdded(E element) {
+  List<SetObserver<E>> snapshot;
+  synchronized (observers) {
+    snapshot = new ArrayList<>(observers);    // copy under the lock
+  }
+  for (SetObserver<E> observer : snapshot)    // iterate outside the lock
+    observer.added(this, element);            // alien call, now lock-free
+}
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+Correct — no exception, no deadlock. This is the fix for snippets #1 and #2.
+
+The lock is held only long enough to copy the list. The alien `added` call then runs on the copy with no lock held
+— an [open call](#how-do-you-call-an-alien-method-safely-when-a-lock-is-needed).
+
+- **Fixes #1.** The loop now iterates `snapshot`, a private copy. If the observer calls `removeObserver` and changes
+  the real `observers` list, the copy being iterated is untouched — no modify-during-iteration.
+- **Fixes #2.** No lock is held during the alien call, so a background thread taking the lock to remove an observer
+  gets it immediately — nothing to deadlock against.
+- **Extra win: concurrency.** The lock is held only for the fast copy, not for the whole notify loop. Other threads
+  wait far less, even when an observer's `added` runs long.
+
+An alternative to the snapshot is a `CopyOnWriteArrayList`, which makes iteration lock-free without copying by hand.
+
+</details>
+
+</details>

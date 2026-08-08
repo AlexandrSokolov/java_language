@@ -31,6 +31,81 @@ Synchronization is not only for keeping threads apart, it is also how one thread
 
 </details>
 
+### Two ways to get synchronization wrong?
+<details><summary>Show answer</summary>
+
+Synchronization fails in two opposite directions — too little or too much:
+
+- **Too little — insufficient.** You miss one of the two things safe sharing needs, so updates collide or never
+  arrive. [What makes synchronization insufficient](#what-problem-does-synchronization-solve).
+- **Too much — excessive.** Two kinds of damage:
+  - **Correctness** — deadlock or nondeterministic behavior, from *what* you call under the lock:
+    [never cede control to the client while holding a lock](../03_Liveness_Performance_Testing/06.1_Liveness_Problems.md#calling-client-code-while-holding-a-lock).
+  - **Performance** — from *how much* you do under the lock:
+    [what synchronization costs in performance](../03_Liveness_Performance_Testing/06.2_Performance_&_Scalability.md#what-does-synchronization-cost-in-performance).
+
+One dial, two failure ends: too little breaks correctness, too much breaks liveness and performance.
+
+</details>
+
+### What problem does synchronization solve?
+<details><summary>Show answer</summary>
+
+Threads sharing the same mutable data need **safe sharing** —
+and [safe sharing needs two things](02_Sharing_Objects.md#sharing-a-mutable-variable--what-to-ensure):
+- each update must land in one step, and
+- each update must actually reach the other threads.
+
+
+Miss either and it breaks quietly — no error, just a wrong result:
+- **Updates collide.** `count++` is read-modify-write; two threads read the same value, both add one, one
+  increment is lost.
+- **Updates never arrive.** One thread writes, another keeps reading an old copy forever, because nothing forces
+  the write out to it.
+
+Synchronization is the tool that covers both at once: only one thread runs the guarded code at a time, and each
+thread taking the lock sees every earlier change made under it. That is [what it guarantees](#what-does-synchronization-guarantee).
+
+</details>
+
+### What problem does synchronization solve?
+<details><summary>Show answer</summary>
+
+Threads sharing the same mutable data need **safe sharing** — and [safe sharing needs two things](02_Sharing_Objects.md#sharing-a-mutable-variable--what-to-ensure):
+each update must land in one step, and each update must actually reach the other threads. Miss either and it
+breaks quietly — no error, just a wrong result:
+
+- **Updates collide.** `count++` is read-modify-write; two threads read the same value, both add one, one
+  increment is lost.
+- **Updates never arrive.** One thread writes, another keeps reading an old copy forever, because nothing forces
+  the write out to it.
+
+Synchronization is the tool that covers both at once: only one thread runs the guarded code at a time, and each
+thread taking the lock sees every earlier change made under it. That is [what it guarantees](#what-does-synchronization-guarantee).
+
+</details>
+
+### Calling client code while holding a lock?
+<details><summary>Show answer</summary>
+
+Never do it. Inside a `synchronized` method or block, only call code you control. A method you hand off to —
+an overridable method, a listener, a function passed in — is **alien**: you don't know what it does while you
+hold the lock.
+
+What it can do, all bad:
+
+- **Deadlock.** The alien method tries to take a lock you already hold (or takes a second lock in the opposite
+  order another thread uses), and both sides wait forever.
+- **Reentered state.** The alien method calls back into your object and sees it mid-update — a half-changed state
+  you assumed no one could observe while locked.
+- **Nondeterministic failure.** Whether it breaks depends on what the caller's code happens to do, so it passes
+  in tests and fails in production.
+
+The fix: do the work that needs the lock, take a snapshot if needed, release the lock, *then* call the alien
+method outside the guarded region.
+
+</details>
+
 ### What is atomicity?
 <details><summary>Show answer</summary>
 
@@ -71,6 +146,44 @@ Use an atomic type instead, whose increment is one indivisible step:
 AtomicInteger count = new AtomicInteger();
 count.incrementAndGet();   // read-modify-write done atomically
 ```
+
+</details>
+
+### What happens when a thread re-takes its own lock?
+<details><summary>Show answer</summary>
+
+It succeeds — the thread already owns the lock, so taking it again is free and it doesn't block.
+
+This comes up when a thread holds the lock and, still inside the guarded region, calls a method that takes the
+same lock — a synchronized method calling another synchronized method on the same object. The second take would
+block forever if the thread had to wait for a lock it itself holds.
+
+A lock that lets the same thread take it again is a **reentrant** lock. Java's `synchronized` locks are reentrant.
+
+</details>
+
+### Why is reentrancy useful?
+<details><summary>Show answer</summary>
+
+It stops a thread from deadlocking against itself. A synchronized method that calls another synchronized method
+on the same object would otherwise block forever — waiting for a lock it already holds.
+
+```java
+class Counter {
+  private int count;
+  synchronized void incrementBy(int n) {
+    for (int i = 0; i < n; i++)
+      increment();          // takes the same lock this thread already holds
+  }
+  synchronized void increment() {
+    count++;
+  }
+}
+```
+
+`incrementBy` holds the lock, then calls `increment`, which takes the same lock. Reentrancy lets the second take
+succeed; without it the thread would freeze against itself. This pattern is common in object-oriented code, so
+reentrancy is what makes locks usable there at all.
 
 </details>
 
