@@ -244,6 +244,10 @@ object it is. Two boxed objects can hold the same value and still be two objects
 
 **One extra value.** A boxed type can be `null`. A primitive has only real values.
 
+**Operators.** `+`, `-`, `*`, `/`, `<`, `>` are defined only on primitives. A boxed value has no operator of
+its own — to run arithmetic or a `<`/`>` compare, the compiler unboxes it to a primitive first, then reboxes
+the result if needed.
+
 **Cost.** A boxed value is an object on the heap: more memory, and every operation on it goes through an
 allocation and a method call instead of a machine instruction.
 
@@ -278,6 +282,22 @@ adds, and builds a new one. Harmless once, one object per iteration in a loop:
 Long sum = 0L;
 sum += i;           // sum = Long.valueOf(sum.longValue() + i);
 ```
+
+</details>
+
+### Why do boxed types exist?
+<details><summary>Show answer</summary>
+
+**Collections and generics hold only objects.** `List<int>` is illegal — a type parameter must be a real
+object. So to put a number in any collection you need `List<Integer>`, `Map<Long, ...>`, and so on. This is
+the one that forced boxed types to exist: without them there is no way to store a primitive in a collection.
+
+**A boxed value can be `null`; a primitive cannot.** An `int` is always some number — `0` included — so it
+can't say "no value". A boxed type can be `null`, which you need for an empty database column, an optional
+field, or a "not set yet" state. It separates the value `0` from "absent".
+
+**A home for methods and constants.** `Integer.parseInt`, `Long.MAX_VALUE`, `Double.compare`. These are
+`static`, so they didn't need the wrapper to exist — but once it did, it became the natural place to put them.
 
 </details>
 
