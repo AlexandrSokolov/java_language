@@ -4,46 +4,6 @@
 <details><summary>Show code</summary>
 
 ```java
-new Thread(System.out::println).start();
-
-ExecutorService exec = Executors.newCachedThreadPool();
-exec.submit(System.out::println);                 // Same argument (`System.out::println`)
-```
-
-</details>
-
-<details><summary>Show answer</summary>
-
-```java
-new Thread(System.out::println).start();          // compiles
-
-ExecutorService exec = Executors.newCachedThreadPool();
-exec.submit(System.out::println);                 // does NOT compile
-```
-
-Same argument (`System.out::println`), both targets have a `Runnable` overload — yet the first compiles and the
-second doesn't.
-
-`submit` also has a `Callable<T>` overload; `Thread`'s constructor doesn't. You'd think it can't matter, since every
-`println` returns `void` and so can't be a `Callable` — but resolution doesn't reason that way. `System.out::println`
-is an *inexact* method reference (`println` is itself overloaded), so its meaning isn't known until a target type is
-picked. With two functional-interface overloads competing for the same position, resolution can't choose, and it
-fails to compile.
-
-The tell: it would compile if `println` weren't overloaded, or if `submit` weren't. It takes *both* overloadings —
-the referenced method and the invoked method — to break it.
-
-Fix: disambiguate the reference, e.g. cast it to the intended type, or don't overload across functional interfaces
-in the first place.
-
-</details>
-
-</details>
-<details><summary><strong>Show details</strong></summary>
-
-<details><summary>Show code</summary>
-
-```java
 interface Report {
   String render();
   String renderAsHtml();
@@ -277,8 +237,19 @@ one — varargs is treated as the last resort. So the two-arg version silently w
 `print(1)` and `print(1, 2, 3)` fall to varargs. Same method name, three call shapes, two different targets — the
 kind of "which one runs?" ambiguity overloading is supposed to avoid.
 
-General rule: **don't overload a varargs method at all.** 
-If you must, ensure no confusing call site exists — but distinct names are the clean fix here too.
+General rule: **overloading a varargs method is fine when every overload does the same thing** — the
+count-tuned pattern below is the standard optimization, since each fixed-arity call skips the array
+allocation that varargs forces:
+
+```java
+public void print(int a)
+public void print(int a, int b)
+public void print(int a, int b, int c)
+public void print(int a, int b, int c, int d, int... rest)   // varargs starts at 4+
+```
+
+It's error-prone only when the overloads carry *different behavior* — then a caller who lands on the wrong
+one gets a different result, as here. Avoid *that*; the same-behavior count optimization is safe.
 
 </details>
 
@@ -488,48 +459,6 @@ or, better, follow the design rule and don't put two functional-interface overlo
 <details><summary>Show code</summary>
 
 ```java
-new Thread(System.out::println).start();
-
-ExecutorService exec = Executors.newCachedThreadPool();
-exec.submit(System.out::println);                 // Same argument (`System.out::println`)
-```
-
-</details>
-
-<details><summary>Show answer</summary>
-
-```java
-new Thread(System.out::println).start();          // compiles
-
-ExecutorService exec = Executors.newCachedThreadPool();
-exec.submit(System.out::println);                 // does NOT compile
-```
-
-Same argument (`System.out::println`), both targets have a `Runnable` overload — yet the first compiles and the
-second doesn't.
-
-`submit` also has a `Callable<T>` overload; `Thread`'s constructor doesn't. You'd think it can't matter, since every
-`println` returns `void` and so can't be a `Callable` — but resolution doesn't reason that way. `System.out::println`
-is an *inexact* method reference (`println` is itself overloaded), so its meaning isn't known until a target type is
-picked. With two functional-interface overloads competing for the same position, resolution can't choose, and it
-fails to compile.
-
-The tell: it would compile if `println` weren't overloaded, or if `submit` weren't. It takes *both* overloadings —
-the referenced method and the invoked method — to break it.
-
-Fix: disambiguate the reference, e.g. cast it to the intended type, or don't overload across functional interfaces
-in the first place.
-
-</details>
-
-</details>
-
-### Describe a code snippet 11
-<details><summary><strong>Show details</strong></summary>
-
-<details><summary>Show code</summary>
-
-```java
 public List<Cheese> getCheeses() {
   return cheesesInStock.isEmpty()
           ? null
@@ -607,7 +536,7 @@ using a copy where you meant live wastes allocation and hides updates.
 
 </details>
 
-### Describe a code snippet 12
+### Describe a code snippet 11
 <details><summary><strong>Show details</strong></summary>
 
 <details><summary>Show code</summary>
@@ -641,7 +570,7 @@ Reach for those first; drop to `isPresent` only when none fit.
 
 </details>
 
-### Describe a code snippet 13
+### Describe a code snippet 12
 <details><summary><strong>Show details</strong></summary>
 
 <details><summary>Show code</summary>
