@@ -244,6 +244,9 @@ object it is. Two boxed objects can hold the same value and still be two objects
 
 **One extra value.** A boxed type can be `null`. A primitive has only real values.
 
+**Collections.** A primitive can't go in a collection — `List<int>` is illegal. 
+A boxed value can, because a type parameter must be an object: `List<Integer>`.
+
 **Operators.** `+`, `-`, `*`, `/`, `<`, `>` are defined only on primitives. A boxed value has no operator of
 its own — to run arithmetic or a `<`/`>` compare, the compiler unboxes it to a primitive first, then reboxes
 the result if needed.
