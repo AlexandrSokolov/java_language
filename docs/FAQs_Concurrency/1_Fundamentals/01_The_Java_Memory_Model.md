@@ -31,78 +31,33 @@ Synchronization is not only for keeping threads apart, it is also how one thread
 
 </details>
 
-### Two ways to get synchronization wrong?
+### Synchronization — what must you take care of?
 <details><summary>Show answer</summary>
 
-Synchronization fails in two opposite directions — too little or too much:
+Two things, both on you to get right:
 
-- **Too little — insufficient.** You miss one of the two things safe sharing needs, so updates collide or never
-  arrive. [What makes synchronization insufficient](#what-problem-does-synchronization-solve).
-- **Too much — excessive.** Two kinds of damage:
-  - **Correctness** — deadlock or nondeterministic behavior, from *what* you call under the lock:
-    [never cede control to the client while holding a lock](../03_Liveness_Performance_Testing/06.1_Liveness_Problems.md#calling-client-code-while-holding-a-lock).
-  - **Performance** — from *how much* you do under the lock:
-    [what synchronization costs in performance](../03_Liveness_Performance_Testing/06.2_Performance_&_Scalability.md#what-does-synchronization-cost-in-performance).
+- **Correctness** — never call code you don't control from inside the lock, or it can
+  [deadlock or corrupt state](../03_Liveness_Performance_Testing/06.1_Liveness_Problems.md#synchronized-block--how-to-avoid-liveness-problems).
+- **Performance** — every other thread
+  [waits while you hold the lock](../03_Liveness_Performance_Testing/06.2_Performance_&_Scalability.md#what-does-synchronization-cost-in-performance),
+  so [keep the guarded part small](../03_Liveness_Performance_Testing/06.2_Performance_&_Scalability.md#reducing-synchronizations-performance-cost).
 
-One dial, two failure ends: too little breaks correctness, too much breaks liveness and performance.
+Correctness you solve outright; performance you reduce by holding the lock as briefly as you can.
 
 </details>
 
-### What problem does synchronization solve?
+### Which problems need synchronization?
 <details><summary>Show answer</summary>
 
-Threads sharing the same mutable data need **safe sharing** —
-and [safe sharing needs two things](02_Sharing_Objects.md#sharing-a-mutable-variable--what-to-ensure):
-- each update must land in one step, and
-- each update must actually reach the other threads.
+Three situations where a lock is the fix:
 
-
-Miss either and it breaks quietly — no error, just a wrong result:
-- **Updates collide.** `count++` is read-modify-write; two threads read the same value, both add one, one
-  increment is lost.
-- **Updates never arrive.** One thread writes, another keeps reading an old copy forever, because nothing forces
-  the write out to it.
-
-Synchronization is the tool that covers both at once: only one thread runs the guarded code at a time, and each
-thread taking the lock sees every earlier change made under it. That is [what it guarantees](#what-does-synchronization-guarantee).
-
-</details>
-
-### What problem does synchronization solve?
-<details><summary>Show answer</summary>
-
-Threads sharing the same mutable data need **safe sharing** — and [safe sharing needs two things](02_Sharing_Objects.md#sharing-a-mutable-variable--what-to-ensure):
-each update must land in one step, and each update must actually reach the other threads. Miss either and it
-breaks quietly — no error, just a wrong result:
-
-- **Updates collide.** `count++` is read-modify-write; two threads read the same value, both add one, one
-  increment is lost.
-- **Updates never arrive.** One thread writes, another keeps reading an old copy forever, because nothing forces
-  the write out to it.
-
-Synchronization is the tool that covers both at once: only one thread runs the guarded code at a time, and each
-thread taking the lock sees every earlier change made under it. That is [what it guarantees](#what-does-synchronization-guarantee).
-
-</details>
-
-### Calling client code while holding a lock?
-<details><summary>Show answer</summary>
-
-Never do it. Inside a `synchronized` method or block, only call code you control. A method you hand off to —
-an overridable method, a listener, a function passed in — is **alien**: you don't know what it does while you
-hold the lock.
-
-What it can do, all bad:
-
-- **Deadlock.** The alien method tries to take a lock you already hold (or takes a second lock in the opposite
-  order another thread uses), and both sides wait forever.
-- **Reentered state.** The alien method calls back into your object and sees it mid-update — a half-changed state
-  you assumed no one could observe while locked.
-- **Nondeterministic failure.** Whether it breaks depends on what the caller's code happens to do, so it passes
-  in tests and fails in production.
-
-The fix: do the work that needs the lock, take a snapshot if needed, release the lock, *then* call the alien
-method outside the guarded region.
+- **Read-modify-write on shared data** — `i++`, or check-then-act. Two threads interleave the steps and one
+  update is lost. The whole action must be indivisible, so you lock it. *(atomicity)*
+- **A write that never reaches another thread** — one thread writes, another keeps reading a stale copy forever.
+  The lock forces the write out and makes the reader pick it up. *(visibility)*
+- **A multi-step change across several fields** — the object must move from one good state to another with no
+  thread seeing the middle. More than one variable, so an atomic type can't cover it — you lock the whole change.
+  *(atomicity across a block)*
 
 </details>
 
@@ -111,13 +66,20 @@ method outside the guarded region.
 
 An operation is **atomic** when it happens in one step — no other thread can see it half-done.
 
-A single read or write of most types is atomic on its own. 
-But `i++` is not: it is three steps — read `i`, add one, write it back. 
-Two threads can both read the same value, both add one, and both write back the same result — one increment is lost.
+Applied to a single operation, this is what mutual exclusion gives you: 
+the operation is indivisible, so a reader gets either the before or the after, never a mix.
 
-Atomicity is mutual exclusion at the smallest scale. Mutual exclusion keeps a whole block indivisible; 
-an atomic operation is a single step that is already indivisible. When an operation is not atomic on its own
-(like `i++`), you wrap it in a `synchronized` block to make the whole thing indivisible.
+</details>
+
+### When does atomicity break?
+<details><summary>Show answer</summary>
+
+Two ways — the operation is too many steps, or the type is too wide to move in one:
+
+- **The operation is multi-step** — a [read-modify-write like `i++`](#which-operation-isnt-atomic-on-its-own)
+  is three steps, so two threads interleave them and one update is lost.
+- **The type is too wide** — [`long` and `double` can be read or written in two halves](#how-do-you-make-reads-and-writes-atomic),
+  so a reader can catch a mix of old and new even on a single read or write.
 
 </details>
 
@@ -146,6 +108,25 @@ Use an atomic type instead, whose increment is one indivisible step:
 AtomicInteger count = new AtomicInteger();
 count.incrementAndGet();   // read-modify-write done atomically
 ```
+
+</details>
+
+### Which tool gives atomicity, and when?
+<details><summary>Show answer</summary>
+
+Each problem has its own light tool; the synchronized block is the fallback, not the first choice:
+
+- **Single read/write of a wide type** — a `long` or `double` can be torn in halves. Reach for `volatile`.
+- **Read-modify-write on one variable** — `i++`, check-then-act. Reach for an atomic type like `AtomicInteger`.
+
+A synchronized block can solve both of these too, but on such a small, isolated problem it's too heavy — 
+it holds other threads back for something a lighter tool covers for free.
+
+Where it has no alternative:
+
+- **A multi-step change across several fields** — the object must move from one good state to another with no
+  thread seeing the middle. More than one variable, so no atomic type reaches it. Only a synchronized block makes
+  the whole change indivisible.
 
 </details>
 

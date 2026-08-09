@@ -13,11 +13,11 @@ Avoid sharing the same mutable object where you can. Ways, in order of preferenc
   read at once.
 
 If none of these fit and you are forced to share the same mutable object live, you cannot remove the
-problem — you have to manage it, and [there are two things you must ensure](#sharing-a-mutable-variable--what-to-ensure).
+problem — you have to manage it, and [there are two things you must ensure](#what-does-safe-sharing-require).
 
 </details>
 
-### Sharing a mutable variable — what to ensure?
+### What does safe sharing require?
 <details><summary>Show answer</summary>
 
 - **Atomicity** — a read or write completes in one step, so no thread sees it half-done.
@@ -26,10 +26,6 @@ problem — you have to manage it, and [there are two things you must ensure](#s
 Atomicity alone fails: the value is whole, but a reader may keep seeing an old copy forever.
 Visibility alone fails: the update reaches readers, but a read-modify-write (like `i++`) still lets two
 threads collide. Sharing safely means covering both.
-
-A lock covers both at once — that is exactly 
-[what synchronization guarantees](01_The_Java_Memory_Model.md#what-does-synchronization-guarantee). 
-Lighter tools cover one each: `volatile` gives visibility only, an atomic type gives both for a single variable.
 
 </details>
 
@@ -88,12 +84,41 @@ Same result — state that never changes — reached two ways: a promise in the 
 ### Passing a built object between threads safely?
 <details><summary>Show answer</summary>
 
-Hand the reference over in a way that guarantees the receiving thread sees the object fully built — all
-its fields written, not half-constructed. This correct hand-off is called **safe publication**.
+Hand the reference over in a way that guarantees the receiving thread sees the object fully built — all its
+fields written, not half-constructed. This correct hand-off is called **safe publication**.
 
-The problem it solves: just making a reference visible is not enough. 
-Another thread can see the reference before it sees the writes that built the object, and read a half-made object. 
-Safe publication ties the two together — see the reference, see the finished object.
+How you actually do it: [safe publication needs the right kind of hand-off](#how-do-you-safely-publish-a-reference).
+When it goes wrong: [unsafe publication](#how-can-publication-go-wrong).
+
+</details>
+
+### How do you safely publish a reference?
+<details><summary>Show answer</summary>
+
+Any hand-off that forces the writes-then-reference to become visible together — each way carries that
+guarantee, so you don't memorize a list, you recognize the mechanism:
+
+- **Static field set during class init** — the JVM guarantees class initialization is seen by all threads.
+- **`final` field** — the memory model guarantees a `final` field is visible once the constructor finishes.
+- **`volatile` field** — a write is visible to any thread that later reads it.
+- **Field guarded by a lock** — the reader takes the same lock, so it sees the writer's earlier writes.
+- **A concurrent collection** — putting the reference in guarantees a safe hand-off to whoever takes it out.
+
+The through-line: every one draws a happens-before line at the moment of sharing, so the writes that
+built the object land before the reader touches it.
+
+</details>
+
+### How can publication go wrong?
+<details><summary>Show answer</summary>
+
+Making the reference visible is not enough on its own. The writes that built the object and the write of the
+reference are separate — another thread can see the reference before it sees those field writes, and read an
+object that is only half-constructed.
+
+The reference arrives, but the fields it points to are still being written. So the reader gets a valid-looking
+pointer to a broken object — no error, just wrong data. This is **unsafe publication**, and it's what
+[safe publication](#passing-a-built-object-between-threads-safely) exists to prevent.
 
 </details>
 
@@ -115,21 +140,3 @@ Immutable-after-a-point removes the need to lock later reads;
 safe publication is what makes that first hand-off correct.
 
 </details>
-
-### How do you safely publish a reference?
-<details><summary>Show answer</summary>
-
-Any hand-off that forces the writes-then-reference to become visible together — each way carries that
-guarantee, so you don't memorize a list, you recognize the mechanism:
-
-- **Static field set during class init** — the JVM guarantees class initialization is seen by all threads.
-- **`final` field** — the memory model guarantees a `final` field is visible once the constructor finishes.
-- **`volatile` field** — a write is visible to any thread that later reads it.
-- **Field guarded by a lock** — the reader takes the same lock, so it sees the writer's earlier writes.
-- **A concurrent collection** — putting the reference in guarantees a safe hand-off to whoever takes it out.
-
-The through-line: every one draws a happens-before line at the moment of sharing, so the writes that
-built the object land before the reader touches it.
-
-</details>
-
