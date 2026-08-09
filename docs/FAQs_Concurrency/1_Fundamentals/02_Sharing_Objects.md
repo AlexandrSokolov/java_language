@@ -140,3 +140,50 @@ Immutable-after-a-point removes the need to lock later reads;
 safe publication is what makes that first hand-off correct.
 
 </details>
+
+
+### Does the synchronized modifier document thread safety?
+<details><summary>Show answer</summary>
+
+No. `synchronized` on a method is an implementation detail, not part of the API — Javadoc doesn't even emit it,
+and its presence doesn't reliably mean the method is safe to call concurrently.
+
+The deeper mistake is treating thread safety as all-or-nothing. It has levels, and a class must state in prose (or
+a thread-safety annotation) which level it offers. See
+[the levels of thread safety](#what-are-the-levels-of-thread-safety). The `synchronized` keyword plays no part in
+that documentation.
+
+</details>
+
+### What are the levels of thread safety?
+<details><summary>Show answer</summary>
+
+A spectrum, from "never needs synchronization" to "can't be made safe at all":
+
+- Immutable — instances never change, so no synchronization is ever needed. `String`, `Long`, `BigInteger`.
+- Unconditionally thread-safe — mutable, but enough internal synchronization that callers need none.
+  `AtomicLong`, `ConcurrentHashMap`.
+- Conditionally thread-safe — safe, except some sequences need external locking by the caller. The
+  `Collections.synchronized…` wrappers, whose iterators must be locked by the client.
+- Not thread-safe — the caller must wrap every call (or call sequence) in its own synchronization. `ArrayList`,
+  `HashMap`.
+- Thread-hostile — unsafe even if the caller synchronizes every call. Usually from unsynchronized mutation of
+  static state; such classes get fixed or deprecated, never written on purpose.
+
+Trigger: no sync needed → caller syncs some sequences → caller syncs everything → sync can't save it.
+
+</details>
+
+### What must a class document about thread safety?
+<details><summary>Show answer</summary>
+
+State the class's thread-safety level in its doc comment — in prose or as a thread-safety annotation.
+
+- A conditionally thread-safe class must also say *which* call sequences need external locking and *which lock* the
+  client acquires for them (usually the instance, sometimes another object).
+- A method with its own special thread-safety behavior documents it on the method, not only on the class.
+- A static factory must document the returned object's thread safety unless the return type makes it obvious — as
+  `Collections.synchronizedMap` does.
+- Enum immutability needs no mention; it's a given.
+
+</details>

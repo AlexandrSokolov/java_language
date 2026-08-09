@@ -298,3 +298,313 @@ An alternative to the snapshot is a `CopyOnWriteArrayList`, which makes iteratio
 </details>
 
 </details>
+
+### Describe a code snippet #12
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```java
+private static final ConcurrentMap<String, String> map = new ConcurrentHashMap<>();
+
+public static String intern(String s) {
+  String previousValue = map.putIfAbsent(s, s);
+  return previousValue == null ? s : previousValue;
+}
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+Correct and thread-safe — but not the fastest form on `ConcurrentHashMap`.
+
+`putIfAbsent` is called on every invocation, including when the key is already present. `ConcurrentHashMap` is
+optimized for `get`, so the hot path (value already interned) pays for the heavier operation each time.
+
+Faster: try `get` first, call `putIfAbsent` only on a miss.
+
+```java
+public static String intern(String s) {
+  String result = map.get(s);
+  if (result == null) {
+    result = map.putIfAbsent(s, s);
+    if (result == null)
+      result = s;
+  }
+  return result;
+}
+```
+
+The `putIfAbsent` return check stays: two threads can race on the same new key, and the loser must take the
+winner's value.
+
+</details>
+
+</details>
+
+### Describe a code snippet #13
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```java
+long start = System.currentTimeMillis();
+action.run();
+long elapsed = System.currentTimeMillis() - start;
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+Wrong clock for measuring elapsed time.
+
+`currentTimeMillis` reads wall-clock time, which can jump while `action` runs — an NTP correction, a manual clock
+change, daylight-saving — and can even move backwards. The subtraction then gives a wrong or negative `elapsed`
+(clock time vs a steady counter).
+
+Use `nanoTime`, a steady counter meant for intervals:
+
+```java
+long start = System.nanoTime();
+action.run();
+long elapsed = System.nanoTime() - start;
+```
+
+Its absolute value means nothing, but the difference is a true elapsed time, unaffected by clock adjustments.
+
+</details>
+
+</details>
+
+### Describe a code snippet #14
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```java
+synchronized (obj) {
+  if (queueIsEmpty())
+    obj.wait();
+  process(obj.removeFirst());
+}
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+`wait` in an `if`, not a `while`.
+
+If the thread wakes with the queue still empty — a stale wakeup, an over-generous `notifyAll`, a stray notify, or
+a spurious wakeup — the `if` doesn't recheck, so `removeFirst` runs on an empty queue and the invariant breaks.
+
+Minimal fix — recheck in a loop:
+
+```java
+synchronized (obj) {
+  while (queueIsEmpty())
+    obj.wait();
+  process(obj.removeFirst());
+}
+```
+
+Better: don't hand-write `wait`/`notify` at all in new code. A `BlockingQueue` gives this exact
+producer-consumer wait with `take`, correctly and without the loop; `Condition` or a latch covers the other
+cases. `wait`/`notify` is low-level plumbing to maintain in legacy code, not to write fresh.
+
+</details>
+
+</details>
+
+### Describe a code snippet #15
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```java
+public synchronized void awaitReady() throws InterruptedException {
+  while (!ready)
+    wait();          // waits on 'this' — a publicly reachable object
+}
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+Waiting on `this`, which any outside code can reach.
+
+A `synchronized` instance method locks `this`, and `wait()` waits on `this`. Because the object is public, unrelated
+code can `synchronized (obj) { obj.notify(); }` on it — accidentally or maliciously — waking this thread when
+`ready` is still false, or worse, swallowing a real notification. The `while` loop absorbs the false wakeup, but the
+exposed lock is still a design flaw.
+
+Minimal fix — wait on a private lock nobody else can touch:
+
+```java
+private final Object lock = new Object();
+public void awaitReady() throws InterruptedException {
+  synchronized (lock) {
+    while (!ready)
+      lock.wait();
+  }
+}
+```
+
+Better: skip `wait`/`notify` for new code. A `CountDownLatch` expresses "wait until ready" directly and can't be
+tampered with through a public monitor; the higher-level utilities don't expose this surface at all.
+
+</details>
+
+</details>
+
+### Describe a code snippet #1
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```java
+public class Counter {
+  private int count;
+  public synchronized void increment() { count++; }
+  public synchronized int get() { return count; }
+}
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+The class is thread-safe, but it locks on `this` — a publicly reachable lock.
+
+`synchronized` methods lock the instance, and the instance is visible to everyone. A client can
+`synchronized (counter) { … }` and hold the lock indefinitely, stalling every other caller — a denial-of-service,
+by accident or on purpose. A subclass can also lock `this` for an unrelated reason and collide with these methods
+on the same lock.
+
+Fix — lock on a private final object nobody else can see:
+
+```java
+public class Counter {
+  private final Object lock = new Object();
+  private int count;
+  public void increment() { synchronized (lock) { count++; } }
+  public int get()        { synchronized (lock) { return count; } }
+}
+```
+
+This works because the class is unconditionally thread-safe — it publishes no lock for clients to acquire. A
+conditionally thread-safe class couldn't do this: it must expose the lock it asks clients to hold.
+
+</details>
+
+</details>
+
+### Describe a code snippet #1
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```java
+private volatile FieldType field;
+private FieldType getField() {
+  FieldType result = field;
+  if (result == null)
+    field = result = computeFieldValue();
+  return result;
+}
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+This is the single-check idiom, and it's correct only for a field that tolerates being initialized more than once.
+
+There's no lock and no second check, so two threads can both see `field == null` and both run `computeFieldValue`.
+Each stores and returns its own value; different callers may briefly get different objects. Nothing throws — the
+behavior is a repeated init, not an error. That's fine only if repeat init is harmless.
+
+If the field must be initialized exactly once (the usual case), this is the wrong idiom — use double-check, which
+adds the lock and the second check:
+
+```java
+private volatile FieldType field;
+private FieldType getField() {
+  FieldType result = field;
+  if (result == null) {
+    synchronized (this) {
+      if (field == null)
+        field = result = computeFieldValue();
+    }
+  }
+  return result;
+}
+```
+
+`volatile` is required in both. In single-check it's what makes a computed value visible to other threads; dropping
+it gives the racy single-check variant, valid only for non-`long`/`double` primitives when recomputation per thread
+is acceptable.
+
+</details>
+
+</details>
+
+### Describe a code snippet #1
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```java
+public class SlowCountDownLatch {
+  private int count;
+
+  public SlowCountDownLatch(int count) {
+    if (count < 0) throw new IllegalArgumentException(count + " < 0");
+    this.count = count;
+  }
+
+  public void await() {
+    while (true) {
+      synchronized (this) {
+        if (count == 0) return;
+      }
+    }
+  }
+
+  public synchronized void countDown() {
+    if (count != 0) count--;
+  }
+}
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+`await` busy-waits: it loops forever, taking and releasing the lock on every pass just to check `count`. A waiting
+thread stays runnable the whole time, so each waiter pins a processor doing nothing. With many waiters this is
+drastically slower than a latch that sleeps until signalled — roughly ten times slower for a thousand waiters.
+
+The thread should block until woken, not spin. The real fix is not to hand-write this at all — use
+`java.util.concurrent.CountDownLatch`, which parks waiting threads and wakes them when the count hits zero. If you
+must implement waiting yourself, wait on the monitor and signal it:
+
+```java
+public synchronized void await() throws InterruptedException {
+  while (count != 0)
+    wait();
+}
+public synchronized void countDown() {
+  if (count != 0 && --count == 0)
+    notifyAll();
+}
+```
+
+Now waiters consume no CPU while parked, and `countDown` wakes them only when the latch opens.
+
+</details>
+
+</details>
