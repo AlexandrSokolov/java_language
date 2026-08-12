@@ -50,12 +50,6 @@ highly technical explanations of why things are designed the way they are.
 
 ---
 
-## Java Concurrency
-
-### Java Concurrency in Practice by Brian Goetz
-
----
-
 ## Java Persistence
 
 Since we were just looking at how enums break database mappings, you should know Vlad Mihalcea. 
