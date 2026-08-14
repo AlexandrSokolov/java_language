@@ -608,3 +608,186 @@ Now waiters consume no CPU while parked, and `countDown` wakes them only when th
 </details>
 
 </details>
+
+### Describe a code snippet #NN
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```java
+public class FSOAccount {
+  private double balance;
+
+  public FSOAccount(double openingBalance) {
+    // check openingBalance > 0, throw if not
+    balance = openingBalance;
+  }
+
+  public synchronized boolean withdraw(int amount) {
+    // check amount > 0, throw if not
+    if (balance >= amount) {
+      balance = balance - amount;
+      return true;
+    }
+    return false;
+  }
+
+  public synchronized void deposit(int amount) {
+    // check amount > 0, throw if not
+    balance = balance + amount;
+  }
+
+  public synchronized double getBalance() {
+    return balance;
+  }
+}
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+**Correct.** The code is thread-safe and live: `balance` is private, set consistently in the constructor, and
+every method that touches it is `synchronized` — so no thread ever sees a half-updated balance, and no method
+blocks forever. This is a textbook fully synchronized object.
+
+**But it is the wrong design for a real system, for two reasons:**
+
+- **Serial access.** Every method takes the lock, including `getBalance()`. Two threads cannot even read
+  concurrently — all access to one account is serialized. Correct, but slow.
+- **Fragile at scale.** The safety holds only because *every* access to `balance` sits inside a synchronized
+  method. Here you confirm that by eye; in a large codebase you cannot, and a single unguarded access breaks it
+  with no warning.
+
+**What to use instead:** a lighter type where the field carries its own safety — `AtomicLong` (in minor units,
+not `double`) for the balance, or an `AtomicReference` updated with `compareAndSet`, so reads run lock-free and
+writes stay atomic without serializing everything.
+
+Handle: all-synchronized buys safety and liveness at the cost of speed and verifiability — modern code pushes the
+safety into the field's type instead of locking every method.
+
+</details>
+
+</details>
+
+### Describe a code snippet #NN
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```java
+public class SharedState {
+  private int counter = 0;
+  private boolean ready = false;
+
+  public void write() {   // Thread A
+    counter = 42;
+    ready = true;
+  }
+
+  public void read() {    // Thread B, right after
+    if (ready) {
+      System.out.println(counter);
+    }
+  }
+}
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+**Data race — Thread B can print `0`, or nothing at all.** Neither field is `volatile` or guarded by a lock, so
+there is no guarantee that Thread A's writes reach Thread B in order, or at all.
+
+Two independent things go wrong, and either one alone causes it:
+
+- **Caching.** Each CPU core has its own local cache. Thread A's `counter = 42` and `ready = true` land in A's
+  cache first and may not reach main memory for a while. Thread B on another core keeps reading `ready == false`
+  and `counter == 0` from its own cache or from RAM until A's cache is flushed — so B may print nothing (never
+  enters the `if`), or enter late.
+- **Reordering.** Even if caches flushed instantly, the JIT compiler and the CPU may reorder the two writes in
+  `write()`, because within a single thread swapping them changes nothing — `counter` and `ready` don't depend on
+  each other. So the hardware may do `ready = true` first, then `counter = 42`. Thread B slips in between: sees
+  `ready == true`, enters the `if`, reads `counter` — still `0`. The crucial point: `ready` being visible does
+  **not** mean `counter` is visible. Two plain writes carry no ordering promise between them.
+
+**Fix — make the flag `volatile`; that alone fixes both, and `counter` need not be volatile:**
+
+```java
+private int counter = 0;
+private volatile boolean ready = false;   // one volatile flag is enough
+```
+
+A `volatile` write inserts a memory barrier that (1) forbids moving any earlier write — including `counter = 42`
+— after `ready = true`, so `counter` is provably written first, and (2) flushes *all* prior writes (`counter`
+included) to main memory. A `volatile` read of `ready` refreshes B's view from main memory. So once B sees
+`ready == true`, `counter = 42` provably happened before it and was published with it — `ready == true` with
+`counter == 0` becomes impossible.
+
+This is the happens-before rule: a `volatile` write happens-before a later read of that same field, and everything
+the writer did before that write becomes visible to the reader after it. (A `synchronized` block on both methods
+fixes it the same way, adding mutual exclusion you don't need here.)
+
+Handle: two plain writes give no ordering or visibility promise across threads — one `volatile` flag written last
+acts as a gate that orders and publishes every plain write before it.
+
+</details>
+
+</details>
+
+### Describe a code snippet #NN
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```java
+public class Counter {
+  private volatile int count = 0;   // volatile — surely thread-safe?
+
+  public void increment() {
+    count++;                        // many threads call this
+  }
+
+  public int get() {
+    return count;
+  }
+}
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+**Lost updates — `volatile` does not make this safe.** After N threads each call `increment()` once, the final
+`count` is often less than N. `volatile` fixes visibility, but this bug is not a visibility bug.
+
+`count++` is not one operation. It is three: read `count`, add 1, write it back. `volatile` guarantees each single
+read and each single write is fresh — but it does nothing to keep the three steps together. Two threads interleave:
+
+```text
+Thread A: read count (5)
+Thread B: read count (5)     // reads before A writes back
+Thread A: write 6
+Thread B: write 6            // both wrote 6 — one increment lost
+```
+
+Both threads read the same freshest value and both wrote the same result. The update was lost not because a write
+was stale, but because the read-modify-write was split. This is why `volatile` is safe only when a write does not
+depend on the current value — the moment the new value is computed *from* the old one, you have a compound action
+`volatile` can't protect.
+
+**Fix — use an atomic type (lock-free), or a lock:**
+
+```java
+private final AtomicInteger count = new AtomicInteger();
+public void increment() { count.incrementAndGet(); }   // read-modify-write done as one atomic step
+```
+
+`AtomicInteger` does the read-add-write as a single atomic compare-and-set, so no thread can slip between the
+steps. A `synchronized increment()` also works, at the cost of a lock.
+
+Handle: `volatile` publishes single reads and writes, never a read-modify-write — anything that computes the new
+value from the old (`i++`, check-then-act) needs an atomic or a lock.
+
+</details>
