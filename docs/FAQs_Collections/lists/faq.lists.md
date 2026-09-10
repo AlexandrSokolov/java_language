@@ -125,7 +125,7 @@ The view returned by `reversed` allows any modifications that are permitted by t
 - [`UnmodifiableList`](#what-is-unmodifiablelist-and-how-is-it-intended-to-be-used)
 - [`CopyOnWriteArrayList`](#what-is-copyonwritearraylist-and-how-does-it-work)
 
-<img src="../../docs/images/List_Implementations_Hierarchy.png" alt="Implementations of the List interface" width="600">
+<img src="../../images/List_Implementations_Hierarchy.png" alt="Implementations of the List interface" width="600">
 
 
 </details>

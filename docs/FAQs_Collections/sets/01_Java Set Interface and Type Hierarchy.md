@@ -130,7 +130,7 @@ The hash code of a Set is the sum of the hash codes of its elements.
 <details><summary>Show answer</summary>
 
 - [`HashSet`](#hashset)
-- [`CopyOnWriteArraySet`](./03_Concurrency%20and%20Set%20Implementations.md/#copyonwritearrayset-its-operations-compare-with-hashset)
+- [`CopyOnWriteArraySet`](./03_Concurrency%20and%20Set%20Implementations.md/#what-are-the-characteristics-and-operation-costs-of-copyonwritearrayset-and-how-does-it-differ-from-hashset)
 - [`EnumSet`](#enumset)
 
 </details>
@@ -174,7 +174,7 @@ When _collisions_ do occur, the table needs a way to store multiple elements in 
 A common approach is to keep the colliding elements in a linked structure, 
 such as a list or a tree, stored within that bucket:
 
-<img src="../../docs/images/Hash_Table.png" alt="A hash table with chained overflow" width="600">
+<img src="../../images/Hash_Table.png" alt="A hash table with chained overflow" width="600">
 
 </details>
 
@@ -356,7 +356,7 @@ defined in `SequencedCollection` (such as accessing the first or last element, o
 Its only additional contribution is a covariant override of the `reversed()` method, 
 so calling `reversed()` on a `SequencedSet` produces another `SequencedSet`, preserving type‑safety and fluent usage.
 
-<img src="../../docs/images/SequencedSet_Hierarchy.png" alt="SequencedSet and related types" width="600">
+<img src="../../images/SequencedSet_Hierarchy.png" alt="SequencedSet and related types" width="600">
 
 
 </details>
@@ -463,7 +463,7 @@ Any changes made through such a view — including structural modifications — 
 <details><summary>Show answer</summary>
 
 - [`java.util.TreeSet`](#treeset-its-purpose)
-- [`ConcurrentSkipListSet`](./03_Concurrency%20and%20Set%20Implementations.md#concurrentskiplistset)
+- [`ConcurrentSkipListSet`](./03_Concurrency%20and%20Set%20Implementations.md#what-is-concurrentskiplistset-and-how-is-it-implemented)
 
 </details>
 

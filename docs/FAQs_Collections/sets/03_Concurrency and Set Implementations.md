@@ -134,7 +134,7 @@ Since moving between linked nodes takes constant time, searching proceeds by:
 
 This strategy minimizes traversal work and enables efficient search.
 
-<img src="../../docs/images/SkipListSearching.png" alt="Searching a skip list" width="600">
+<img src="../../images/SkipListSearching.png" alt="Searching a skip list" width="600">
 
 </details>
 

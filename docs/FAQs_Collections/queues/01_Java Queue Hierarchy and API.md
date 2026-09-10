@@ -28,7 +28,12 @@ This makes queues especially suited for coordination, task scheduling, and concu
 ### What is the hierarchy of the `Queue` interface in the Java Collections Framework?
 <details><summary>Show answer</summary>
 
-<img src="../../docs/images/Implementations_of_Queue.png" alt="Implementations of Queue in the Collections Framework" width="600"/>
+<img src="../../images/Implementations_of_Queue.png" alt="Implementations of Queue in the Collections Framework" width="600"/>
+
+Note, there is also a concurrent, non-blocking deque implementation:
+```java
+public class ConcurrentLinkedDeque<E> extends AbstractCollection<E> implements Deque<E>
+```
 
 </details>
 
@@ -284,7 +289,7 @@ and `O(1)` access to the highest‑priority element.
 ### How is an element added to a priority heap?
 <details><summary>Show answer</summary>
 
-![Adding an element to a PriorityQueue](../../docs/images/Adding_to_PriorityQueue.png)
+![Adding an element to a PriorityQueue](../../images/Adding_to_PriorityQueue.png)
 
 To insert a new element into a priority heap, the element is first placed in the leftmost available position 
 at the bottom of the heap. It is then repeatedly swapped with its parent until the heap property is restored — that is, 
@@ -295,7 +300,7 @@ until its parent has higher priority (for a min‑heap, a smaller value).
 ### How is the head element removed from a priority heap?
 <details><summary>Show answer</summary>
 
-![Removing the head of a PriorityQueue](../../docs/images/Removing_head_of_PriorityQue.png)
+![Removing the head of a PriorityQueue](../../images/Removing_head_of_PriorityQue.png)
 
 **Retrieving the highest‑priority element from a priority heap is straightforward, as it is stored at the root**.
 

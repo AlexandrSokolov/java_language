@@ -148,7 +148,7 @@ If the head and tail indices become equal, the queue may be either full or empty
 so the implementation keeps a separate element count to distinguish between these states.
 
 
-<img src="../../docs/images/circular_array.png" alt="A circular array" width="600"/>
+<img src="../../images/circular_array.png" alt="A circular array" width="600"/>
 
 </details>
 
