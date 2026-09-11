@@ -109,7 +109,7 @@ The system relies on **probability**, not strict ordering.
 
 The Deque interface extends both Queue and SequencedCollection, inheriting queue semantics while adding symmetric access to the beginning and end of the collection.
 
-<img src="../../docs/images/Sequenced_Collections_Hierarchy.png" alt="Implementations of Queue in the Collections Framework" width="600"/>
+<img src="../../images/Sequenced_Collections_Hierarchy.png" alt="Implementations of Queue in the Collections Framework" width="600"/>
 
 
 </details>
@@ -170,7 +170,11 @@ LIFO semantics — last in, first out. Classic stack behavior on top of a double
 <details><summary>Show answer</summary>
 
 - [`ArrayDeque`](#what-is-arraydeque)
-- [`LinkedList`](#linkedlist-as-implementation-of-deque)
+- [`LinkedList`](#what-is-linkedlist-as-an-implementation-of-deque)
+- `ConcurrentLinkedDeque` - concurrent, non-blocking implementation of deque
+  ```java
+  public class ConcurrentLinkedDeque<E> extends AbstractCollection<E> implements Deque<E>
+  ```
 
 </details>
 
