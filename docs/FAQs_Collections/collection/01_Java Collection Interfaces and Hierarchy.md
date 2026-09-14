@@ -100,7 +100,7 @@ and an order that is an inherent property of the elements themselves, such as al
 - [`SequencedMap`](maps/faq.maps.md#sequencedmap)
 - [`NavigableMap`](maps/faq.maps.md#navigablemap)
 
-<img src="../../docs/images/Sequenced_Collections_Hierarchy.png" alt="Main Interfaces" width="600">
+<img src="../../images/Sequenced_Collections_Hierarchy.png" alt="Main Interfaces" width="600">
 
 
 </details>

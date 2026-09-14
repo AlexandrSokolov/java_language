@@ -16,18 +16,6 @@ It exposes three methods:
 
 ---
 
-### Which methods does the Iterable interface provide for traversing its elements?
-<details>
-<summary>Show answer</summary>
-
-- `Iterator<T> iterator()` - Returns an iterator over elements of type T
-- `Spliterator<T> spliterator()` - Creates a Spliterator over the elements described by this Iterable
-  (for parallel streams)
-
-</details>
-
----
-
 ### Iterating Through a Collection and Consuming Elements One by One
 <details>
 <summary>Show answer</summary>

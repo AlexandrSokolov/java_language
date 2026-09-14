@@ -336,38 +336,59 @@ In general, you may want to copy a collection of a given type into:
 <summary>Show answer</summary>
 
 
-One drawback of this design is that, applied to collections of wrapper types,
-it doesn’t accommodate automatic unboxing into the corresponding array of primitives:
+**1. No unboxing into a primitive array.**
+Applied to collections of wrapper types, it does not unbox into the matching primitive array:
 
 ```java
 List<Integer> l = List.of(0, 1, 2);
 int[] a = l.toArray(new int[0]);  // compile-time error
 ```
-This is illegal because the parameter T in the method call must - as for any type parameter - be a reference type.
+Illegal because `T` must be a reference type, like any type parameter. Solutions:
 
-Solutions:
-1. resort to copying the array explicitly:
-    ```java
-    jshell> List<Integer> integers = List.of(0, 1, 2);
-    integers ==> [0, 1, 2]
-    jshell> int[] ints = new int[integers.size()];
-    ints ==> int[3] { 0, 0, 0 }
-    jshell> for (int i=0; i<integers.size(); i++) { ints[i] = integers.get(i); }
-    jshell> ints
-    ints ==> int[3] { 0, 1, 2 }
-    ```
-2. using the Stream API:
-    ```java
-    jshell> int[] ints = integers.stream()
-       ...>     .mapToInt(Integer::intValue)
-       ...>     .toArray();
-    ints ==> int[3] { 0, 1, 2 
-    ```
+1. copy the array explicitly:
+```java
+    List<Integer> integers = List.of(0, 1, 2);
+    int[] ints = new int[integers.size()];
+    for (int i = 0; i < integers.size(); i++) { ints[i] = integers.get(i); }
+```
+2. use the Stream API:
+```java
+    int[] ints = integers.stream()
+                         .mapToInt(Integer::intValue)
+                         .toArray();
+```
 
+**2. Pre-sizing the array is slower, not faster.**
+The instinct is to pre-size to the exact length:
+
+```java
+String[] arr = list.toArray(new String[list.size()]);  // trap: looks optimized, is slower
+```
+A pre-sized array is allocated and filled with nulls first, then those nulls are overwritten with the data — two passes. 
+A zero-length array lets the JVM allocate and fill in one step through optimized intrinsic code:
+
+```java
+String[] arr = list.toArray(new String[0]);      // preferred
+String[] arr = list.toArray(String[]::new);      // Java 11+, generator form
+```
+
+**3. An oversized array gets a null written after the data.**
+If the passed array is longer than the collection, a `null` is written into the slot right after the last element;
+the remaining old contents stay:
+
+```java
+List<String> list = List.of("A", "B");
+String[] oversized = {"X", "Y", "Z", "W"};
+list.toArray(oversized);
+// oversized is now: ["A", "B", null, "W"]
+```
+The `null` was meant as an end marker for null-free collections. 
+In practice it mutates your array and causes surprise `NullPointerException`s.
+
+Handle: pass `new String[0]` (or `String[]::new`) — it dodges the pre-sizing cost and the null-terminator quirk;
+for primitives, go through a `mapToInt` stream.
 
 </details>
-
----
 
 
 ### What should you consider when storing objects in a Set, Map, or internally ordered Queue?
