@@ -560,3 +560,41 @@ explicitly "read the just-uploaded file and update your memory." When he does:
   about what memory is "for," no "I can't/won't because…". Just read it and update.
 - Uploading alone does not trigger this; the explicit instruction does. When given, comply without
   friction.
+
+## Links go inline, on the term — never as a separate "See ..." line
+
+When a card mentions a term or problem that another card covers, the link goes ON that word,
+inline in the text. Never add a separate routing line like `See [...](...)`.
+
+Reason: an inline link is a choice — he clicks it or not, zero cost either way. A separate
+"See ..." line forces him to read a sentence that carries no information before he can skip it.
+That wasted read is exactly the noise the whole system removes.
+
+- Link the term where it appears: `[`Future`](#...) — a handle to a result...`
+- Never: a body paragraph followed by `See [...](...)` on its own line.
+- If the term to link does not appear in the text, reword so it does — do not fall back to a
+  "See ..." line.
+- Applies to same-file anchors and cross-file links alike.
+
+### Examples
+
+Good — link sits on the word already in the text:
+
+A `Future<T>` holds the result of a task that may still be running. 
+Call [`get()`](#how-does-get-block) to collect it — it blocks until the result is ready.
+
+Good — link sits on a phrase describing the related problem, no term needed:
+
+If the task never finishes, the caller is stuck. You handle this by 
+[setting a timeout on the wait](#how-do-you-bound-a-blocking-get) instead of blocking forever.
+
+
+Bad — same content, but the link is dumped on a separate line:
+
+A `Future<T>` holds the result of a task that may still be running. Call `get()` to collect it —
+it blocks until the result is ready.
+
+See [How does get() block?](#how-does-get-block)
+
+The link target is the same. The Bad version forces a read of a throwaway line before it can be
+skipped; the Good version folds the same route onto a word or phrase already being read.
