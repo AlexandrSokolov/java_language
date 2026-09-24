@@ -273,8 +273,8 @@ The goal: **one trigger regenerates the map**, so he never holds N stems at once
 Just as a card's answer-shape must follow from its single axis, a router's shape must follow from its cluster's
 logic — pick the structure that lets him *reconstruct* the cluster, not *memorize* its members:
 
-- a **causal/derivation chain** → a numbered walk **plus a single sentence trigger** that regenerates the whole
-  chain (each link forces the next);
+- a **causal/derivation chain** → the links as an unordered list, in chain order, **plus a single sentence
+  trigger** that regenerates the whole chain (each link forces the next);
 - an **independent fan-out** (sibling factors with no ordering) → **named, labeled handles**, each tied to the
   reason it exists, so recalling the reason regenerates the child;
 - a **comparison** → a single labeled axis or a grid, so members fall out of the structure.
@@ -355,6 +355,7 @@ reserve the full five for when he's deliberately choosing a question's framing.)
 - Code examples inside the card retain their language identifier (e.g. ` ```java `).
 - **Multiple cards in one response go in ONE fenced block**, separated by a blank line — never one block per
     card. The block is what he copies; splitting it forces N copy operations instead of one.
+- Lists in card answers are unordered (`-`), never numbered (`1.`, `2.`).
 - Java code in cards uses **2-space indentation**, not 4.
 
 Correct format:
