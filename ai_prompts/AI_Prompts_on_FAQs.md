@@ -228,9 +228,9 @@ change — and whenever he re-uploads a file for verification — check:
   hyphen, e.g. "methods — trade-offs" → `methods--trade-offs`.)
 - **No stranded duplicates.** When a card is rewritten into replacements, the *old* version must be
   deleted, or it becomes a "same topic, two versions" defect and steals the anchor.
-- **Cross-file links match real filenames.** Watch the underscore-vs-dot gotcha: files are named
-  with underscores (`1_3_...md`), so links written as `1.3_...md` will break. Filenames use
-  underscores; cross-file links must match.
+- **Cross-file links match real filenames.** The real name is the uploaded document's source name, dots where the
+  user put them. Disk paths (`/mnt/user-data/uploads/...`, `/mnt/project/...`) may have the dots replaced; never take
+  a filename from them. If only the path is available, ask.
 - It is reasonable to do this audit with a quick script when a file is re-uploaded — read the file,
   extract stems and links, and report which resolve and which don't.
 
@@ -300,7 +300,7 @@ Read the whole file first; never diagnose from stems alone. Then, in order:
   exists and carries that thread. If absent, that is the top finding.
 - **Flag orphans, stubs, duplicates.** Cards that route nowhere, TODO openers, repeated answers.
 - **Audit the link/anchor layer** per the "audit links and duplicates" section above (slugs, cross-file
-  underscore-vs-dot, broken same-file anchors). A quick script is the right tool on a re-upload.
+  filenames, broken same-file anchors). A quick script is the right tool on a re-upload.
 - **Tier worst-first by orientation damage:** missing/stub front door > clusters scattered out of order > orphans
   and duplicates > broken links > local stem wording. Report in that order; let him direct scope.
 
