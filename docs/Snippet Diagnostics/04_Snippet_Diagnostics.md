@@ -1,0 +1,971 @@
+### Reusing a stream variable
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```java
+Stream<Order> orders = orderList.stream();
+long count = orders.count();                      // first terminal
+List<Order> big = orders.filter(o -> o.total() > 100).toList();   // second terminal — what happens?
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+The second terminal throws `IllegalStateException: stream has already been operated upon or closed`. A stream is
+single-use: one terminal operation consumes it, and the pipeline object cannot be run again.
+
+Fix — build a fresh stream from the source each time, or materialize once and reuse the collection:
+
+```java
+long count = orderList.size();                                        // the source already knows
+List<Order> big = orderList.stream().filter(o -> o.total() > 100).toList();
+```
+
+There is no need to materialize anything here — `orderList` is already the collection, so the stream in the first
+line bought nothing even before it was reused. Materializing is only the answer when the source is a stream you
+cannot re-derive, and then note that `toList()` returns an unmodifiable list.
+
+The rule: a `Stream` is not a reusable collection; treat it as a one-shot pipeline. Store the source, not the stream.
+
+</details>
+
+</details>
+
+### parallel on an iterate chain
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```java
+Stream.iterate(BigInteger.ONE, n -> n.multiply(BigInteger.TWO))
+      .parallel()
+      .limit(500_000)
+      .forEach(System.out::println);
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+Two problems.
+
+The source has no known size and no cut point: `iterate` produces element N by applying the function to element N-1,
+so no thread can start anywhere but the beginning. `limit` then makes the framework guess how far to go, so it
+produces elements past 500,000 and throws them away. Each `BigInteger` is twice the size of the one before, so every
+wasted element costs more than all the earlier ones together. The run pins every core and never finishes.
+
+Even with a source that split cleanly, parallel would not pay here. It needs both a large element count and enough
+work per element to cover the cost of splitting and merging. The count is there, the work is not — the terminal
+operation only prints. Printing is also serialized on the output stream, so the threads queue behind each other.
+
+Fix: drop `parallel()`.
+
+</details>
+
+</details>
+
+### peek for real work — count case
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```java
+long n = files.stream()
+    .peek(f -> upload(f))     // side effect meant to run for every file
+    .count();                 // just want the number uploaded
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+`upload` may never run. Since Java 9, `count()` returns the size without walking the elements when two things hold:
+the source reports `SIZED` (a `List`, an array, a range) and no stage upstream can change the element count. `peek`
+and `map` cannot change it; `filter` and `flatMap` can. Here both hold, so the pipeline skips traversal and `peek`
+with it. The count is correct; the uploads silently don't happen.
+
+Second, `peek` is the wrong place for work that must happen even when it does run. Its javadoc scopes it to
+debugging. Any element the pipeline can shortcut past — `count()` here, `limit`, `findFirst`, `anyMatch` elsewhere —
+is an element `peek` never sees.
+
+Fix — put the real work in a terminal that must consume every element:
+
+```java
+files.forEach(this::upload);                       // no count needed
+long n = files.size();                             // the number was already known
+```
+
+If the count must come from the pipeline, make the work part of a stage the terminal cannot skip — `map` feeding a
+`collect`, or a `forEach` that counts as it goes.
+
+Note: had the pipeline been `files.stream().filter(f -> f.size() > 0).peek(f -> upload(f)).count()`, `filter` hides
+the size and `peek` runs for every surviving element. The defect is not visible from the `peek` line alone.
+
+</details>
+
+</details>
+
+### toMap with colliding keys
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```java
+Map<Integer, String> byLength = Stream.of("bat", "cat", "dog")   // all length 3
+    .collect(Collectors.toMap(String::length, w -> w));          // runs — result?
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+Throws `IllegalStateException` naming the duplicate key. The two-argument `toMap` assumes keys are unique; the moment
+two elements map to the same key it aborts — no silent overwrite. (The exact message text is not part of the spec,
+so do not match on it.)
+
+Fix — supply a merge function that decides what to do on collision:
+
+```java
+Stream.of("bat", "cat", "dog")
+    .collect(Collectors.toMap(String::length, w -> w, (a, b) -> a + "," + b));
+```
+
+The merge function runs once per collision, so with three same-length words it runs twice. On a sequential stream
+that gives `bat,cat,dog`; under `parallel` the chunks merge in an unspecified order, so a non-commutative merge like
+string concatenation can produce a different arrangement. Use one that does not care about order, or keep the stream
+sequential.
+
+If the key really should be unique, the exception is doing its job — it caught a wrong assumption. If duplicates are
+expected, `groupingBy(String::length)` giving a `Map<Integer, List<String>>` is usually the honest shape.
+
+</details>
+
+</details>
+
+### toMap with a null value
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```java
+Map<Path, String> texts = paths.stream()
+    .collect(Collectors.toMap(p -> p, p -> cache.get(p)));   // cache.get may return null
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+If any `cache.get(p)` returns `null`, this throws `NullPointerException` — even though a plain `HashMap.put(key,
+null)` is legal. `Collectors.toMap` is backed by `Map.merge`, and `merge` uses a null value to mean "remove the key",
+so it forbids null values outright. The collector is stricter than the map it builds.
+
+First decide what a null value means here:
+
+**Keep the pair — null value is fine, just avoid the NPE.** Collect by hand with the three-arg `collect`, which uses
+plain `put`. `HashMap.put` accepts a null value, so nothing throws and the key stays in the map with a null value:
+
+```java
+Map<Path, String> texts = paths.stream()
+    .collect(HashMap::new, (m, p) -> m.put(p, cache.get(p)), HashMap::putAll);  // put allows null value
+```
+
+**Drop the pair — no key when the value is null.** Filter the nulls out before collecting. The natural shape is to
+pair each path with its value first, but a wrong turn hides here:
+
+```java
+paths.stream()
+    .map(p -> Map.entry(p, cache.get(p)))          // WRONG: Map.entry rejects a null value too
+    .filter(e -> e.getValue() != null)
+    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+```
+
+This throws the same `NullPointerException`, now at the `map` step instead of the collector — `Map.entry` forbids a
+null key and a null value, so the pair blows up before the filter can remove it. Use `AbstractMap.SimpleEntry`, which
+allows nulls:
+
+```java
+paths.stream()
+    .map(p -> new AbstractMap.SimpleEntry<>(p, cache.get(p)))   // allows null value
+    .filter(e -> e.getValue() != null)
+    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+```
+
+The trap is that the first line looks like map insertion but isn't — the collector's rule is `merge`'s rule (no null
+values), not `HashMap.put`'s.
+
+</details>
+
+</details>
+
+### Stream.of with an array
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```java
+int[] values = {10, 20, 30};
+int total = Stream.of(values)          // build a stream over the numbers?
+    .mapToInt(Integer::intValue)
+    .sum();                            // compiles?
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+The root cause is `Stream.of(values)`: given an `int[]`, it produces a `Stream<int[]>` with **one** element — the
+whole array — not a stream of three ints. `Stream.of` only spreads a `T...`, and `int[]` isn't `Integer[]`, so the
+array is treated as a single object.
+
+The compiler stops at the next line, not this one: `mapToInt(Integer::intValue)` cannot apply `Integer::intValue` to
+an `int[]`. So the error points at the wrong stage — the defect is one line above the red squiggle.
+
+Note the same code with `Integer[] values` compiles and works, because `Stream.of` then spreads it into three
+elements. The trap is specific to primitive arrays.
+
+Fix — use `Arrays.stream`, which has an `int[]` overload returning an `IntStream`:
+
+```java
+int total = Arrays.stream(values).sum();          // IntStream over 10, 20, 30
+```
+
+The rule: for a primitive array use `Arrays.stream`, not `Stream.of`. `Stream.of` is safe only for object arrays or a
+loose list of arguments.
+
+</details>
+
+</details>
+
+### map where flatMap was needed
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```java
+List<Order> orders = ...;
+List<Item> allItems = orders.stream()
+    .map(Order::items)                             // Order::items returns List<Item>
+    .collect(Collectors.toList());                 // what type is this really?
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+This does not compile. `map(Order::items)` turns each order into its *list* of items, so the stream is
+`Stream<List<Item>>` and `collect(toList())` produces a `List<List<Item>>`, which will not assign to `List<Item>`.
+Flattening never happened; the nesting is still there.
+
+Worth knowing because the compiler does not always save you: assign it to `var`, or pass it to something taking
+`Collection<?>`, and the wrong shape flows on silently until something downstream fails.
+
+Fix — `flatMap` opens each inner list into the stream instead of keeping it as one element. Two valid shapes:
+
+```java
+// one step: element is an Order, so a lambda is needed
+List<Item> allItems = orders.stream()
+    .flatMap(o -> o.items().stream())
+    .toList();                                     // Java 16+, returns an unmodifiable List
+
+// two steps: get the lists, then flatten them — both method references
+List<Item> allItems = orders.stream()
+    .map(Order::items)                             // Stream<List<Item>>
+    .flatMap(Collection::stream)                   // List -> Stream<Item>
+    .toList();
+```
+
+Why `Collection::stream` works as a reference but `Order::items` cannot be one here: `flatMap` wants a function
+`T -> Stream`. After `map`, the element is a `List`, and `Collection::stream` is exactly `List -> Stream`. With a
+raw `Order` element, no single method takes `Order -> Stream<Item>`, so the lambda `o -> o.items().stream()` does
+that step by hand.
+
+Rule of thumb: when the per-element function returns a collection or stream and you want the contents merged, that's
+`flatMap`, not `map`. `map` gives one output per input; `flatMap` gives many.
+
+</details>
+
+</details>
+
+### flatMap with a List-returning reference
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```java
+List<Item> allItems = orders.stream()
+    .flatMap(Order::items)                         // Order::items returns List<Item>
+    .toList();
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+This does not compile. `flatMap` wants a function `T -> Stream`, but `Order::items` is `Order -> List<Item>` — a
+`List`, not a `Stream`. The method reference is one step short: nothing turns the list into a stream.
+
+Fix — call `.stream()` on the list inside a lambda:
+
+```java
+List<Item> allItems = orders.stream()
+    .flatMap(o -> o.items().stream())              // Order -> Stream<Item>
+    .toList();
+```
+
+Why no method reference works in one hop here: the element is an `Order`, and no single method on `Order` returns
+`Stream<Item>` directly. `Order::items` stops at `List`. To stay all method-reference, split it — `map` to the list,
+then `flatMap` the list:
+
+```java
+List<Item> allItems = orders.stream()
+    .map(Order::items)                             // Stream<List<Item>>
+    .flatMap(Collection::stream)                   // Collection::stream is List -> Stream, a valid reference
+    .toList();
+```
+
+The tell: a method reference passed to `flatMap` only compiles when that method already returns a `Stream`. If it
+returns a `List` or array, either wrap it in a lambda that calls `.stream()`, or `map` to it first and `flatMap` with
+`Collection::stream`.
+
+</details>
+
+</details>
+
+### sorted without a comparator
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```java
+record Point(int x, int y) {}                      // not Comparable
+List<Point> sorted = points.stream()
+    .sorted()                                      // compiles — safe?
+    .collect(Collectors.toList());
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+It compiles but throws `ClassCastException` at runtime the moment two elements are compared. The no-argument
+`sorted()` casts elements to `Comparable`; `Point` doesn't implement it, so the cast fails during execution, not at
+compile time.
+
+The throw is not certain, though — it needs a comparison to happen. An empty or one-element stream sorts without
+comparing anything and returns normally. So the bug can sit in production until the day a second element shows up,
+and a unit test with one element passes.
+
+Fix — pass an explicit comparator so the ordering is defined:
+
+```java
+points.stream()
+    .sorted(Comparator.comparingInt(Point::x).thenComparingInt(Point::y))
+    .collect(Collectors.toList());
+```
+
+The trap is the silence at compile time: `sorted()` has no way to demand `Comparable` in its signature, so the check
+slips to runtime. Any time the element isn't obviously `Comparable`, pass a comparator.
+
+</details>
+
+</details>
+
+### findFirst on an empty result
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```java
+User admin = users.stream()
+    .filter(User::isAdmin)
+    .findFirst()
+    .get();                                        // what if no admin exists?
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+If no user is an admin, `findFirst()` returns an empty `Optional` and `.get()` throws `NoSuchElementException`.
+Calling `get()` without checking presence is the classic Optional misuse — it reintroduces exactly the failure
+Optional was meant to make visible.
+
+Fix — decide what "not found" means and encode it, rather than blindly unwrapping:
+
+```java
+User admin = users.stream().filter(User::isAdmin).findFirst()
+    .orElseThrow(() -> new IllegalStateException("no admin configured for tenant " + tenantId));
+// or .orElse(defaultAdmin) / .map(...).orElse(...) if absence is normal
+```
+
+`orElseThrow` with a message beats a bare `get()`: same failure when it's truly unexpected, but the error says what
+was missing and where. Reach for `get()` almost never.
+
+Two notes on the operation itself. `findFirst` means the first in encounter order, which costs coordination under
+`parallel` — use `findAny` when any match will do. And "first admin" is only meaningful if `users` has a defined
+order; from a `HashSet` the result is whichever one iteration happens to reach.
+
+</details>
+
+</details>
+
+### Describe a code snippet #N
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```java
+List<Result> out = ids.stream()
+    .map(this::expensiveLookup)                    // remote call per id, seconds each
+    .filter(r -> r.score() > threshold)
+    .toList();                                     // correct — what's wasteful?
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+Correct, but slow, and the waste has two layers.
+
+**Wrong layer to fix it in — the pipeline itself.** The score comes *from* the lookup, so it cannot be tested before
+the call: there is nothing to filter on until the remote value is back. Reordering stages inside the stream buys
+nothing here.
+
+**Best fix — filter at the source, not in the client.** If the server can apply the score criterion, ask it for only
+the ids that already pass. Then the losers are never fetched, never transferred, never filtered locally. This is the
+real reduction: cut the element count before the data reaches the pipeline, not after.
+
+```java
+List<Result> out = repository.findByScoreAbove(threshold);   // server returns survivors only
+```
+
+**When you must fetch all and filter locally — the cost is N blocking calls, so the lever is concurrency.** Each
+`expensiveLookup` blocks for seconds and the calls are independent, so running them at once collapses wall time from
+N×seconds toward one. This is the case parallel is *for* — not trivial per-element work:
+
+```java
+List<Result> out = ids.parallelStream()
+    .map(this::expensiveLookup)
+    .filter(r -> r.score() > threshold)
+    .toList();
+```
+
+Caveat that must not be skipped: `parallelStream` runs on the shared common `ForkJoinPool`, sized to CPU count. Many
+blocking I/O calls starve it and stall unrelated parallel work. For blocking calls prefer a bounded pool you control
+— submit the lookups to a sized `ExecutorService`, or a virtual-thread executor on Java 21+, rather than raw
+`parallelStream`.
+
+The two levers, in order: reduce the element count at the source first; if you can't, attack the wall time with
+controlled concurrency. Stage reordering is not a lever when the filter needs the mapped value.
+
+</details>
+
+</details>
+
+### Describe a code snippet #N
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```java
+long total = orders.stream()
+    .map(Order::amountCents)                       // returns int
+    .reduce(0, Integer::sum);                      
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+Every element is boxed into an `Integer` to flow through the object stream, then unboxed to add — one allocation per
+order, plus the accumulator boxing. On a large stream this is real overhead for pure arithmetic.
+
+Fix — drop to a primitive stream with `mapToInt`/`mapToLong`, which carries raw values and gives a direct `sum()`:
+
+```java
+long total = orders.stream()
+    .mapToLong(Order::amountCents)                 // primitive stream, no boxing
+    .sum();
+```
+
+`mapToLong` widens the `int` to `long` for free, which also removes an overflow the original had: `Integer::sum`
+accumulates in `int`, so a total above ~2.1 billion cents wraps silently. The declared `long total` hides that — the
+overflow happens inside the reduce, before the widening conversion on assignment.
+
+Scope note: the boxing itself is often not worth changing. Small `Integer` values come from a cache, and the JIT can
+remove short-lived boxes. The overflow is the finding that matters here; the allocation only shows up at large
+element counts.
+
+Rule: when a pipeline ends in numeric aggregation, use `IntStream`/`LongStream`/`DoubleStream` — and pick the width
+that fits the total, not the element.
+
+</details>
+
+</details>
+
+### groupingBy holding whole elements
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```java
+Map<Dept, List<Employee>> byDept = employees.stream()
+    .collect(Collectors.groupingBy(Employee::dept));
+int headcount = byDept.get(SALES).size();          // only ever need the counts
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+Two independent defects.
+
+**Memory.** It builds a full `List<Employee>` per department just to call `size()` on it — every employee object is
+retained when only a number was wanted. Single-argument `groupingBy` defaults its downstream to `toList`.
+
+Fix — give `groupingBy` a downstream collector that computes the number directly:
+
+```java
+Map<Dept, Long> headcount = employees.stream()
+    .collect(Collectors.groupingBy(Employee::dept, Collectors.counting()));
+```
+
+**Absent key — NPE, and it survives the fix in a different form.** `groupingBy` only creates keys it actually sees;
+an empty bucket does not exist. So if no employee is in sales:
+
+- Original: `byDept.get(SALES)` returns `null`, and `null.size()` throws `NullPointerException`.
+- Fixed: `headcount.get(SALES)` returns `null` too — a `Long`. Assigning it to an `int` (or any arithmetic) unboxes
+  it, and unboxing a null `Long` throws `NullPointerException`. Same crash, now hidden inside autoboxing instead of a
+  visible `.size()` call:
+
+```java
+int count = headcount.get(SALES);                  // null Long -> int: NPE on unbox
+```
+
+Reliable form — never let the map hand back null:
+
+```java
+long count = headcount.getOrDefault(SALES, 0L);    // absent dept -> 0, no unboxing of null
+```
+
+`0L` because `counting()` returns `Long`; the default must match the value type.
+
+The lesson: `groupingBy`'s second argument reshapes each bucket — `counting()`, `summingInt(...)`, `mapping(...)`,
+`averagingDouble(...)` collect the summary you need instead of the raw list. And a missing key returns null in both
+shapes; `getOrDefault` is what makes the read safe.
+
+</details>
+
+</details>
+
+### Parallel flag on an iterator source
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```java
+Iterable<Order> orders = repository.streamAll();
+StreamSupport.stream(orders.spliterator(), true)
+             .forEach(this::handle);
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+Two problems.
+
+The source has no known size and no cut point: a spliterator built from a plain `Iterable` only knows `hasNext` /
+`next`, so it cannot hand a range to another thread. All it can do is pull elements one at a time and copy them into
+small arrays for other threads to consume — the pulling stays single-threaded and now carries extra copying on top.
+
+Second, `handle` may now run on ForkJoinPool threads while the database cursor behind `streamAll` lives on the
+calling thread. If the connection closes when the caller returns, the worker threads are still reading from it.
+
+Fix: drop the parallel flag — pass `false`.
+
+</details>
+
+</details>
+
+### Stateful lambda in a pipeline
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```java
+List<String> input = List.of("a", "b", "c", "d", "e", "f", "g", "h");
+
+AtomicInteger position = new AtomicInteger();
+List<String> numbered = input.parallelStream()
+        .map(s -> position.incrementAndGet() + ":" + s)
+        .toList();
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+The lambda keeps state outside itself: the number it produces for an element depends on how many elements were
+mapped before it. The `Stream` spec requires `map`'s function to be stateless — the result for an element must depend
+on that element alone.
+
+
+`AtomicInteger` stops the counter from losing increments, so every number 1..8 appears exactly once and no exception
+is thrown. What it cannot fix is *which* element gets which number: the workers run in an unspecified order, so `"a"`
+may come out as `5:a`. The list order is still correct — `toList` on an ordered stream keeps encounter order — so the
+result looks plausible and is wrong.
+
+
+Dropping `parallel` makes the output right — one thread increments in encounter order — but the lambda is still
+illegal, and the next reader who parallelizes it gets the bug back. Fix the lambda: derive the number from the
+element's position, so the result holds either way.
+
+
+```java
+List<String> numbered = IntStream.range(0, input.size())
+        .mapToObj(i -> (i + 1) + ":" + input.get(i))
+        .toList();
+```
+
+This shape is also safe to parallelize if the work ever grows, because the index carries the position — but
+`input.get(i)` only works on a random-access list; on a `LinkedList` it turns the pass into O(n²).
+
+Separately, `parallel` did not belong here anyway — eight elements and one concatenation each. Parallel pays only
+when the per-element work is heavy enough to cover splitting and merging.
+
+</details>
+
+</details>
+
+### reduce with a non-associative op
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```java
+List<Integer> prices = List.of(100, 20, 5, 3);
+
+int remaining = prices.parallelStream()
+        .reduce(200, (a, b) -> a - b);
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+Subtraction is not associative: `(a - b) - c` is not `a - (b - c)`. `reduce` splits the elements into chunks and
+merges the partial results in whatever order the tree unwinds, so regrouping the operands changes the answer.
+
+There is a second defect in the same line. With the two-argument `reduce`, the identity doubles as the starting value
+for **every chunk**, and the spec requires `f(identity, x) == x`. Here 200 is not an identity for subtraction, so
+each chunk starts from 200 and subtracts its own elements. Sequential gives `200-100-20-5-3 = 72`. Split into two
+chunks it works out as `(200-100-20) - (200-5-3) = -112`. That number is one possible chunking, not *the* wrong
+answer — the framework decides how many chunks to make, based on the core count and the data size, so the result
+moves between machines. It can pass on a laptop and fail in production.
+
+
+Sequential hides both: one chunk means no regrouping and only one application of the identity, so the answer is
+always 72 and nothing flags the bug.
+
+Fix 1 — drop `parallel`. One chunk, so neither defect can fire:
+
+```java
+int remaining = prices.stream()
+        .reduce(200, (a, b) -> a - b);
+```
+
+Fix 2 — make the lambda legal, so the result holds whether or not anyone parallelizes it later. `+` is associative
+and 0 satisfies `0 + x == x`; the starting value is applied once, outside the stream:
+
+```java
+int remaining = 200 - prices.stream()
+        .reduce(0, Integer::sum);
+```
+
+Fix 1 leaves an illegal lambda in the code and only works because nothing splits it — the next reader who adds
+`parallel` gets the bug back. Fix 2 is a rewrite of the calculation, and it is the one to keep.
+
+Separately, `parallel` did not belong here anyway — four numbers and one subtraction each. Parallel pays only when
+the per-element work is heavy enough to cover splitting and merging.
+
+</details>
+
+</details>
+
+### Collectors.toList vs Stream.toList
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```java
+List<String> a = names.stream().collect(Collectors.toList());
+a.add("extra");                                    
+
+List<String> b = names.stream().toList();
+b.add("extra");                                    
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+The second `add` throws `UnsupportedOperationException`. The two look interchangeable but differ in one contract:
+`Stream.toList()` (Java 16+) returns an **unmodifiable** list, while `Collectors.toList()` returns a mutable one (in
+practice an `ArrayList`, though its spec doesn't even promise mutability).
+
+So neither is a safe default without knowing which you got:
+
+```java
+List<String> mutable   = new ArrayList<>(names.stream().toList());   // if you must modify
+List<String> immutable = names.stream().toList();                    // if you want it frozen
+```
+
+Two more differences worth having. `Stream.toList()` allows null elements; `Collectors.toUnmodifiableList()` and
+`List.copyOf` reject them, so those are not drop-in replacements for a stream that can produce nulls. And
+"unmodifiable" is not "immutable" — the list cannot be changed through this reference, but the elements inside it
+still can be, so a mutable element type leaves the contents open.
+
+The trap bites when refactoring one call into the other and a later `add`/`sort`/`remove` suddenly breaks. Pick by
+whether the result must be modifiable, not by which is shorter to type.
+
+</details>
+
+</details>
+
+### Counting matching lines in a file
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```java
+try (BufferedReader reader = Files.newBufferedReader(path)) {
+  long errors = reader.lines()
+                      .parallel()
+                      .filter(line -> line.contains("ERROR"))
+                      .count();
+  System.out.println(errors);
+}
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+The parallel flag buys nothing here and costs coordination.
+
+`BufferedReader.lines()` reads forward through the file. Its spliterator reports no size and has no index, so
+no worker can start at line N without every earlier line already being read. Splitting can only hand out batches
+of lines that one thread has already pulled — the reading stays serial, and the other threads wait on it.
+
+The per-line work is one `contains` call, so even a source that split cleanly would not pay. Parallel needs both a
+large element count and enough work per element to cover the split-and-merge cost.
+
+Fix: drop `parallel()`.
+
+```java
+try (BufferedReader reader = Files.newBufferedReader(path)) {
+  long errors = reader.lines()
+                      .filter(line -> line.contains("ERROR"))
+                      .count();
+}
+```
+
+Rewrite if the file is large and the per-line work is real: read into a `List` first, or use `Files.lines` on a
+memory-mapped source, so the source has a size and an index before you parallelize. Parallelizing the read itself
+is not available from this API.
+
+</details>
+
+</details>
+
+### Summing into a map by parity
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```java
+List<Integer> numbers = IntStream.rangeClosed(1, 10_000).boxed().toList();
+Map<Boolean, Integer> shared = new ConcurrentHashMap<>();
+
+Map<Boolean, Integer> result =
+    numbers.parallelStream()
+           .reduce(shared,
+                   (acc, n) -> { acc.merge(n % 2 == 0, n, Integer::sum); return acc; },
+                   (a, b) -> { b.forEach((k, v) -> a.merge(k, v, Integer::sum)); return a; });
+
+System.out.println(result);
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+Prints wrong sums — one run gave `{false=2600, true=15360}` where the answer is `{false=25000000, true=25010000}`.
+Two contract breaks, both in `reduce`.
+
+**The identity is one instance, not a value.** `reduce(identity, acc, comb)` requires `comb(identity, x)` to equal
+`x`, which only holds if the identity is empty. Here every chunk starts from the same `shared` map, so the "empty"
+starting value already holds what other chunks wrote. There is no empty state after the first element.
+
+**The accumulator mutates and returns the same reference.** `reduce` promises the accumulator produces a new value
+and leaves its input alone. This one writes into `acc` and hands the same object back.
+
+Together those make `a` and `b` the same object in every combiner call. `combine(m, m)` walks the map and sums each
+value into itself, so every combiner call doubles both buckets. How many calls run depends on how the source split,
+so the printed number changes between runs — and on a small list the pool may not split at all and the code looks
+correct.
+
+`ConcurrentHashMap` hides nothing here and fixes nothing. It keeps the map structurally intact under concurrent
+writes, so no entry is lost and nothing throws — which is why the failure is silent.
+
+**Fix:** `reduce` cannot express mutable accumulation. It takes one identity *value*; a `Collector` takes a
+*supplier*, so each chunk gets a fresh container and the combiner always receives two different maps.
+
+```java
+Map<Boolean, Integer> result =
+    numbers.parallelStream()
+           .collect(Collectors.partitioningBy(n -> n % 2 == 0,
+                                              Collectors.summingInt(n -> n)));
+```
+
+`reduce` is for values — `sum`, `min`, `max`. Building a collection is `collect`.
+
+</details>
+
+</details>
+
+### Optional as a field
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```java
+class Config {
+  private Optional<String> region;                 // "clean null-safety"?
+  Config(String region) { this.region = Optional.ofNullable(region); }
+}
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+`Optional` is the wrong tool for a field. It isn't `Serializable`, it adds an allocation per instance, and it still
+allows `region = null`, so it doesn't even remove the null it was meant to. It was designed as a **return type** for
+methods that might have nothing to return, not as a container for state.
+
+Fix — store a plain nullable field (or split the type), and hand out `Optional` only at the read boundary:
+
+```java
+class Config {
+  private final String region;                     // may be null
+  Config(String region) { this.region = region; }
+  Optional<String> region() { return Optional.ofNullable(region); }   // Optional at the API edge
+}
+```
+
+Two of those three costs are conditional. `Serializable` only matters if the class is actually serialized, and the
+allocation only matters at high instance counts. The one that always holds is the third: an `Optional` field can
+itself be null, so every reader still needs a null check *and* an `isPresent` check — two states where there was one.
+
+The same applies to a record component. `record Config(Optional<String> region)` compiles, but the canonical
+constructor will accept `null` for it, so the component carries the same double state.
+
+The rule: `Optional` in method returns, not in fields, parameters, or collections.
+
+</details>
+
+</details>
+
+### Infinite stream without a limit
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```java
+List<Integer> squares = Stream.iterate(1, n -> n + 1)
+    .map(n -> n * n)
+    .filter(n -> n % 2 == 0)
+    .collect(Collectors.toList());                 // what does this do at runtime?
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+It never returns. `Stream.iterate(1, n -> n + 1)` is an infinite source, and `filter` does not short-circuit — it
+keeps pulling forever while `collect` keeps accumulating. Nothing tells the pipeline to stop, so it ends in
+`OutOfMemoryError`.
+
+Before that, a quieter defect: `n * n` on `int` overflows at n = 46341 and starts producing negative values. The
+filter keeps testing `n % 2 == 0`, which still passes for half of them, so the list fills with wrong numbers for a
+long time before memory runs out. `mapToLong` first, or `Math.multiplyExact` to make the overflow throw.
+
+Fix — bound an infinite source with a short-circuiting stage before the terminal:
+
+```java
+List<Integer> squares = Stream.iterate(1, n -> n + 1)
+    .map(n -> n * n)
+    .filter(n -> n % 2 == 0)
+    .limit(10)                                     // now the pull stops
+    .collect(Collectors.toList());
+// or the 3-arg iterate with a predicate: Stream.iterate(1, n -> n < 100, n -> n + 1)
+```
+
+The trap: `filter` looks like it narrows the stream, but it only narrows what passes — it never ends it. Only
+`limit`, `takeWhile`, `findFirst`, or a short-circuiting match can terminate an infinite source.
+
+</details>
+
+</details>
+
+### Modifying source during collect
+<details><summary><strong>Show details</strong></summary>
+
+<details><summary>Show code</summary>
+
+```java
+List<Task> tasks = new ArrayList<>(loaded);
+tasks.stream()
+    .filter(Task::isStale)
+    .forEach(tasks::remove);                        // prune stale tasks — safe?
+```
+
+</details>
+
+<details><summary>Show answer</summary>
+
+This throws `ConcurrentModificationException`. The `forEach` is still reading `tasks` through the stream while
+`tasks::remove` structurally changes that same list.
+
+Do not read that as a rule. `CME` is documented as best-effort — the spliterator records `modCount` when it starts
+and compares it at points in the traversal, not per element, so the elements keep being delivered and the check fires
+at the end. It is a bug report, not a guard: nothing was prevented, you were just told. Change the shape a little and
+you are not told at all. `tasks.set(i, other)` does not touch `modCount`, so no exception and an unspecified mix of
+old and new values. `CopyOnWriteArrayList` and the concurrent collections never throw. Under `parallel` the timing
+shifts and a wrong result is as likely as an exception.
+
+So the defect is not "it throws". The defect is that modifying the source of a live stream is undefined behaviour,
+and this particular source happened to notice.
+
+Fix — separate the read from the write: collect what to remove, then remove it (or use `removeIf`, built for exactly
+this):
+
+```java
+tasks.removeIf(Task::isStale);                      // one call, no stream, no interference
+
+// or, if a stream is needed to decide:
+List<Task> stale = tasks.stream().filter(Task::isStale).toList();
+tasks.removeAll(stale);
+```
+
+The rule: never write to the collection a stream is reading while the terminal runs. Decide with the stream, mutate
+afterward.
+
+</details>
+
+</details>
