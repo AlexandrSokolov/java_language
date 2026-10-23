@@ -1,0 +1,17 @@
+# Auto-Configuration
+
+How Spring Boot configures beans on its own.
+
+- How `@EnableAutoConfiguration` finds auto-configurations — `AutoConfiguration.imports`; `spring.factories` is the
+  old way, no longer read for auto-configuration since Boot 3.
+- Conditions — `@ConditionalOnClass`, `@ConditionalOnMissingBean`, `@ConditionalOnProperty`.
+- Starters.
+- Seeing what was applied — the condition report (`--debug`).
+- Writing your own starter.
+
+
+# Properties and Profiles
+
+- Where configuration comes from, and which source wins.
+- `@ConfigurationProperties` vs `@Value`.
+- Profiles — settings per environment.
