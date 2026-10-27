@@ -332,6 +332,31 @@ Long sum = 0L;      // long was meant
 
 </details>
 
+### Boxed primitive vs `BigDecimal` — what differs?
+<details><summary>Show answer</summary>
+
+```java
+Integer i = 10;                                // compiler boxes: Integer.valueOf(10)
+int sum = i + 5;                               // compiler unboxes, adds as int
+int max = Integer.max(i, 5);                   // static helper: takes ints, i is unboxed
+
+BigDecimal a = new BigDecimal("10");
+BigDecimal s = a + 5;                          // compile error: no operators, no boxing
+BigDecimal t = a.add(BigDecimal.valueOf(5));   // instance method; returns a new object
+```
+
+They look alike — both are immutable `Number` subclasses. But a boxed type wraps one primitive, and `BigDecimal` has
+no primitive inside:
+
+- **Boxed:** the compiler boxes and unboxes for you, so math runs on the primitive — through operators, or through
+  static helpers that take primitives (`Integer.sum`, `Integer.max`, `Math.addExact`).
+- **`BigDecimal`:** no boxing, no operators. Math is only instance methods on the object: `add`, `subtract`,
+  `multiply`, `divide`.
+
+A boxed type is a primitive inside an object; `BigDecimal` is an object all the way down.
+
+</details>
+
 ### When is String a poor substitute for a real type?
 <details><summary>Show answer</summary>
 
