@@ -27,7 +27,7 @@ specifying and implementing common data structures, following consistent design 
 
 - [`java.util.Map` - key-value entries to store and retrieve elements.]()
 
-<img src="../../docs/images/Main_Collection_Interfaces.png" alt="Main Interfaces" width="600">
+<img src="../../images/Main_Collection_Interfaces.png" alt="Main Interfaces" width="600">
 
 
 </details>
