@@ -21,13 +21,15 @@ If you lose your place: think of the next keyword, say its bridge sentence, and 
 
 ---
 
-## 2. Full version (about 1.5 minutes; 2 minutes with the tech lines)
+## 2. Full version (about 2 minutes at a calm pace; 2.5 minutes with the tech lines)
 
 Lines marked **(tech)** are for the technical team. Skip them with HR.
 
+*Don't speed up to make it shorter. If you need it shorter, cut the tech lines.*
+
 > **[Engineer]** I'm a Java backend developer with about twenty years in IT, eighteen of them as a developer. I'm an engineer by education, from Novosibirsk State Technical University.
 >
-> **[Core]** In 2014 I joined BrandMaker's development team in Russia and worked on the core of the product: users, permissions, groups and administration. So I learned the product from the inside. In 2016 I moved to the headquarters in Karlsruhe, and that move defined the next ten years of my career.
+> **[Core]** In 2014 I joined BrandMaker's development team in Russia and worked on the core of the product, the administration module: users, permissions and groups. So I learned the product from the inside. In 2016 I moved to the headquarters in Karlsruhe, and that move defined the next ten years of my career.
 >
 > **[Integration]** There I joined the integration team. We extended the product and connected it with the systems of large international customers like IKEA, Amazon and Deutsche Bank. The team was small, so I didn't only write code. I designed the integrations: the data models and the communication flows.
 > **(tech)** We used REST, webhooks, JMS and later Kafka, and file exchange over SFTP. We also moved our components from a big JEE monolith to Spring-based microservices running in Docker.
@@ -74,7 +76,11 @@ For a recruiter call, or when they say "briefly, please":
 - **No criticism of the owners.** No "private equity story", no "short-term cost cutting", no cancelled customers. Even a sympathetic interviewer will wonder how you'll talk about *their* company one day. "I was the last one kept" is a stronger message than any complaint.
 - **No guessing about the owners' reasons.** You don't know them, and guessing sounds bitter.
 - **No "Russian bear" joke.** Jokes about nationality are risky, and "quiet" sounds like a communication weakness. Your focused, quiet style belongs in Topic 6, framed as a strength.
-- **No promotion date.** Your reference letter and your story should never show two versions of your title.
+- **No promotion date, unless they ask.** Your CV and your reference letter say Senior Software Developer since 2016. The formal title came later, in 2021. Don't bring up the date yourself: leaving out a detail nobody asked about is not a lie. If they ask directly ("When did you become senior?"), tell the truth, calmly:
+
+  > From my first year in Germany, management told me directly that they saw me as a senior developer, and I worked at that level from the start. The formal title came later, in 2021. My reference letter describes the whole period as senior.
+
+  If they ask why the title came later: give the real reason in one short sentence. Everything in this answer is true, so you can say it calmly, without a sigh. It doesn't contradict the letter. It explains it: the company itself counted you as senior from 2016.
 
 ---
 
