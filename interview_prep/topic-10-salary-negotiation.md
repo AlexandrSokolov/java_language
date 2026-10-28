@@ -134,6 +134,39 @@
 | 85 | 92 |
 | 90 и выше | по зарплате не торгуйтесь, только пакет |
 
+### Шаг 3, сильный вариант: ваша текущая зарплата как аргумент
+
+*Это единственное исключение из правила «не называть текущую зарплату» (темы 3 и 9). На этапе предложения ваша текущая зарплата — сильный аргумент: это правда, и её можно доказать расчётным листком («Gehaltsabrechnung», по-английски «payslip»).*
+
+**Когда использовать:**
+- их вилка примерно на уровне вашей текущей зарплаты или ниже, например 80–90;
+- только в разговоре о зарплате с HR, никогда на интервью.
+
+**Когда не использовать:** если их вилка выше вашей текущей зарплаты (Databricks, банки). Тогда ваша цифра только потянет предложение вниз.
+
+**Только цифра, без истории.** Не рассказывайте, с какой низкой зарплаты вы начинали. Это не показывает вашу ценность, а новый работодатель может услышать: «он уже соглашался на мало — согласится и сейчас». Текущая цифра говорит всё сама.
+
+**Пример: вилка 80–90, они предлагают 80.**
+
+> Thank you, I'm very interested. My current salary is in the mid-eighties, so I was hoping for around 88. Is there room to move closer to that?
+
+*После цифры — молчите.*
+
+**Слова из этой фразы:**
+
+| English | По-русски |
+|---|---|
+| my current salary | моя текущая зарплата |
+| in the mid-eighties | около 85 тысяч (примерно 84–86) |
+| I was hoping for around 88 | я рассчитывал примерно на 88 |
+| Is there room to move closer to that? | Есть ли возможность приблизиться к этой цифре? *(room — здесь «запас, возможность»)* |
+
+**Если попросят подтвердить:**
+
+> Of course. I can send you my latest payslip.
+
+*Назвали цифру как аргумент — она должна быть точной. Ваша — точная. В расчётном листке можно закрыть всё, кроме брутто-суммы: налоговый класс, церковный налог и другие личные данные им не нужны.*
+
 ### Шаг 4. Их ответ
 
 **A. "We can go up to X."**
@@ -220,6 +253,7 @@
 - **Цифру, которую вы не готовы принять.** Если назвали 80 — 80 должно вас устраивать.
 - **Согласие по телефону сразу.** Сначала письменное предложение.
 - **Разговор о деньгах с техническими интервьюерами.**
+- **Историю роста зарплаты и низкий старт.** Если используете текущую зарплату как аргумент — только текущую цифру (раздел 6, шаг 3).
 
 ---
 
@@ -264,6 +298,8 @@
 | We were thinking about X | Is that fixed, or including a bonus? |
 | The offer | Thank you. Could you send it in writing? A day or two to look at it. |
 | Offer below target | I was hoping for [contra]. Is there room to move closer? |
+| Range 80–90, offer 80 | My current salary is in the mid-eighties, so I was hoping for around 88. Is there room to move closer to that? |
+| Can you prove it? | Of course. I can send you my latest payslip. |
 | No room on salary | Could we look at other parts of the package? |
 | — (you have another offer) | I have another offer at X. You're my first choice. Can you get closer? |
 | — (raises) | How do salary reviews work here? Review after probation, in the contract? |
