@@ -25,8 +25,6 @@ If you lose your place: think of the next keyword, say its bridge sentence, and 
 
 Lines marked **(tech)** are for the technical team. Skip them with HR.
 
-*Don't speed up to make it shorter. If you need it shorter, cut the tech lines.*
-
 > **[Engineer]** I'm a Java backend developer with about twenty years in IT, eighteen of them as a developer. I'm an engineer by education, from Novosibirsk State Technical University.
 >
 > **[Core]** In 2014 I joined BrandMaker's development team in Russia and worked on the core of the product, the administration module: users, permissions and groups. So I learned the product from the inside. In 2016 I moved to the headquarters in Karlsruhe, and that move defined the next ten years of my career.
@@ -38,7 +36,7 @@ Lines marked **(tech)** are for the technical team. Skip them with HR.
 >
 > **[Easy to support]** That taught me my strongest skill: building systems that are easy to support. I added validations and clear status information, so even business users could see what went wrong, and often fix it without calling support.
 >
-> **[Last one kept → Next]** I also grew as a colleague: I mentored juniors, and I learned to disagree openly but respectfully. This year the owners closed the BrandMaker product and all teams in Europe, and I was the last developer they kept. Now I'm looking for a team where I can own complex backend systems and make them reliable and easy to support.
+> **[Last one kept → Next]** I also grew as a colleague: I mentored juniors, and I learned to disagree openly but respectfully. This year the owners closed the BrandMaker product and all teams in Europe, and I was the last developer they kept. Now I'm looking for a team that takes on hard problems. A team where I can use my experience to make systems reliable and easy to support. And a team where I can keep growing, not only use what I already know: I'd like to go deeper into distributed systems and work more with the cloud.
 
 ---
 
