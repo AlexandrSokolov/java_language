@@ -2,6 +2,8 @@
 
 *Как пользоваться: о деньгах говорят на трёх этапах — анкета, первый звонок с HR и предложение (offer). На каждом этапе своя цель. Ниже для каждого этапа: что говорят они → что отвечаете вы. В конце — шпаргалка. Ответы — на английском, пояснения — по-русски.*
 
+*Карточки: в заголовке — что говорят они или ваша ситуация. Ответьте вслух, потом откройте и сверьтесь.*
+
 ---
 
 ## 1. Ваши числа (только для вас)
@@ -19,113 +21,234 @@
 
 ---
 
-## 2. Где о деньгах говорят
+## 2. Цепочки
+
+Сначала запомните цепочки. Если сбились: вспомните следующий шаг, и разговор продолжится.
+
+### Где о деньгах говорят
+
+**Цепочка:** Form → First HR call → (tech interviews: no money) → Offer
 
 | Этап | Что происходит | Ваша цель |
 |---|---|---|
-| Анкета | поле «Gehaltsvorstellung» | не отсеяться и не продешевить |
-| Первый звонок с HR | «What are your expectations?» | остаться в процессе, узнать их вилку |
-| Технические интервью | о деньгах не говорят | — |
-| Предложение | конкретная цифра | поднять цифру или пакет |
+| **Анкета** | поле «Gehaltsvorstellung» | не отсеяться и не продешевить |
+| **Первый звонок с HR** | «What are your expectations?» | остаться в процессе, узнать их вилку |
+| **Технические интервью** | о деньгах не говорят | — |
+| **Предложение** | конкретная цифра | поднять цифру или пакет |
+
+### First HR call
+
+**Цепочка:** Their range first → React to the range → They insist → No minimum, no current salary → Fixed or bonus?
+
+| # | Ключ | Что делаете | Первая фраза |
+|---|---|---|---|
+| 1 | **Their range first** | Не называете цифру первым. | *"Before I give a number…"* |
+| 2 | **React to the range** | Совпадает → «fits»; чуть ниже → «flexible, let's continue»; намного ниже → «Is there flexibility?» | *"That fits…" / "That's a bit below…" / "That's quite far…"* |
+| 3 | **They insist** | Вилка 80–90, гибкость. | *"My expectation is around 80 to 90…"* |
+| 4 | **No minimum, no current salary** | Каждый раз возвращаете к 80–90. | *"I don't really think in minimums…" / "I'd rather focus on this role…"* |
+| 5 | **Fixed or bonus?** | На любую их цифру — уточнить Fixgehalt или Zielgehalt. | *"Is that the fixed salary…"* |
+
+### The offer
+
+**Цепочка:** Thank and take time → Clarify details → Counter once → Their answer
+
+| # | Ключ | Что делаете | Первая фраза |
+|---|---|---|---|
+| 1 | **Thank and take time** | Не соглашаетесь по телефону, просите письменно. | *"Thank you, I'm really happy to hear that…"* |
+| 2 | **Clarify details** | Фикс или бонус, 12 или 13 зарплат, отпуск, Tarif или AT, пересмотр, испытательный срок. | *"Is this the fixed salary…"* |
+| 3 | **Counter once** | +8–10%, потом молчите. Сильный вариант — текущая зарплата как аргумент. | *"…I was hoping for [contra]."* |
+| 4 | **Their answer** | «Up to X» → соглашаетесь; «can't move» → пакет; «final» → решение по минимуму. | — |
+
+### Остальное — короткие цепочки
+
+- **Другие предложения:** only true → no company name → a request, not an ultimatum → your range grows
+- **Повышения:** ask about the process → agree a review after probation, in the contract
+- **Бонус:** fixed salary first → move part of the bonus into the base
+- **Сроки ответа:** ask for the deadline → more time only if true → ask others to speed up
 
 ---
 
-## 3. Анкета: «Gehaltsvorstellung»
+## 3. Анкета — card
 
-> 85.000 € brutto p. a., je nach Gesamtpaket
+### Form · "Gehaltsvorstellung"
+<details><summary>Show answer</summary>
+
+85.000 € brutto p. a., je nach Gesamtpaket
+
+</details>
 
 *Одна цифра, близкая к цели. «Je nach Gesamtpaket» («в зависимости от всего пакета») оставляет место для разговора.*
 
 ---
 
-## 4. Первый звонок с HR
+## 4. First HR call — cards
 
-### Они: "What are your salary expectations?"
+### HR 1 · "What are your salary expectations?"
+<details><summary>Show answer</summary>
 
-**Вы — сначала их вилка:**
+Before I give a number, could you share the range for this position?
 
-> Before I give a number, could you share the range for this position?
+</details>
 
-### Они называют вилку
+### HR 2a · Their range fits yours or is higher (e.g. 80–95)
+<details><summary>Show answer</summary>
 
-**A. Вилка совпадает с вашей или выше** (например, 80–95):
+That fits my expectations.
 
-> That fits my expectations.
+</details>
 
 *Больше ничего не говорите. Не называйте цифру внутри их вилки: этим вы сами опускаете себя к её нижней границе.*
 
-**B. Вилка немного ниже** (например, 70–80 или 75–85):
+### HR 2b · Their range is a bit lower (e.g. 70–80, 75–85)
+<details><summary>Show answer</summary>
 
-> That's a bit below what I expected. But I'm really interested in the role, and the team and the technology matter a lot to me, so I'm flexible. Let's continue.
+That's a bit below what I expected. But I'm really interested in the role,
+and the team and the technology matter a lot to me, so I'm flexible. Let's continue.
+
+</details>
 
 *Не соглашайтесь на их цифру и не отказывайтесь. Цель — дойти до предложения.*
 
-**C. Вилка намного ниже минимума** (например, 55–65):
+### HR 2c · Their range is far below your minimum (e.g. 55–65)
+<details><summary>Show answer</summary>
 
-> That's quite far from my expectations. Is there flexibility for a very experienced candidate?
+That's quite far from my expectations. Is there flexibility for a very experienced candidate?
 
-*Если гибкости нет — вежливо закончите. Это экономит время обеим сторонам:* «Thank you for being open. I think we're too far apart on salary, but I'd be happy to stay in touch.»
+</details>
 
-### Они не называют вилку и настаивают
+### HR 2c · No flexibility: end politely
+<details><summary>Show answer</summary>
 
-> My expectation is around 80 to 90 thousand euros gross per year, depending on the role and the whole package. I'm flexible for the right role.
+Thank you for being open. I think we're too far apart on salary, but I'd be happy to stay in touch.
 
-### Они: "What's your minimum?" / "Would you accept 70?"
+</details>
 
-> I don't really think in minimums. It depends on the whole package and the role. My expectation is around 80 to 90.
+*Это экономит время обеим сторонам.*
+
+### HR 3 · No range, and they insist
+<details><summary>Show answer</summary>
+
+My expectation is around 80 to 90 thousand euros gross per year, depending on the role and the whole package.
+I'm flexible for the right role.
+
+</details>
+
+### HR 4 · "What's your minimum?" / "Would you accept 70?"
+<details><summary>Show answer</summary>
+
+I don't really think in minimums. It depends on the whole package and the role.
+My expectation is around 80 to 90.
+
+</details>
 
 *Никогда не называйте минимум. Его услышат как вашу цену.*
 
-### Они: "What do you earn now?"
+### HR 5 · "What do you earn now?"
+<details><summary>Show answer</summary>
 
-> I'd rather focus on this role. My previous salary was set for a different role at a different time. My expectation here is around 80 to 90.
+I'd rather focus on this role. My previous salary was set for a different role at a different time.
+My expectation here is around 80 to 90.
 
-*Только если давят очень сильно:* «It was in the mid-eighties. But I'm flexible for the right role.» *Это правда и не страшно, но лучше не доходить до этого.*
+</details>
 
-### Они называют одну цифру: "We were thinking about 80."
+### HR 5 · Only if they push very hard
+<details><summary>Show answer</summary>
 
-> Is that the fixed salary, or the total including a bonus?
+It was in the mid-eighties. But I'm flexible for the right role.
+
+</details>
+
+*Это правда и не страшно, но лучше не доходить до этого.*
+
+### HR 6 · "We were thinking about 80."
+<details><summary>Show answer</summary>
+
+Is that the fixed salary, or the total including a bonus?
+
+</details>
 
 *Важно: в Германии часто называют «Zielgehalt» — сумму вместе с бонусом. Вам нужен «Fixgehalt», фиксированная часть.*
 
 ---
 
-## 5. Технические интервью
+## 5. Технические интервью — card
 
-*О деньгах здесь не говорят. Если спросят:*
+### Tech interview · They ask about money
+<details><summary>Show answer</summary>
 
-> I'm sure we'll find a good solution. I'd be happy to discuss the details with HR.
+I'm sure we'll find a good solution. I'd be happy to discuss the details with HR.
+
+</details>
 
 ---
 
-## 6. Предложение (offer)
+## 6. The offer — cards
 
-### Шаг 1. Поблагодарить и взять время
+### Offer 1 · They make you an offer
+<details><summary>Show answer</summary>
 
-> Thank you, I'm really happy to hear that. Could you send me the offer in writing? I'd like a day or two to look at the whole package.
+Thank you, I'm really happy to hear that. Could you send me the offer in writing?
+I'd like a day or two to look at the whole package.
+
+</details>
 
 *Никогда не соглашайтесь сразу по телефону, даже если цифра хорошая. Решение — после письменного предложения.*
 
-### Шаг 2. Уточнить детали
+### Offer 2 · Clarify the details
 
-| Вопрос | По-английски |
-|---|---|
-| Фиксированная часть или с бонусом? | Is this the fixed salary, or including a bonus? |
-| 12 или 13 зарплат? | Is it paid in 12 or 13 monthly salaries? |
-| Сколько дней отпуска? | How many vacation days are there? |
-| Есть ли коллективный договор? | Is the role under a collective agreement, or "außertariflich"? |
-| Как пересматривают зарплату? | How do salary reviews work here? |
-| Испытательный срок? | How long is the probation period? |
+### Details · Fixed or bonus?
+<details><summary>Show question</summary>
 
-*Про коллективный договор: если должность по «Tarifvertrag», повышения каждый год прописаны заранее. Если «außertariflich» (AT), всё решают переговоры.*
+Is this the fixed salary, or including a bonus?
 
-### Шаг 3. Встречное предложение — всегда один раз
+</details>
 
-*Если предложение ниже вашей цели, вежливо попросите больше. Это нормально и в Германии ожидаемо. Обычно стороны сходятся где-то посередине, поэтому первая цифра выше цели.*
+### Details · 12 or 13 salaries?
+<details><summary>Show question</summary>
 
-> I'm very interested, and I'd like to make this work. Based on my experience and the role, I was hoping for [contra]. Is there room to move closer to that?
+Is it paid in 12 or 13 monthly salaries?
 
-*После цифры — молчите. Пауза работает на вас.*
+</details>
+
+### Details · Vacation days
+<details><summary>Show question</summary>
+
+How many vacation days are there?
+
+</details>
+
+### Details · Collective agreement
+<details><summary>Show question</summary>
+
+Is the role under a collective agreement, or "außertariflich"?
+
+</details>
+
+*Если должность по «Tarifvertrag», повышения каждый год прописаны заранее. Если «außertariflich» (AT), всё решают переговоры.*
+
+### Details · Salary reviews
+<details><summary>Show question</summary>
+
+How do salary reviews work here?
+
+</details>
+
+### Details · Probation
+<details><summary>Show question</summary>
+
+How long is the probation period?
+
+</details>
+
+### Offer 3 · The counter-offer (always once)
+<details><summary>Show answer</summary>
+
+I'm very interested, and I'd like to make this work.
+Based on my experience and the role, I was hoping for [contra]. Is there room to move closer to that?
+
+</details>
+
+*Если предложение ниже вашей цели, вежливо попросите больше. Это нормально и в Германии ожидаемо. Обычно стороны сходятся где-то посередине, поэтому первая цифра выше цели. После цифры — молчите. Пауза работает на вас.*
 
 | Их предложение | Ваша контр-цифра |
 |---|---|
@@ -134,7 +257,13 @@
 | 85 | 92 |
 | 90 и выше | по зарплате не торгуйтесь, только пакет |
 
-### Шаг 3, сильный вариант: ваша текущая зарплата как аргумент
+### Offer 3, strong version · Range 80–90, they offer 80
+<details><summary>Show answer</summary>
+
+Thank you, I'm very interested. My current salary is in the mid-eighties,
+so I was hoping for around 88. Is there room to move closer to that?
+
+</details>
 
 *Это единственное исключение из правила «не называть текущую зарплату» (темы 3 и 9). На этапе предложения ваша текущая зарплата — сильный аргумент: это правда, и её можно доказать расчётным листком («Gehaltsabrechnung», по-английски «payslip»).*
 
@@ -146,12 +275,6 @@
 
 **Только цифра, без истории.** Не рассказывайте, с какой низкой зарплаты вы начинали. Это не показывает вашу ценность, а новый работодатель может услышать: «он уже соглашался на мало — согласится и сейчас». Текущая цифра говорит всё сама.
 
-**Пример: вилка 80–90, они предлагают 80.**
-
-> Thank you, I'm very interested. My current salary is in the mid-eighties, so I was hoping for around 88. Is there room to move closer to that?
-
-*После цифры — молчите.*
-
 **Слова из этой фразы:**
 
 | English | По-русски |
@@ -161,31 +284,41 @@
 | I was hoping for around 88 | я рассчитывал примерно на 88 |
 | Is there room to move closer to that? | Есть ли возможность приблизиться к этой цифре? *(room — здесь «запас, возможность»)* |
 
-**Если попросят подтвердить:**
+### Offer 3 · "Can you prove your current salary?"
+<details><summary>Show answer</summary>
 
-> Of course. I can send you my latest payslip.
+Of course. I can send you my latest payslip.
+
+</details>
 
 *Назвали цифру как аргумент — она должна быть точной. Ваша — точная. В расчётном листке можно закрыть всё, кроме брутто-суммы: налоговый класс, церковный налог и другие личные данные им не нужны.*
 
-### Шаг 4. Их ответ
+### Offer 4a · "We can go up to X."
+<details><summary>Show answer</summary>
 
-**A. "We can go up to X."**
+Thank you, that works for me.
 
-> Thank you, that works for me.
+</details>
 
 *Можно добавить одну просьбу из пакета, например пересмотр после испытательного срока (раздел 8).*
 
-**B. "We can't move on salary."**
+### Offer 4b · "We can't move on salary."
+<details><summary>Show answer</summary>
 
-> I understand. Could we look at other parts of the package instead?
+I understand. Could we look at other parts of the package instead?
+
+</details>
 
 *Просите по очереди, не всё сразу: пересмотр зарплаты после испытательного срока, письменно в договоре · больше дней отпуска · гибкий график · помощь с переездом и поиском жилья · больше home office в первые месяцы.*
 
-**C. "This is our final offer."**
+### Offer 4c · "This is our final offer." (you accept)
+<details><summary>Show answer</summary>
 
-*Решение по вашему минимуму и вашим альтернативам. Если цифра не ниже минимума и роль подходит — соглашайтесь спокойно и с благодарностью:*
+Thank you. I accept, and I'm looking forward to working with you.
 
-> Thank you. I accept, and I'm looking forward to working with you.
+</details>
+
+*Решение по вашему минимуму и вашим альтернативам. Если цифра не ниже минимума и роль подходит — соглашайтесь спокойно и с благодарностью.*
 
 ---
 
@@ -199,17 +332,31 @@
 - **Не ультиматум, а просьба.** Покажите, что эта компания для вас предпочтительнее.
 - **Ваша вилка растёт.** Компании, с которой вы только начинаете, называйте новую вилку, например 85–95.
 
-**На этапе предложения:**
+### Other offer · At the offer stage
+<details><summary>Show answer</summary>
 
-> I have another offer at [X]. Your company is my first choice, because [real reason: the team, the technology, the product]. Is there a way to get closer to that?
+I have another offer at [X]. Your company is my first choice,
+because [real reason: the team, the technology, the product]. Is there a way to get closer to that?
 
-**Если вы ещё на интервью, а другое предложение уже есть:**
+</details>
 
-> I'd like to be open with you. I've received another offer, with a deadline on [date]. Your company is my preferred option. Would it be possible to speed up the process?
+### Other offer · You're still interviewing here
+<details><summary>Show answer</summary>
 
-**Если компания, с которой вы говорили раньше, ещё не сделала предложение, а ситуация изменилась:**
+I'd like to be open with you. I've received another offer, with a deadline on [date].
+Your company is my preferred option. Would it be possible to speed up the process?
 
-> Since we last spoke, I've received an offer, so my expectations are now around [X]. But I'd still prefer your company.
+</details>
+
+### Other offer · Your expectations have changed
+<details><summary>Show answer</summary>
+
+Since we last spoke, I've received an offer, so my expectations are now around [X].
+But I'd still prefer your company.
+
+</details>
+
+*Для компании, с которой вы говорили раньше, но которая ещё не сделала предложение.*
 
 ---
 
@@ -217,13 +364,20 @@
 
 *Автоматическая индексация зарплаты в Германии бывает в основном у компаний с «Tarifvertrag». Требовать гарантированные 3–5% в год звучит жёстко. Лучше спросить о процессе, а договориться о конкретном пересмотре.*
 
-**Мягкий вопрос (на этапе предложения):**
+### Raises · The soft question (offer stage)
+<details><summary>Show question</summary>
 
-> How do salary reviews work here? Is there an annual review, and do you take inflation into account?
+How do salary reviews work here? Is there an annual review, and do you take inflation into account?
 
-**Сильный ход, если они не дотягивают до вашей цифры:**
+</details>
 
-> If 80 is the maximum for now, could we agree on a salary review after the probation period, with a target of 85 if I meet your expectations? Could we put that in the contract?
+### Raises · They can't reach your number: review after probation
+<details><summary>Show answer</summary>
+
+If 80 is the maximum for now, could we agree on a salary review after the probation period,
+with a target of 85 if I meet your expectations? Could we put that in the contract?
+
+</details>
 
 *По-немецки это «Gehaltsüberprüfung nach der Probezeit». Это ваш главный инструмент: вы соглашаетесь чуть ниже, но с письменной договорённостью.*
 
@@ -233,15 +387,22 @@
 
 *Ваш приоритет — фиксированная часть. Это нормальная позиция, её можно сказать прямо.*
 
-**Если предлагают бонус:**
+### Bonus · They offer a bonus
+<details><summary>Show answer</summary>
 
-> For me, a higher fixed salary is more important than a variable bonus. Could part of the bonus move into the base salary?
+For me, a higher fixed salary is more important than a variable bonus.
+Could part of the bonus move into the base salary?
 
-**Если называют «Zielgehalt»:**
+</details>
 
-> What part of that is fixed, and how is the bonus usually paid out in practice?
+### Bonus · They name a "Zielgehalt"
+<details><summary>Show answer</summary>
 
-**У крупных американских компаний** часть зарплаты бывает в акциях. Спросите, какая часть фиксированная, и считайте только её как гарантированные деньги.
+What part of that is fixed, and how is the bonus usually paid out in practice?
+
+</details>
+
+*У крупных американских компаний часть зарплаты бывает в акциях. Спросите, какая часть фиксированная, и считайте только её как гарантированные деньги.*
 
 ---
 
@@ -266,17 +427,23 @@
 - **Если в письме есть срок** («gültig bis …») — это ваш ориентир. Если срока нет, спросите о нём.
 - **Устное обещание ни к чему не обязывает** ни вас, ни их. Работа есть, только когда подписанный компанией договор лежит у вас.
 
-**Вы получаете предложение:**
+### Time · You receive the offer
+<details><summary>Show answer</summary>
 
-> Thank you, I'm really happy about the offer. By when do you need my answer?
+Thank you, I'm really happy about the offer. By when do you need my answer?
 
-**Вам нужно больше времени** *(только если это правда)*:
+</details>
 
-> I'm very interested. I'm also in the final stage with another company, and I want to make a fair and final decision. Could I give you my answer by [date]?
+### Time · You need more time *(только если это правда)*
+<details><summary>Show answer</summary>
 
-**Параллельно — другим компаниям, особенно топовым:**
+I'm very interested. I'm also in the final stage with another company,
+and I want to make a fair and final decision. Could I give you my answer by [date]?
 
-> I'd like to be open with you. I've received an offer, and I need to answer by [date]. Your company is my preferred option. Would it be possible to speed up the process?
+</details>
+
+### Time · Ask other companies to speed up
+*Фраза — карточка «Other offer · You're still interviewing here» в разделе 7.*
 
 *Компании часто реально ускоряются, когда у кандидата есть предложение. Но у топ-компаний процесс длинный: несколько раундов, иногда месяц и больше. Окно в 1–2 недели помогает, только если вы у них уже на последних этапах. Поэтому подавайте в топ-компании не после первого предложения, а когда начнутся первые интервью в других.*
 
