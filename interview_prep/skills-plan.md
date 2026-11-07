@@ -130,3 +130,114 @@ Quarkus — **не учим**: тот же Jakarta EE / MicroProfile (JAX-RS, CD
 | Дальше | каждый день → экзамен **B2** | AWS (LocalStack → свой аккаунт), Terraform → по желанию сертификат AWS |
 
 Конец ноября: купить ваучеры со скидками Black Friday (CKAD, при желании CCDAK).
+
+---
+
+## 8. Paying for CKAD / CCDAK without a card (SEPA only)
+
+*Added 07.11.2026, without web search — verify partner status, prices and terms before paying.*
+
+**My constraint:** no working Visa/Mastercard, no PayPal, no virtual cards. Available: **SEPA transfer** and **Google Play gift cards**.
+
+**What does NOT work:**
+- **Google Play gift cards** — neither Linux Foundation (CKAD) nor Confluent (CCDAK) sells exams through an app; only on their websites with card checkout.
+- **Direct SEPA on the official sites** — checkout expects a card.
+
+**Validity (no rush after buying):**
+- **CKAD:** 12 months from purchase. The free retake must also fit into these 12 months. Includes 2 sessions of the **killer.sh** exam simulator.
+- **CCDAK:** usually 12 months from purchase — confirm at purchase.
+- → Buy at Black Friday, learn in December–February, take the exam when ready.
+
+### Option A — German authorized partner, invoice + SEPA
+
+The partner sells an exam voucher, issues an invoice (Rechnung), I pay by SEPA, they email the voucher code, I redeem it in **my own** Linux Foundation / Confluent account.
+
+| Partner | Covers | Contact |
+|---|---|---|
+| **Fast Lane** (flane.de) | Linux Foundation, Confluent (per Gemini — verify) | info@flane.de |
+| **NobleProg** (nobleprog.de) | Linux Foundation (verify) | support form on site |
+
+**Before paying, check:**
+1. The partner is listed on the **official partner list** of Linux Foundation / Confluent.
+2. What exactly I get: CKAD exam **incl. retake + killer.sh**? Valid from purchase or from redemption?
+3. Price in EUR incl. VAT, invoice to a private person.
+4. Whether they pass on the Black Friday discount (usually **not** — partners sell at list price; that's the main downside).
+
+**Skip:** non-EU sellers (e.g. Merit Global Training) — "bank wire" there is an international SWIFT transfer, not SEPA: fees, and my bank may block or question it.
+
+**Request text (German):**
+```
+Guten Tag,
+
+ich möchte als Privatperson nur einen Prüfungsgutschein (Exam Voucher) für die Zertifizierung CKAD (Linux Foundation) und ggf. CCDAK (Confluent) erwerben – ohne Schulung.
+
+Ist das möglich, und kann ich per Rechnung / SEPA-Überweisung bezahlen?
+Bitte teilen Sie mir den Preis inkl. MwSt. mit und ob die Wiederholungsprüfung (Retake) und der Simulator killer.sh enthalten sind. Ab wann gilt die Gültigkeit von 12 Monaten?
+
+Vielen Dank und freundliche Grüße
+Aleksandr Sokolov
+```
+
+### Option B — a friend pays by card, I repay by SEPA (only way to get the Black Friday price)
+
+- Cleanest variant: the friend pays **while logged into MY Linux Foundation account** (my name, matching my ID). The exam lands directly in my account — no voucher transfer needed. Individual purchases may not be transferable, so a "buy it yourself and send me the code" approach is riskier.
+- The friend needs his phone for 3-D Secure confirmation → easiest sitting together.
+- I repay by normal SEPA transfer.
+
+### Option C — Bundesagentur für Arbeit (BA pays the provider directly — no payment problem)
+
+I'm registered as arbeitsuchend → ask my Arbeitsvermittler **before buying anything** (no reimbursement afterwards):
+- **Bildungsgutschein** for an AZAV-certified course (Kubernetes / DevOps / cloud courses often include the certification exam). Pros: free, structured, with a teacher. Cons: usually in German (also trains German), often full-time for weeks — conflicts with job search and intensive German.
+- **Vermittlungsbudget (§ 44 SGB III):** can cover individual job-search costs — ask whether exam fees for CKAD/CCDAK qualify.
+
+### Exam-day note
+
+The name in the Linux Foundation / Confluent account must match the ID shown to the online proctor **exactly** (Latin letters). Check the accepted ID list before scheduling (passport vs. residence permit).
+
+---
+
+## 9. Learning resources: structured courses + practice
+
+*Added 07.11.2026, without web search. Goal: courses where someone **explains** concepts and operations, combined with hands-on practice — not just exercises.*
+
+### Payable with Google Play gift cards
+
+- **Udemy via the Android app** — courses can be bought as in-app purchases through Google Play (check the price shown in the app; it can differ from web sale prices). After purchase the course is also available on the web.
+  - **CKAD:** Mumshad Mannambeth — *Kubernetes Certified Application Developer (CKAD) with Tests*. Lectures + browser labs (KodeKloud) + mock exams. The most popular CKAD prep.
+  - **Kafka:** Stéphane Maarek — *Apache Kafka Series – Learn Apache Kafka for Beginners*; same author has courses on Kafka Streams, Schema Registry and **CCDAK practice tests**.
+- **Google Play Books (ebooks):**
+  - Benjamin Muschko — *Certified Kubernetes Application Developer (CKAD) Study Guide* (O'Reilly): follows the exam curriculum, with exercises.
+  - *Kafka: The Definitive Guide*, 2nd ed. (O'Reilly) — Confluent usually gives it away **free** after registration, so check there first.
+- **LinkedIn Learning** — included in LinkedIn Premium (Career); on Android, Premium can usually be bought via Google Play. Good Kubernetes and Kafka courses. Some German city libraries give free LinkedIn Learning access with a library card (paid in cash) — ask the local Stadtbibliothek.
+
+### Free structured courses
+
+**Kubernetes**
+- **LFS158 Introduction to Kubernetes** (Linux Foundation, edX) — free to audit.
+- **TechWorld with Nana** (YouTube) — full Kubernetes course, very clear explanations of concepts.
+- **freeCodeCamp** (YouTube) — several full-length Kubernetes courses.
+- **kubernetes.io** — "Learn Kubernetes Basics" tutorials + docs (the docs are allowed during the CKAD exam — get used to navigating them).
+
+**Kafka**
+- **Confluent Developer** (developer.confluent.io) — free video courses with hands-on exercises, by the people behind Kafka and the exam: *Kafka 101*, *Kafka Internal Architecture* (replication, ISR, leader election), *Kafka Streams 101*, *Schema Registry 101*, *Kafka Connect 101*.
+- **Confluent training portal** — some free self-paced courses; check what's available.
+
+### Practice (after the concept lessons)
+
+**CKAD**
+- **dgkanatsios/CKAD-exercises** (GitHub) — the classic exercise set by exam topic; solve without peeking.
+- **Killercoda** — free CKAD scenarios in the browser.
+- **killer.sh** — 2 sessions included with the exam; harder than the real exam. Do it at the end.
+
+**Kafka**
+- **Confluent cp-all-in-one** (GitHub, Docker Compose) — brokers, Schema Registry, Connect, ksqlDB locally. Kill brokers and observe: `acks=1` vs `acks=all`, `min.insync.replicas`, leader failover, consumer rebalancing, lag.
+- Practice tests (e.g. Maarek's CCDAK tests on Udemy) — CCDAK is multiple choice and tests tricky details.
+
+*Removed from Gemini's list:* "k8s.naveedkumbhar.com" — couldn't confirm it exists; don't rely on it.
+
+### Suggested combination
+
+| Exam | Learn (explanations) | Practice | Final check |
+|---|---|---|---|
+| **CKAD** | Udemy Mumshad (or free LFS158 + Nana) | CKAD-exercises + Killercoda daily, project on kind | killer.sh ×2 → exam |
+| **CCDAK** | Confluent Developer courses + *Definitive Guide* | experiments on cp-all-in-one, Kafka in own project | practice tests → exam |
