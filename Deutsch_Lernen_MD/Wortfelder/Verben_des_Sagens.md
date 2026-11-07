@@ -61,9 +61,9 @@
 | Wie steht es im Buch? („Juhu!“, …) | „Juhu!“, jubelte Marie. |
 | – Leo sagt Sofie, warum sie noch kein Kaninchen haben.<br>– Und gestern? | – Er erklärt es seiner Schwester.<br>– Gestern hat er es ihr erklärt. |
 | Dein Kind versteht die Hausaufgabe nicht. Was machst du gleich? | Ich erkläre sie ihm gleich. |
-| Was war Leos Antwort an Sofie? | Er hat ihr erklärt, dass sie sich später ein Kaninchen wünschen. |
+| Sofie hat gefragt: „Warum haben wir kein Kaninchen?“ Was hat Leo gemacht? (später, wünschen) | Er hat ihr erklärt, dass sie sich später ein Kaninchen wünschen. |
 | – Luisa ist sauer auf Klara und erzählt alles Papa.<br>– Und gestern? | – Sie beklagt sich bei Papa.<br>– Gestern hat sie sich auch beklagt. |
-| Wer war das Problem für Luisa? | Sie hat sich über ihre Schwester beklagt. |
+| Gestern hat Klara Teddy gebissen. Luisa ist sauer zu Papa gegangen. Was hat sie gemacht? (Klara) | Sie hat sich bei Papa über Klara beklagt. |
 | Im Restaurant ist dein Essen kalt. Und du? | Ich würde mich beim Kellner beklagen. |
 
 ## Stufe 5 (Ausdrücke)
@@ -75,11 +75,11 @@
 | Deine Tochter hat ein Geheimnis. | Flüster es mir ins Ohr! |
 | Im Kino will dein Freund etwas sagen. | Flüster bitte, die Leute schauen! |
 | Dein Freund hat seinen Job verloren. Was fragst du? | Kann ich dich irgendwie trösten? |
-| Das Kind weint, und Mama nimmt es in den Arm. | Mama tröstet es immer am besten. |
+| Das Kind weint. Papa versucht es, aber nur bei Mama hört es auf. (am besten) | Mama tröstet es immer am besten. |
 | Dein Team führt 1:0, aber es sind noch 40 Minuten. | Zum Jubeln ist es noch zu früh. |
 | Die Prüfung war schlecht, nur knapp bestanden. | Das ist kein Grund zum Jubeln. |
-| Im Vorstellungsgespräch fragt man nach deinem Projekt. | Das erkläre ich Ihnen gern. |
-| Dein Kind fragt etwas Schwieriges beim Abendessen. | Das erkläre ich dir später. |
+| Im Vorstellungsgespräch: „Erzählen Sie von Ihrem Projekt!“ Du antwortest freundlich: | Das erkläre ich Ihnen gern. |
+| Beim Abendessen fragt dein Kind: „Wie funktioniert das Internet?“ Jetzt ist keine Zeit. | Das erkläre ich dir später. |
 | Ein komisches Problem im Code, keiner weiß warum. | Das ist schwer zu erklären. |
 | Dein Chef ist sauer, aber es war nicht deine Schuld. | Lassen Sie mich das erklären. |
 | Ein Kollege fragt: „Wie geht’s?“ Alles ist okay. | Ich kann mich nicht beklagen. |
@@ -101,7 +101,7 @@
 
 | Situation / Frage | Antwort |
 |---|---:|
-| Wann wird Mama böse? (Kinder, laut sein) | Sie schimpft, wenn die Kinder laut sind. |
+| Mama ruft wütend: „Ruhe!“ Wann passiert das? (Kinder, laut sein) | Sie schimpft, wenn die Kinder laut sind. |
 | Was sagt Paul ganz leise zu Oskar? (bester Freund) | Er flüstert ihm zu, dass er sein bester Freund ist. |
 | Wozu nimmt Mama Paul in den Arm? (nicht mehr traurig sein) | Sie tröstet ihn, damit er nicht mehr traurig ist. |
 | Warum ist Marie so laut? (Julian, endlich fahren) | – Sie jubelt, weil Julian endlich fährt.<br>– Julian fährt endlich, deshalb jubelt sie. |
