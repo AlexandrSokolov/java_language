@@ -31,13 +31,13 @@
 |---|---:|
 | Dein Sohn ruft wütend: „Blödes Spiel! Blöder Bruder!” | Schimpf nicht so! |
 | Die Kinder rufen im Bus wütend böse Wörter. | Schimpft nicht so laut! |
-| Deine Tochter will dir etwas sagen, aber das Baby schläft. | Flüster es mir zu! |
+| Deine Tochter will dir etwas sagen, aber das Baby schläft. | Flüster es mir zu!<br>Flüster mir das zu! |
 | Die Kinder wollen dir etwas sagen, aber Oma schläft. | Flüstert es mir zu! |
 | Deine kleine Tochter weint, dein Sohn steht daneben. | Tröste deine Schwester! |
 | Der Kleine ist hingefallen und weint, die großen Kinder lachen. | Tröstet euren Bruder! |
 | Dein Sohn ruft „Tor! Juhu!“, aber das Spiel ist noch nicht vorbei. | Jubel nicht zu früh! |
 | Eure Mannschaft hat gewonnen! Du sagst zu den Kindern | Jubelt alle zusammen! |
-| Du verstehst die Aufgabe deiner Tochter nicht. | Erklär mir das bitte! |
+| Du verstehst die Aufgabe deiner Tochter nicht. | Erklär mir das bitte!<br>Erklär es mir bitte! |
 | Die Kinder kennen das Spiel, ihre Schwester Nele nicht. | Erklärt es eurer Schwester! |
 | Beim Amt verstehst du das Formular nicht. | Erklären Sie mir das bitte? |
 | Dein Sohn sagt den ganzen Tag: „Das ist unfair! Immer ich!“ | Beklag dich nicht! |
