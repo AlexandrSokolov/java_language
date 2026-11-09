@@ -319,7 +319,8 @@ than both of its children or because it has reached a leaf position**.
 ### Which Queue implementations are thread‑safe but non‑blocking?
 <details><summary>Show answer</summary>
 
-`ConcurrentLinkedQueue` - an unbounded, thread-safe, FIFO-ordered queue.
+- `ConcurrentLinkedQueue` - an unbounded, thread-safe, FIFO-ordered queue.
+- `ConcurrentLinkedDeque`
 
 </details>
 
