@@ -1,21 +1,26 @@
 # Baby & Kleinkind
 
-## Stufe 1 — Situation → Was?
+## Stufe 1a — Nomen
 
 | Situation / Frage | Antwort |
 |---|---:|
-| Lotta ist noch zu klein für das Töpfchen. Was trägt sie? | Sie trägt eine Windel. |
-| Amelie ist schon groß. Wo sitzt sie, wenn sie mal muss? | Sie sitzt auf dem Töpfchen. |
-| Sofie hat Hunger und trinkt Milch. Woraus? | Aus dem Fläschchen. |
-| Jonathan hat etwas im Mund und nuckelt daran. | Das ist sein Schnuller. |
-| Theo liegt drin, und Mama schiebt ihn. | Er liegt im Kinderwagen. |
-| Lotta liegt auf dem Boden auf einer weichen Decke. | Sie liegt auf ihrer Krabbeldecke. |
-| Mama legt Lotta hin und macht ihr eine neue Windel. | Mama wickelt Lotta. |
-| Lotta liegt auf dem Rücken und bewegt schnell die Beine. | Sie strampelt. |
-| Jonathan hat den Schnuller im Mund. Was macht er? | Er nuckelt. |
-| Jonathan spricht im Traum, aber keine echten Wörter. | Er brabbelt. |
-| Theo liegt im Kinderwagen. Was macht Mama? | Sie schiebt den Kinderwagen. |
-| Stella liegt lange wach. Endlich … | Sie schläft ein. |
+| Das Baby kann nicht aufs Klo. | Es trägt eine Windel. |
+| Amelie ist zu klein fürs Klo. | Sie sitzt auf dem Töpfchen. |
+| Milch fürs Baby, kein Glas. | Es trinkt aus dem Fläschchen. |
+| Gummi im Mund, das Baby ist still. | Das ist sein Schnuller. |
+| Theo im Park, vier Räder. | Er liegt im Kinderwagen. |
+| Baby auf dem Boden, weich und bunt. | Es liegt auf der Krabbeldecke. |
+
+## Stufe 1b — Verben
+
+| Situation / Frage | Antwort |
+|---|---:|
+| Volle Windel, Mama hilft. | Mama wickelt das Baby. |
+| Baby auf dem Rücken, Beine schnell. | Es strampelt. |
+| Schnuller im Mund. | Er nuckelt. |
+| Baby spricht, aber keine Wörter. | Es brabbelt. |
+| Kinderwagen, Mama geht dahinter. | Sie schiebt den Kinderwagen. |
+| Stella, lange wach … endlich! | Sie schläft ein. |
 
 ## Stufe 2 — Fragen
 

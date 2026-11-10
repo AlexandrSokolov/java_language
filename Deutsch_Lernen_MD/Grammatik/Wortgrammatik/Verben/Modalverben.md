@@ -10,14 +10,14 @@
 | Du bist bei einem Freund. Es ist spät, du gehst nach Hause. | Ich muss los. |
 | Im Kurs fragt man dich: „Sprechen Sie Englisch?“ Ja. | Ja, ich kann Englisch. |
 | Auf dem Tisch liegt das letzte Stück Kuchen. Du fragst höflich. | Darf ich? |
-| Dein Sohn soll Brokkoli essen. Er schiebt den Teller weg. | Ich will das nicht! |
-| Die Kinder wollen in den Zoo, aber es regnet stark. | Das geht heute nicht. |
+| Dein Sohn soll Brokkoli essen. Er schiebt den Teller weg. | Ich will das nicht!<br>Ich will nicht! |
+| Die Kinder wollen in den Zoo, aber es regnet stark. | Wir können heute nicht in den Zoo.<br>Das geht heute nicht. |
 
 ## Stufe 2 — mit Infinitiv
 
 | Situation / Frage | Antwort |
 |---|---:|
-| Dein Kollege versteht das Problem nicht. Du bietest Hilfe an. | Ich kann es dir erklären. |
+| Dein Kollege versteht das Problem nicht. Du bietest Hilfe an. | Ich kann es dir erklären.<br>Soll ich dir helfen? |
 | Der Kollege will ein Meeting um 17 Uhr. Um 17 Uhr ist die Kita zu Ende. | Ich muss um fünf die Kinder abholen. |
 | Deine Tochter will zur Party ihrer Freundin. Du sagst ja. | Du darfst zur Party gehen. |
 | Es ist 19 Uhr. Alle haben Hunger. Du fragst die Familie. | Wollen wir essen? |
@@ -32,7 +32,7 @@
 |---|---:|
 | Morgen ist Feiertag. (arbeiten) | Morgen muss ich nicht arbeiten. |
 | Der Kollege will morgen extra früh kommen, aber das ist nicht nötig. (früher kommen) | Du brauchst nicht früher zu kommen.<br>Du musst nicht früher kommen. |
-| Dein Sohn will mit dem Handy ins Bett. (mitnehmen) | Du darfst das Handy nicht mit ins Bett nehmen. |
+| Dein Sohn will mit dem Handy ins Bett. (mitnehmen) | Du darfst das Handy nicht ins Bett mitnehmen.<br>Du darfst das Handy nicht mit ins Bett nehmen. |
 | Deine Frau will das Geschirr spülen, aber die Spülmaschine ist leer. (spülen) | Du brauchst das nicht zu spülen.<br>Das musst du nicht spülen. |
 | Die Kinder fragen: „Müssen wir heute Hausaufgaben machen?“ Es sind Ferien. | Nein, ihr müsst heute keine Hausaufgaben machen. |
 

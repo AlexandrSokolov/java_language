@@ -46,7 +46,9 @@
 
 ## 6. Хранение и формат файлов
 
-**Главная версия — MD** (в проекте и у меня в GitLab). **`.docx` — экспорт** для работы в Google Docs и для жены. Claude правит MD и по запросу делает из него `.docx`.
+**Главная версия — MD** (в проекте и у меня в GitLab). **`.docx` — экспорт** для жены, если понадобится. Claude правит MD и по запросу делает из него `.docx`.
+
+**Google Docs** — в будущем только для карточек «картинка → слово» (маленькие картинки для быстрых ассоциаций, можно без контекста).
 
 Папки в проекте:
 - `Methode/` — этот файл
@@ -56,7 +58,7 @@
 - `IT_Business/`
 - `Quellen/` — разобранные книги и уроки
 
-**Формат MD:** `# Тема`, затем для каждой ступени свой заголовок `## Stufe 1 — …` и своя таблица:
+**Формат MD:** `# Тема`, затем для каждой ступени свой заголовок `## Stufe 1a — …` и своя таблица:
 
 ```
 | Situation / Frage | Antwort |
@@ -76,7 +78,9 @@
 
 | Stufe | Что тренирует | Пример |
 |---|---|---|
-| 1 — Situation → Wort | понять слово из контекста | *Julian ist wütend: „Blödes Fahrrad!"* → *Er schimpft.* |
+| 1a — Nomen | существительное из контекста (всегда первая) | *Gummi im Mund, das Baby ist still.* → *Das ist sein Schnuller.* |
+| 1b — Verben | глагол из контекста | *Schnuller im Mund.* → *Er nuckelt.* |
+| 1c — Adjektive / Adverbien | прилагательные, наречия (по мере надобности) | *Tränen in den Augen.* → *Er ist traurig.* |
 | 2 — Fragen | правильный вопрос + падеж | *W\_\_ tröstet Mama? (Paul)* → *(Wen?) Sie tröstet ihn.* |
 | 3 — Imperativ | du / ihr / Sie | *Die Kinder rufen im Bus böse Wörter.* → *Schimpft nicht so laut!* |
 | 4 — Zeiten | Präsens, Perfekt, Präteritum (книжное), werden, würde/wäre, Modalverben | *Und gestern?* → *Gestern hat er geschimpft.* |
@@ -84,6 +88,13 @@
 | 6 — Adjektiv + Nomen | окончания прилагательных, mein/dieser | *Er spielt mit sein_ klein_ Schwester.* → *mit seiner kleinen Schwester* |
 | 6 (альтернатива) — Spiegel | по ответу придумать вопрос, коротко, 1 на слово | *Er erklärt es seiner Schwester.* → *Wem erklärt Leo das?* |
 | 7 — Nebensätze | weil, dass, wenn, damit, ob, obwohl, deshalb, trotzdem | *Warum ist Julian wütend? (umfallen)* → *Er schimpft, weil er umgefallen ist.* |
+
+### Stufe 1: по частям речи, без взаимных подсказок
+- В файлах с лексикой Stufe 1 **делится по частям речи**, каждая часть — своя таблица: **1a — Nomen** (всегда первая), **1b — Verben**, при необходимости **1c — Adjektive / Adverbien** и дальше.
+- В семантических полях с одной частью речи (например, Verben des Sagens) Stufe 1 не делится.
+- **Слева нет ни одного нового слова этого файла.** В 1a нет новых глаголов и других новых существительных: *Schnuller* не описываем через *nuckeln*, *Kinderwagen* — через *schieben*, *Windel* — через *Töpfchen*. Иначе строки подсказывают друг другу, и я отвечаю по памяти о соседней строке, а не по смыслу.
+- **1b может опираться на существительные из 1a** (они уже пройдены): *Schnuller im Mund.* → *Er nuckelt.* Но не на другие новые глаголы. Так же 1c опирается на 1a и 1b.
+- **Слева предельно коротко**: 2–6 слов, только зацепки, можно без полного предложения. Прочитал → понял → сразу ответил. Справа — целая фраза.
 
 ### Правила составления
 - **Левая часть не должна подсказывать ответ.** В ней нет нужного глагола или формы. Только ситуация, из которой ответ однозначен, даже если исходный текст забыт.
@@ -114,5 +125,7 @@
 Книга «Marie und das Laufrad» и др. (13 историй):
 - `Wortfelder/`: `Verben_des_Sagens`
 - `Themen/`: `Gefühle`, `Familie_Geschwister`, `Baby_Kleinkind`, `Spielen_Draußen`, `Tiere`, `Körper_Wehwehchen`
+
+Stufe 1a/1b по новому правилу пока сделаны только в `Baby_Kleinkind`. Остальные тематические файлы переделать.
 
 Следующие шаги: урок из учебника B1 по фото словаря, документ со связками, IT- и бизнес-чанки для собеседования.
