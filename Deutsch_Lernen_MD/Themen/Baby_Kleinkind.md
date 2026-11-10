@@ -22,61 +22,81 @@
 | Kinderwagen, Mama geht dahinter. | Sie schiebt den Kinderwagen. |
 | Stella, lange wach … endlich! | Sie schläft ein. |
 
-## Stufe 2 — Fragen
+## Stufe 2 — Artikel (der / den / dem)
 
 | Situation / Frage | Antwort |
 |---|---:|
-| W\_\_ wickelt Mama? (Lotta) | (Wen?) Sie wickelt Lotta. |
-| W\_\_\_ legt Mama Lotta? (die Krabbeldecke) | (Wohin?) Auf die Krabbeldecke. |
-| W\_\_ liegt Lotta? (die Krabbeldecke) | (Wo?) Auf der Krabbeldecke. |
-| W\_\_\_ setzt sich Amelie? (das Töpfchen) | (Wohin?) Aufs Töpfchen. |
-| W\_\_ sitzt Amelie? (das Töpfchen) | (Wo?) Auf dem Töpfchen. |
-| W\_\_\_ steckt Stella den Schnuller? (der Mund) | (Wohin?) In den Mund. |
-| W\_\_ gibt Leo das Fläschchen? (Sofie) | (Wem?) Er gibt es seiner Schwester. |
-| W\_\_\_ trinkt Sofie? (das Fläschchen) | (Woraus?) Aus dem Fläschchen. |
-| W\_\_ liegt Theo? (der Kinderwagen) | (Wo?) Im Kinderwagen. |
-| W\_\_ hat Jonathan verloren? (der Schnuller) | (Was?) Seinen Schnuller. |
-| W\_\_ braucht Amelie nicht mehr? (die Windeln) | (Was?) Sie braucht keine Windeln mehr. |
+| Das Baby weint. (Schnuller, geben) | Gib mir den! |
+| Lotta spielt. (Krabbeldecke, liegen auf) | Sie liegt auf der. |
+| Das Baby hat Hunger. (Fläschchen, holen) | Hol mir das! |
+| Papa geht im Park spazieren. (Kinderwagen, schieben) | Er schiebt den. |
+| Die Packung ist neu. (Windeln, zeigen) | Zeig mir die! |
+| Baby weint, kein Gummi im Mund. (Schnuller, wo?) | Wo ist der denn? |
+| Sofie hat Durst. (Fläschchen, trinken aus) | Sie trinkt aus dem. |
+| Amelie muss mal. (Töpfchen, sich setzen auf) | Sie setzt sich auf das. |
+| Theo ist müde. (Kinderwagen, schlafen in) | Er schläft in dem. |
+| Lotta will spielen. (Krabbeldecke, wo?) | Wo ist die? |
+| Jonathan ist still. (Schnuller, nuckeln an) | Er nuckelt an dem. |
+| Neue Windeln, Lotta ist trocken. (gut klappen mit) | Es klappt gut mit denen. |
+| Amelie sucht es überall. (Töpfchen, wo?) | Wo ist das? |
 
-## Stufe 3 (Imperativ)
+## Stufe 3 — Fragen
 
 | Situation / Frage | Antwort |
 |---|---:|
-| Dein kleiner Sohn muss mal. Du zeigst auf das Töpfchen. | Setz dich aufs Töpfchen! |
-| Das Baby schläft im Kinderwagen. Die Kinder sind laut. | Seid leise, das Baby schläft! |
-| Du hast keine Hand frei. Dein Sohn soll eine Windel holen. | Bring mir bitte eine Windel! |
-| Der Schnuller liegt auf dem Boden. Deine Tochter steht daneben. | Gib mir bitte den Schnuller! |
-| Deine Tochter will helfen. Das Baby hat Hunger. | Gib dem Baby das Fläschchen! |
-| Die Kinder wollen den Kinderwagen schieben. | Schiebt den Kinderwagen langsam! |
-| Das Baby strampelt beim Wickeln. Du sagst lieb: | Halt doch mal still! |
+| W\_\_ wickelt Mama? (Baby) | (Wen?) Sie wickelt das Baby. |
+| W\_\_\_ strampelt das Baby? (Beine) | (Womit?) Es strampelt mit den Beinen. |
+| W\_\_\_ nuckelt Jonathan? (Schnuller) | (Woran?) Er nuckelt am Schnuller. |
+| W\_\_\_ legt Mama Lotta? (Krabbeldecke) | (Wohin?) Auf die Krabbeldecke. |
+| W\_\_ liegt Lotta? (Krabbeldecke) | (Wo?) Auf der Krabbeldecke. |
+| W\_\_\_ setzt sich Amelie? (Töpfchen) | (Wohin?) Aufs Töpfchen. |
+| W\_\_ sitzt Amelie? (Töpfchen) | (Wo?) Auf dem Töpfchen. |
+| W\_\_\_ trinkt Sofie? (Fläschchen) | (Woraus?) Aus dem Fläschchen. |
+| W\_\_ schiebt Papa? (Kinderwagen) | (Was?) Er schiebt den Kinderwagen. |
+| W\_\_\_ legt Mama Theo? (Kinderwagen) | (Wohin?) In den Kinderwagen. |
+| W\_\_ schläft Theo ein? (Kinderwagen) | (Wo?) Im Kinderwagen. |
+| \_\_\_ w\_\_ brabbelt das Baby? (Bruder) | (Mit wem?) Es brabbelt mit seinem Bruder. |
+| W\_\_ braucht Amelie nicht mehr? (Windeln) | (Was?) Sie braucht keine Windeln mehr. |
 
-## Stufe 4 (Zeiten)
+## Stufe 4 — Imperativ
+
+| Situation / Frage | Antwort |
+|---|---:|
+| Lotta hat eine volle Windel, du kochst gerade. Zu deiner Frau: | Wickel du sie bitte! |
+| Du wickelst das Baby, die Beine gehen wild hin und her. Du sagst lieb: | Strampel nicht so!<br>Nicht so strampeln! |
+| Dein großer Sohn hat den Daumen im Mund. | Nuckel nicht am Daumen! |
+| Die Kinder rennen mit dem Kinderwagen den Weg runter. | Schiebt den Kinderwagen langsam! |
+| Das Baby ist müde, du singst leise. | Schlaf schön ein, mein Schatz! |
+| Die Kinder liegen im Bett und flüstern noch. | Jetzt schlaft schön ein! |
+
+## Stufe 5 — Zeiten
 
 | Situation / Frage | Antwort |
 |---|---:|
 | Lotta hat jetzt eine neue Windel. Was hat Mama gemacht? | Sie hat Lotta gewickelt. |
-| Jonathan hat seinen Schnuller nicht mehr. | Er hat seinen Schnuller verloren. |
-| Leo hat Sofie gestern das Fläschchen gegeben. Und Sofie? | Sie hat ganz brav getrunken. |
+| Gestern auf dem Rücken, die Beine wild. Und das Baby? | Es hat wild gestrampelt. |
+| Das Baby hat den ganzen Morgen „Ba-ba-ba“ gemacht. | Es hat den ganzen Morgen gebrabbelt. |
+| – Papa geht im Park hinter dem Kinderwagen.<br>– Und gestern? | – Er schiebt den Kinderwagen.<br>– Gestern hat er ihn auch geschoben. |
 | Stella konnte lange nicht schlafen. Und am Ende? | Am Ende ist sie eingeschlafen. |
-| Wie steht es im Buch? (Jonathan, zufrieden, nuckeln) | Jonathan nuckelte zufrieden. |
-| Amelie ist jetzt groß. Und früher? | Früher brauchte sie Windeln. |
-| Nächstes Jahr ist Lotta größer. Und die Windeln? | Dann wird sie keine Windeln mehr brauchen. |
-| Das Baby weint in der Nacht. Und du? | Ich würde es auf den Arm nehmen. |
+| Wie steht es im Buch? (Jonathan, Schnuller im Mund, zufrieden) | Jonathan nuckelte zufrieden an seinem Schnuller. |
+| Wie steht es im Buch? (Theo, müde, im Kinderwagen) | Theo schlief im Kinderwagen ein. |
+| Lotta hat eine volle Windel, deine Frau telefoniert. Du fragst: (sollen) | Soll ich sie wickeln? |
+| Theo läuft jetzt selbst, der Kinderwagen bleibt zu Hause. (müssen, nicht mehr) | Mama muss ihn nicht mehr schieben. |
 
-## Stufe 5 (Ausdrücke)
+## Stufe 6 — Ausdrücke
 
 | Situation / Frage | Antwort |
 |---|---:|
 | Das Baby riecht nicht gut. | Die Windel ist voll. |
-| Das Baby schläft endlich. Du sagst leise: | Endlich schläft es! |
-| Deine Tochter braucht tagsüber keine Windel mehr. Du sagst stolz: | Sie ist schon trocken. |
-| Beim Kinderarzt: Das Baby wacht jede Nacht oft auf. | Es schläft nachts nicht durch. |
-| Das Baby weint, der Schnuller ist weg. | Wo ist denn der Schnuller? |
-| Bekannte schauen in den Kinderwagen. | Wie alt ist das Baby? |
-| Amelie fragt: „Brauche ich auch eine Windel?“ | Nein! Dafür bin ich doch schon viel zu groß. |
-| Dein Kind ruft dich, aber du bist gerade beschäftigt. | Gleich, mein Schatz! |
+| Die Packung ist leer, keine einzige mehr. | Die Windeln sind alle. |
+| Das Baby hat lange geweint, jetzt ist es still. Du sagst leise: | Endlich ist es eingeschlafen! |
+| Beim Kinderarzt: Abends dauert es mit dem Baby sehr lange. | Es kann abends schlecht einschlafen. |
+| Das Baby weint, der Gummi im Mund ist weg. | Wo ist denn der Schnuller? |
+| Beim Kinderarzt: „Stillen Sie noch?“ Nein. | Nein, es bekommt das Fläschchen. |
+| Bekannte fragen: „Braucht Amelie noch Windeln?“ Du sagst stolz: | Nein, sie geht schon aufs Töpfchen. |
+| Theo will auch liegen und gefahren werden. | Für den Kinderwagen bist du schon zu groß! |
 
-## Stufe 6 (Adjektiv + Nomen)
+## Stufe 7a — Adjektiv + Nomen
 
 | Situation / Frage | Antwort |
 |---|---:|
@@ -86,10 +106,20 @@
 | Die Decke ist weich. Lotta liegt auf ihr\_ weich\_ Krabbeldecke. | Lotta liegt auf ihrer weichen Krabbeldecke. |
 | Die Milch ist warm. Sofie trinkt aus d\_ warm\_ Fläschchen. | Sofie trinkt aus dem warmen Fläschchen. |
 | Der Schnuller ist blau. Wo ist d\_ blau\_ Schnuller? | Wo ist der blaue Schnuller? |
-| Die Schwester ist klein. Leo hilft sein\_ klein\_ Schwester. | Leo hilft seiner kleinen Schwester. |
-| Das Baby ist müde. Dies\_ müd\_ Baby schläft gleich ein. | Dieses müde Baby schläft gleich ein. |
+| Das Töpfchen ist rot. Dies\_ rot\_ Töpfchen gehört Amelie. | Dieses rote Töpfchen gehört Amelie. |
 
-## Stufe 7 (Nebensätze)
+## Stufe 7b — Adverb + Verb
+
+| Situation / Frage | Antwort |
+|---|---:|
+| Lotta ist erst zwei Tage alt. Wie wickelt Mama sie? | Sie wickelt sie ganz vorsichtig. |
+| Beine schnell hin und her, die Decke fliegt weg. | Es strampelt wild. |
+| Schnuller im Mund, Jonathan lächelt. | Er nuckelt zufrieden. |
+| Das Baby lacht und macht „Ba-ba“, ganz für sich. | Es brabbelt fröhlich vor sich hin. |
+| Das Baby schläft im Kinderwagen, Papa will es nicht wecken. | Er schiebt den Kinderwagen ganz langsam. |
+| Kaum im Bett, schon schläft er. (Perfekt) | Er ist sofort eingeschlafen. |
+
+## Stufe 8 — Nebensätze
 
 | Situation / Frage | Antwort |
 |---|---:|

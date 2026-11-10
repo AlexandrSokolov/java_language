@@ -81,13 +81,20 @@
 | 1a — Nomen | существительное из контекста (всегда первая) | *Gummi im Mund, das Baby ist still.* → *Das ist sein Schnuller.* |
 | 1b — Verben | глагол из контекста | *Schnuller im Mund.* → *Er nuckelt.* |
 | 1c — Adjektive / Adverbien | прилагательные, наречия (по мере надобности) | *Tränen in den Augen.* → *Er ist traurig.* |
-| 2 — Fragen | правильный вопрос + падеж | *W\_\_ tröstet Mama? (Paul)* → *(Wen?) Sie tröstet ihn.* |
-| 3 — Imperativ | du / ihr / Sie | *Die Kinder rufen im Bus böse Wörter.* → *Schimpft nicht so laut!* |
-| 4 — Zeiten | Präsens, Perfekt, Präteritum (книжное), werden, würde/wäre, Modalverben | *Und gestern?* → *Gestern hat er geschimpft.* |
-| 5 — Ausdrücke | готовые фразы на каждый день, собеседование, экзамен | *Ein Kollege fragt: „Wie geht's?"* → *Ich kann mich nicht beklagen.* |
-| 6 — Adjektiv + Nomen | окончания прилагательных, mein/dieser | *Er spielt mit sein_ klein_ Schwester.* → *mit seiner kleinen Schwester* |
-| 6 (альтернатива) — Spiegel | по ответу придумать вопрос, коротко, 1 на слово | *Er erklärt es seiner Schwester.* → *Wem erklärt Leo das?* |
-| 7 — Nebensätze | weil, dass, wenn, damit, ob, obwohl, deshalb, trotzdem | *Warum ist Julian wütend? (umfallen)* → *Er schimpft, weil er umgefallen ist.* |
+| 2 — Artikel (der / den / dem) | склонённый указательный артикль в конце фразы, без существительного | *Das Baby weint. (Schnuller, geben)* → *Gib mir den!* |
+| 3 — Fragen | правильный вопрос + падеж | *W\_\_ tröstet Mama? (Paul)* → *(Wen?) Sie tröstet ihn.* |
+| 4 — Imperativ | du / ihr / Sie, только глаголы файла | *Die Kinder rennen mit dem Kinderwagen.* → *Schiebt den Kinderwagen langsam!* |
+| 5 — Zeiten | Präsens, Perfekt, Präteritum (книжное), werden, würde/wäre, Modalverben | *Und gestern?* → *Gestern hat er geschimpft.* |
+| 6 — Ausdrücke | готовые фразы на каждый день, собеседование, экзамен | *Das Baby riecht nicht gut.* → *Die Windel ist voll.* |
+| 7a — Adjektiv + Nomen | окончания прилагательных, mein/dieser | *Er spielt mit sein_ klein_ Schwester.* → *mit seiner kleinen Schwester* |
+| 7b — Adverb + Verb | устойчивые сочетания наречия с глаголом, место наречия | *Kaum im Bett, schon schläft er. (Perfekt)* → *Er ist sofort eingeschlafen.* |
+| 7 (альтернатива) — Spiegel | по ответу придумать вопрос, коротко, 1 на слово | *Er erklärt es seiner Schwester.* → *Wem erklärt Leo das?* |
+| 8 — Nebensätze | weil, dass, wenn, damit, ob, obwohl, deshalb, trotzdem | *Warum ist Julian wütend? (umfallen)* → *Er schimpft, weil er umgefallen ist.* |
+
+### Главное правило: каждая ступень — только слова этого файла
+- Ступени 2–8 тренируют **только новые слова файла**. В каждой строке ответ строится вокруг слова файла: артикль, падеж, время, императив, выражение — именно для него.
+- Общие глаголы и слова (*setzen, bringen, geben, sein, nehmen, verlieren, brauchen…*) **не становятся предметом тренировки**. Они допустимы только как фон в ситуации, если без них никак.
+- Если для слова в ступени нет естественной ситуации, строку не делаем. Ступень из 1–2 строк или без ступени вовсе — это нормально. Лучше пусто, чем общая речь.
 
 ### Stufe 1: по частям речи, без взаимных подсказок
 - В файлах с лексикой Stufe 1 **делится по частям речи**, каждая часть — своя таблица: **1a — Nomen** (всегда первая), **1b — Verben**, при необходимости **1c — Adjektive / Adverbien** и дальше.
@@ -96,16 +103,26 @@
 - **1b может опираться на существительные из 1a** (они уже пройдены): *Schnuller im Mund.* → *Er nuckelt.* Но не на другие новые глаголы. Так же 1c опирается на 1a и 1b.
 - **Слева предельно коротко**: 2–6 слов, только зацепки, можно без полного предложения. Прочитал → понял → сразу ответил. Справа — целая фраза.
 
+### Stufe 2: Artikel
+- Стоит после 1a/1b и перед Fragen. Цель — закрепить артикль **сразу в склонённой форме**, а не голое der/die/das.
+- Слева короткая ситуация, в скобках существительное **без артикля** + глагол-подсказка. Справа короткая фраза, **указательный артикль в конце**, существительного нет: *Gib mir den! Sie liegt auf der. Wo ist das?*
+- Вперемешку **Nominativ** (*Wo ist der?*), **Akkusativ** (*Zeig mir die!*), **Dativ** (*aus dem, auf der*) и множественное число (*die / die / denen*). Строки одного существительного не ставим подряд.
+- По возможности используем глаголы файла: *Er nuckelt an dem. Er schiebt den.*
+- Genitiv не берём: в речи он заменяется на *von dem*.
+
 ### Правила составления
 - **Левая часть не должна подсказывать ответ.** В ней нет нужного глагола или формы. Только ситуация, из которой ответ однозначен, даже если исходный текст забыт.
-- **Ответ — целая фраза**, а не одно слово.
+- **Ответ — целая фраза**, а не одно слово (кроме Stufe 2 и коротких ответов на вопрос в Stufe 3).
 - **Пропуски**:
   - `_` — только окончание: *sein_ Hund* → *seinem*
   - `__` — часть слова: *W__ setzt du dich?* → *Wohin*
   - `___` — целое слово (артикль, предлог, местоимение — всё, что отделено пробелами)
-- В Stufe 2 справа в скобках правильный вопрос: *(Wem?)*, *(Mit wem?)*, *(Worüber?)*. Про людей спрашиваем *über wen / mit wem*, про вещи — *worüber / womit*.
-- В Imperativ используем и **du**, и **ihr** (обращение к нескольким детям), иногда **Sie**.
-- В Stufe 7 слева живой вопрос + голые подсказки в инфинитиве, без союза и без готовой формы. Каждый союз примерно по одному разу, без лишних повторов.
+- **Stufe 3 (Fragen)**: подсказка в скобках **без артикля**: *(Krabbeldecke)*, а не *(die Krabbeldecke)*. Артикль и падежную форму вспоминаю сам. Справа в скобках правильный вопрос: *(Wem?)*, *(Mit wem?)*, *(Worüber?)*. Про людей спрашиваем *über wen / mit wem*, про вещи — *worüber / womit*.
+- **Stufe 4 (Imperativ)**: только глаголы файла в повелительной форме: *Schieb den Kinderwagen langsam!* Не *Setz dich!, Sei leise!, Bring mir…* Используем и **du**, и **ihr** (обращение к нескольким детям), иногда **Sie**.
+- **Stufe 5 (Zeiten)**: время тренируем на глаголах файла: *hat gewickelt, ist eingeschlafen, nuckelte*. Не *hat verloren, brauchte*.
+- **Stufe 6 (Ausdrücke)**: каждое выражение содержит слово файла.
+- **Stufe 7a**: существительное в связке — из файла. **Stufe 7b**: глагол из файла, по одному живому сочетанию на глагол; нет хорошей пары — строку не делаем.
+- **Stufe 8 (Nebensätze)**: в ответе есть слово файла. Слева живой вопрос + голые подсказки в инфинитиве, без союза и без готовой формы. Каждый союз примерно по одному разу, без лишних повторов.
 - **Объём**: не раздувать. Структуры повторяются от файла к файлу, поэтому 1–2 примера на слово в ступени достаточно.
 
 ### Грамматические заметки
@@ -126,6 +143,6 @@
 - `Wortfelder/`: `Verben_des_Sagens`
 - `Themen/`: `Gefühle`, `Familie_Geschwister`, `Baby_Kleinkind`, `Spielen_Draußen`, `Tiere`, `Körper_Wehwehchen`
 
-Stufe 1a/1b по новому правилу пока сделаны только в `Baby_Kleinkind`. Остальные тематические файлы переделать.
+По актуальным правилам (ступени 1a–8) сделан только `Baby_Kleinkind`. Остальные файлы пока в старой нумерации.
 
 Следующие шаги: урок из учебника B1 по фото словаря, документ со связками, IT- и бизнес-чанки для собеседования.
