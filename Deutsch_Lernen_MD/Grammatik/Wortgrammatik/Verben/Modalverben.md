@@ -27,6 +27,10 @@
 
 > **nicht müssen = nicht brauchen zu**: Es ist nicht nötig. *Du musst nicht kommen. = Du brauchst nicht zu kommen.*
 > **nicht dürfen**: Es ist verboten. *Du darfst nicht kommen.*
+>
+> **kein oder nicht?** Schau auf das Nomen:
+> – **ohne Artikel** oder mit **ein / eine** → **kein** direkt vor dem Nomen. Gemeint ist die Sache allgemein, egal welche: *Du darfst **keinen** Kaffee trinken.*
+> – mit **der / die / das** oder **mein / dein / sein** → **nicht** vor dem Infinitiv. Gemeint ist genau diese Sache: *Du darfst **den** Kaffee **nicht** trinken.*
 
 | Situation / Frage | Antwort |
 |---|---:|
@@ -35,6 +39,9 @@
 | Dein Sohn will mit dem Handy ins Bett. (mitnehmen) | Du darfst das Handy nicht ins Bett mitnehmen.<br>Du darfst das Handy nicht mit ins Bett nehmen. |
 | Deine Frau will das Geschirr spülen, aber die Spülmaschine ist leer. (spülen) | Du brauchst das nicht zu spülen.<br>Das musst du nicht spülen. |
 | Die Kinder fragen: „Müssen wir heute Hausaufgaben machen?“ Es sind Ferien. | Nein, ihr müsst heute keine Hausaufgaben machen. |
+| – Der Arzt sagt: Dein Herz ist schwach. (Kaffee, trinken)<br>– Das ist mein Glas! (Kaffee, trinken) | – Du darfst keinen Kaffee trinken.<br>– Du darfst den Kaffee nicht trinken. |
+| – Wir fahren mit dem Zug. (Auto, mieten)<br>– Das rote Auto ist kaputt. (Auto, nehmen) | – Wir brauchen kein Auto zu mieten.<br>– Du darfst das Auto nicht nehmen. |
+| – Morgen sind Ferien. (Buch, lesen)<br>– Die Geschichte ist langweilig. (Buch, lesen) | – Ihr müsst heute kein Buch lesen.<br>– Du brauchst das Buch nicht zu lesen. |
 
 ## Stufe 4 — Vermutung
 
