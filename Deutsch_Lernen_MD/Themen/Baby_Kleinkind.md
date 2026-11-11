@@ -118,14 +118,3 @@
 | Das Baby lacht und macht „Ba-ba“, ganz für sich. | Es brabbelt fröhlich vor sich hin. |
 | Das Baby schläft im Kinderwagen, Papa will es nicht wecken. | Er schiebt den Kinderwagen ganz langsam. |
 | Kaum im Bett, schon schläft er. (Perfekt) | Er ist sofort eingeschlafen. |
-
-## Stufe 8 — Nebensätze
-
-| Situation / Frage | Antwort |
-|---|---:|
-| Warum braucht Amelie keine Windeln mehr? (schon groß sein) | Sie braucht keine Windeln mehr, weil sie schon groß ist. |
-| Wann wickelt Mama Lotta? (die Windel, voll sein) | Sie wickelt Lotta, wenn die Windel voll ist. |
-| Wozu bekommt Jonathan den Schnuller? (wieder einschlafen) | Er bekommt den Schnuller, damit er wieder einschläft. |
-| Lotta ist noch zu klein für das Töpfchen. Also? (Windeln tragen) | Lotta ist noch zu klein, deshalb trägt sie Windeln. |
-| Was sagt Mama zu Theo? (für den Kinderwagen, zu groß sein) | Mama sagt, dass er für den Kinderwagen zu groß ist. |
-| Jonathan schläft. Ist es ganz still? (brabbeln) | Obwohl er schläft, brabbelt er leise. |

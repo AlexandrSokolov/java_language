@@ -96,14 +96,3 @@
 | Sie hat gejubelt, weil Julian endlich fährt. | Warum hat Marie gejubelt? |
 | Er erklärt es seiner Schwester. | Wem erklärt Leo das? |
 | Sie beklagt sich über ihre Schwester. | Über wen beklagt sich Luisa? |
-
-## Stufe 7 (Nebensätze)
-
-| Situation / Frage | Antwort |
-|---|---:|
-| Mama ruft wütend: „Ruhe!“ Wann passiert das? (Kinder, laut sein) | Sie schimpft, wenn die Kinder laut sind. |
-| Was sagt Paul ganz leise zu Oskar? (bester Freund) | Er flüstert ihm zu, dass er sein bester Freund ist. |
-| Wozu nimmt Mama Paul in den Arm? (nicht mehr traurig sein) | Sie tröstet ihn, damit er nicht mehr traurig ist. |
-| Warum ist Marie so laut? (Julian, endlich fahren) | – Sie jubelt, weil Julian endlich fährt.<br>– Julian fährt endlich, deshalb jubelt sie. |
-| Dein Programm läuft nicht. Was bittest du den Kollegen? (Grund?, nicht funktionieren) | Kannst du mir erklären, warum es nicht funktioniert? |
-| Der Kollege ist immer unzufrieden, aber das Projekt? (alles gut laufen) | Er beklagt sich, obwohl alles gut läuft. |
