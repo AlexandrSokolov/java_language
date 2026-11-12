@@ -5,6 +5,7 @@
 > Die Person: *Ich schaffe das. Ich kriege das hin. Ich komme damit zurecht. Ich bewältige das. Ich scheitere daran.*
 > **Perfekt mit sein**: gelungen, misslungen, gescheitert, fehlgeschlagen, schiefgegangen, zurechtgekommen. **Mit haben**: geklappt, funktioniert, geschafft, hingekriegt, bewältigt.
 > **Umgangssprache**: klappen, hinkriegen, schiefgehen · **formell**: bewältigen, misslingen, fehlschlagen.
+> **Nuancen**: schaffen / bewältigen, scheitern / misslingen / schiefgehen — siehe [unten](#nuancen).
 
 ## Stufe 1 — Situation → Verb
 
@@ -100,3 +101,48 @@
 | Oma ist 85 und wohnt ohne Hilfe. | Sie kommt noch allein zurecht. |
 | Großer Plan, peinliches Ergebnis. | Der Plan ist kläglich gescheitert. |
 | Kuchen verbrannt, Gäste zu früh, der Hund frisst die Torte. | Das ist gründlich schiefgegangen. |
+
+---
+
+## Nuancen
+
+### schaffen vs. bewältigen
+
+Главный критерий не длительность, а **на что смотрим: на результат или на тяжесть**.
+
+**schaffen** — дойти до результата, успеть, осилить. Размер не важен: от письма до проекта. Повседневное слово.
+- цель и срок: *den Bericht bis Freitag, die Prüfung, den Zug, die Deadline schaffen*
+- с инфинитивом: *Ich habe es geschafft, die Ladezeit zu halbieren.*
+- подбадривание: *Du schaffst das!*
+
+**bewältigen** — совладать с **нагрузкой или трудностью**: слово подчёркивает, что было тяжело. Формальное, для отчёта и собеседования.
+- *eine Krise, Stress, eine Herausforderung, eine große Arbeitsmenge, Schwierigkeiten bewältigen*
+- эмоциональное: *einen Verlust, eine Trennung bewältigen* (пережить). Здесь *schaffen* не подходит.
+
+**Пересекаются** на задачах и объёме работы: *die Aufgabe / die Arbeit schaffen* или *bewältigen*. Разница в оттенке и регистре: в разговоре *schaffen*, в отчёте и резюме *bewältigen*.
+
+**Нельзя наоборот**: *den Zug bewältigen*, *es bewältigen, … zu tun* — так не говорят.
+
+**Проверка**: можно спросить «успел или нет?» → *schaffen*. «Выдержал нагрузку?» → *bewältigen*.
+
+### scheitern vs. misslingen vs. schiefgehen
+
+Про проект можно сказать все три, но смысл разный. Критерий: **что именно не получилось**.
+
+**scheitern** — **цель не достигнута, конец**. Большой, окончательный провал, часто с причиной *an*. Самое нейтральное и частое из трёх.
+- *Das Projekt ist gescheitert.* — проект провалился, его больше нет.
+- типичные слова: *Projekt, Plan, Verhandlungen, Ehe, Versuch, Prüfung*
+- подлежащим может быть и человек: *Ich bin an der Prüfung gescheitert.*
+
+**misslingen** — **результат вышел плохим**. Зеркало *gelingen*, человек в Dativ: *mir misslingt*. Про качество того, что сделано. Книжное.
+- типичные слова: *Kuchen, Foto, Experiment, Versuch, Überraschung*
+- *Das Projekt ist misslungen* возможно, но про проект так говорят редко.
+
+**schiefgehen** — **что-то пошло не так по ходу**: неприятности, накладки. Не обязательно полный провал. Разговорное.
+- *Bei dem Projekt ist einiges schiefgegangen.* — были косяки, но проект может закончиться успешно.
+- *Was kann schon schiefgehen?* — про риск вообще.
+
+**Вся тройка на одном проекте:**
+*Beim Release ist einiges **schiefgegangen*** (были накладки) → *die neue Funktion ist **misslungen*** (вышла плохой) → *am Ende ist das Projekt am Geld **gescheitert*** (закрыли).
+
+**fehlschlagen** рядом: конкретная попытка или процесс не сработали: *Der Test / das Deployment ist fehlgeschlagen.*
