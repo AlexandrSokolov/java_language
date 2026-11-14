@@ -73,14 +73,15 @@ int[] findPair(int[] nums, int target) {
 }
 ```
 
-**Better solution: one pass with a `HashMap`.** For each number, the partner it needs is `target - x`. Keep the
-numbers already seen in a map and look the partner up instead of scanning. Time O(n), memory O(n).
+**Better solution: one pass with a `HashMap`.** For each number `x`, the partner it needs is `target - x`. The map
+remembers every number already passed, as value → index. So instead of scanning back over the earlier numbers, you ask
+the map once: "Did I already see `target - x`, and at which index?" Time O(n), memory O(n).
 
 ```java
 int[] findPair(int[] nums, int target) {
   Map<Integer, Integer> seen = new HashMap<>(); // value -> index
   for (int i = 0; i < nums.length; i++) {
-    Integer j = seen.get(target - nums[i]); // look up BEFORE put: a number must not pair with itself
+    Integer j = seen.get(target - nums[i]); // index of the partner, or null if not seen yet
     if (j != null) {
       return new int[] {j, i};
     }
@@ -89,6 +90,16 @@ int[] findPair(int[] nums, int target) {
   return null;
 }
 ```
+
+Example: `nums = [2, 7, 11, 15]`, `target = 18`.
+
+- `i = 0`, number 2: needs 16. The map is empty, so `get(16)` is `null`. Put `2 → 0`.
+- `i = 1`, number 7: needs 11. The map holds `{2}`, so `get(11)` is `null`. Put `7 → 1`.
+- `i = 2`, number 11: needs 7. The map holds `{2, 7}`, so `get(7)` returns `1`. Return `{1, 2}`.
+
+**Why `get` comes before `put`:** with `target = 10` and the number 5, putting 5 first makes `get(10 - 5)` find that
+same 5, so it pairs with itself. Asking first means the map holds only earlier numbers. For `[5, 5]` the answer is still
+found: the second 5 finds the first one.
 
 **Alternative: sort, then two pointers.** One pointer starts at the left end and one at the right end. If the sum is
 too small, move the left one forward. If it is too big, move the right one back.
@@ -138,6 +149,23 @@ You get a string. Find the first character that appears in it only once.
 - Can the input be read twice, or is it a stream?
 
 **Simple solution: for each character, count it by scanning the whole string.** Time O(n²), memory O(1).
+```java
+Character firstUnique(String s) {
+  for (int i = 0; i < s.length(); i++) {
+    char c = s.charAt(i);
+    int count = 0;
+    for (int j = 0; j < s.length(); j++) { // scan the WHOLE string again to count c
+      if (s.charAt(j) == c) {
+        count++;
+      }
+    }
+    if (count == 1) {
+      return c; // first one found in string order = the answer
+    }
+  }
+  return null;
+}
+```
 
 **Better solution: count first, then find.** Pass 1 counts every character in a `HashMap`. Pass 2 walks the string
 again and returns the first character with count 1. Time O(n), memory O(k), where k = number of different characters.
