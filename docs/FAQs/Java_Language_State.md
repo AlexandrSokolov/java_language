@@ -151,6 +151,39 @@ steps.
 
 </details>
 
+### How do you add your own intermediate step to a Java stream?
+<details><summary>Show answer</summary>
+
+Since JDK 24 you write a **gatherer** and pass it to `stream.gather(...)`. Before that, there was no clean way.
+
+Streams had a fixed set of intermediate operations: `map`, `filter`, `flatMap`, `distinct`, `sorted`, `limit` and a
+few more. The end of a stream was open, since you could write your own `Collector`, but the middle was closed. Steps
+like "split into batches of 100", "sliding window", "running total" or "stop when a condition based on earlier
+elements is met" had only workarounds:
+
+- collect into a list and stream it again: loses laziness and does not work on infinite streams;
+- a lambda in `map` that keeps state: breaks the rule that stream lambdas are stateless, and fails with `parallel()`;
+- your own `Spliterator`: works, but is low-level and long.
+
+A `Gatherer` is to the middle of a stream what a `Collector` is to the end: optional state, a step that receives each
+element and decides what to pass on (nothing, one or many elements), and an optional finish step. It can stop the
+stream early, so it works on infinite streams, and with a combiner it runs in parallel.
+
+Common cases ship in `Gatherers`:
+
+```java
+Stream.of(1, 2, 3, 4, 5, 6, 7)
+  .gather(Gatherers.windowFixed(3))
+  .toList(); // [[1, 2, 3], [4, 5, 6], [7]]
+```
+
+Others are `windowSliding`, `scan` (running result), `fold`, and `mapConcurrent`, which runs a blocking function on
+virtual threads with a limit on concurrency and keeps the original order.
+
+**Handle:** `Collector` made the end of a stream extensible; `Gatherer` does the same for the middle.
+
+</details>
+
 ### What changed in Java concurrency with virtual threads?
 <details><summary>Show answer</summary>
 
@@ -266,6 +299,28 @@ sometimes avoid an allocation (escape analysis), but not for arrays or object fi
 The fix is [Valhalla](#what-will-project-valhalla-change).
 
 **Handle:** in Java small data is still a full object — identity you do not need costs memory and speed.
+
+</details>
+
+### How will Java store small data without the cost of a full object?
+<details><summary>Show answer</summary>
+
+With value classes: classes whose objects have no identity, so only their field values matter. They come from
+[Valhalla](#what-will-project-valhalla-change) (JEP 401, preview in JDK 28).
+
+```java
+value record Point(int x, int y) {}
+```
+
+Giving up identity means: fields are final, `==` compares field values instead of references, and `synchronized` on
+such an object fails. Everything else stays as in a normal class: methods, interfaces, use in generics.
+
+The main gain: without identity the JVM no longer has to keep each object as a separate heap allocation behind a
+reference. It can store the fields directly inside the array or the object that holds them, and in local code skip
+the allocation completely. That answers the costs of
+[missing value types](#what-does-the-lack-of-value-types-cost-in-java).
+
+**Handle:** value classes code like a class and work like an int.
 
 </details>
 
