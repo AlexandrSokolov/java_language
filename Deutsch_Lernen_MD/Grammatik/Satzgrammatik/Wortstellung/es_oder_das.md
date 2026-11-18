@@ -38,6 +38,12 @@
 
 ## Stufe 3 — schnell gesprochen ('s)
 
+> **Ich hab's!** allein = „Ich habe es gefunden / verstanden“: Die Lösung, die Idee oder die Sache ist plötzlich da.
+> – gefunden: *Wo ist der Schlüssel? … Ich hab's!* / *Der Bug? Ich hab's!*
+> – verstanden: *Ah, ich hab's!*
+> Nicht für „geschafft“: ❌ *Ich hab's!* → ✅ *Ich hab's geschafft!*
+> Mit Partizip geht 's mit jedem Verb: *Ich hab's gefunden / gesehen / vergessen / geschafft.*
+
 | Situation / Frage | Antwort |
 |---|---:|
 | Du suchst lange die Lösung. Plötzlich weißt du sie! (haben) | Ich hab's! |
@@ -54,6 +60,7 @@
 | Dein Freund geht nach Hause. Du verabschiedest dich. (machen, gut) | Mach's gut! |
 | Die Prüfung ist schwer, aber du glaubst an dich. (schaffen) | Ich schaff's! |
 | Das Projekt ist endlich fertig! (wir, schaffen) | Wir haben's geschafft! |
+| Stundenlang Bug gesucht. Jetzt läuft alles, du bist stolz. (schaffen) | Ich hab's geschafft! |
 
 ## Stufe 4 — Satzbau (Modalverb, lassen, trennbare Verben)
 

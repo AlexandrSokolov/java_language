@@ -3,6 +3,8 @@
 > **ohne Präposition** — die Sprache können, sprechen, lernen: *Ich spreche Deutsch.*
 > **auf** — in welcher Sprache etwas gesagt oder geschrieben ist: *Sag das auf Deutsch!*
 > **in** — Schulfach, Note, Prüfung: *Ich habe eine Zwei in Deutsch.*
+>
+> **Für den Drill:** Bei **in + Fach** (Note, Prüfung) verrät die Situation fast die Antwort. Dann lieber den Satz mit Lücke geben: *Sie hat eine Zwei ___ Deutsch.* → (in). Bei **auf / ohne** geht das manchmal auch.
 
 ## Stufe 1 — ohne Präposition, auf oder in?
 

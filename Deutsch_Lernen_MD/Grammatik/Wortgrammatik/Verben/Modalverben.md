@@ -2,6 +2,7 @@
 
 > können, müssen, wollen, dürfen, sollen, möchten. Das Modalverb steht auf Platz 2, der Infinitiv am Ende: *Ich **kann** es dir **erklären**.*
 > Im Nebensatz steht das Modalverb ganz am Ende: *…, weil ich arbeiten **muss**.*
+> **ihr:** könnt, müsst, wollt, dürft, sollt, möchtet. **jemand** = er-Form: *Möchte noch jemand?*
 
 ## Stufe 1 — ohne zweites Verb
 
@@ -12,6 +13,9 @@
 | Auf dem Tisch liegt das letzte Stück Kuchen. Du fragst höflich. | Darf ich? |
 | Dein Sohn soll Brokkoli essen. Er schiebt den Teller weg. | Ich will das nicht!<br>Ich will nicht! |
 | Die Kinder wollen in den Zoo, aber es regnet stark. | Wir können heute nicht in den Zoo.<br>Das geht heute nicht. |
+| Ein Keks bleibt übrig. Du fragst die Kinder. | Möchte noch jemand?<br>Will noch jemand? |
+| Kinder: „Dürfen wir raus?“ Ja. | Ja, ihr dürft. |
+| 20 Uhr. Die Kinder spielen noch. | Ihr müsst jetzt ins Bett. |
 
 ## Stufe 2 — mit Infinitiv
 
@@ -22,6 +26,9 @@
 | Deine Tochter will zur Party ihrer Freundin. Du sagst ja. | Du darfst zur Party gehen. |
 | Es ist 19 Uhr. Alle haben Hunger. Du fragst die Familie. | Wollen wir essen? |
 | Im Laden fragt die Verkäuferin: „Kann ich Ihnen helfen?“ Du zeigst auf Schuhe im Regal. | Ich möchte diese Schuhe anprobieren. |
+| Kinder wollen fernsehen. Hausaufgaben? Noch nicht. | Ihr müsst zuerst die Hausaufgaben machen. |
+| Meeting online. Du teilst den Bildschirm. | Könnt ihr alle den Bildschirm sehen? |
+| Wochenende. Du fragst die Familie nach Plänen. | Was wollt ihr am Samstag machen? |
 
 ## Stufe 3 — Verneinung: nicht müssen / nicht brauchen zu / nicht dürfen
 
@@ -42,6 +49,9 @@
 | – Der Arzt sagt: Dein Herz ist schwach. (Kaffee, trinken)<br>– Das ist mein Glas! (Kaffee, trinken) | – Du darfst keinen Kaffee trinken.<br>– Du darfst den Kaffee nicht trinken. |
 | – Wir fahren mit dem Zug. (Auto, mieten)<br>– Das rote Auto ist kaputt. (Auto, nehmen) | – Wir brauchen kein Auto zu mieten.<br>– Du darfst das Auto nicht nehmen. |
 | – Morgen sind Ferien. (Buch, lesen)<br>– Die Geschichte ist langweilig. (Buch, lesen) | – Ihr müsst heute kein Buch lesen.<br>– Du brauchst das Buch nicht zu lesen. |
+| Ferien. Kinder fragen nach dem Wecker. | Ihr müsst morgen nicht früh aufstehen.<br>Ihr braucht nicht früh aufzustehen. |
+| Kinder rennen mit Schuhen ins Wohnzimmer. | Ihr dürft nicht mit Schuhen rein! |
+| Team: Der Bug ist schon gefixt. | Ihr braucht das nicht mehr zu testen. |
 
 ## Stufe 4 — Vermutung
 

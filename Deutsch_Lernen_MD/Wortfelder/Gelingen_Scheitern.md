@@ -5,13 +5,13 @@
 > Die Person: *Ich schaffe das. Ich kriege das hin. Ich komme damit zurecht. Ich bewältige das. Ich scheitere daran.*
 > **Perfekt mit sein**: gelungen, misslungen, gescheitert, fehlgeschlagen, schiefgegangen, zurechtgekommen. **Mit haben**: geklappt, funktioniert, geschafft, hingekriegt, bewältigt.
 > **Umgangssprache**: klappen, hinkriegen, schiefgehen · **formell**: bewältigen, misslingen, fehlschlagen.
-> **Nuancen**: schaffen / bewältigen, scheitern / misslingen / schiefgehen — siehe [unten](#nuancen).
+> **Nuancen**: schaffen / bewältigen, scheitern / misslingen / schiefgehen, klappen / passen — siehe [unten](#nuancen).
 
 ## Stufe 1 — Situation → Verb
 
 | Situation / Frage | Antwort |
 |---|---:|
-| Dienstag, 10 Uhr? Ja, passt. | Ja, Dienstag klappt. |
+| Dienstag, 10 Uhr? Kein Problem. | Ja, Dienstag klappt. |
 | Drucker war kaputt, jetzt druckt er. | Er funktioNIERT wieder. |
 | Erster Kuchen, sieht super aus. | Der Kuchen ist mir gelungen. |
 | Prüfung bestanden, endlich! | Ich habe es geschafft! |
@@ -22,6 +22,10 @@
 | Kuchen schwarz, total verbrannt. | Der Kuchen ist mir missLUNgen. |
 | Update installiert, Fehlermeldung. | Das Update ist fehlgeschlagen. |
 | Regen, Bus weg, Kaffee auf der Hose. | Heute geht alles schief. |
+
+## Stufe 2 — Artikel
+
+> Entfällt: Im Wortfeld gibt es nur Verben, keine neuen Nomen.
 
 ## Stufe 3 — Fragen
 
@@ -73,6 +77,7 @@
 | Situation / Frage | Antwort |
 |---|---:|
 | Ein Kollege kommt vom Amt zurück. Du fragst: | Hat alles geklappt? |
+| Du wolltest den Arzttermin verschieben. Deine Frau fragt: „Und?“ | Hat geklappt! |
 | Tester: „Der Button geht nicht.“ Auf deinem Laptop ist alles okay. | Bei mir funktioniert es aber! |
 | Omas Geburtstag: Sie weiß nichts, alle rufen „Überraschung!“, sie lacht. | Die Überraschung ist gelungen! |
 | Deine Tochter hat morgen ein Diktat und Angst. | Du schaffst das! |
@@ -87,6 +92,10 @@
 | Du erzählst einen Witz, keiner lacht. | Der Witz ist misslungen. |
 | Falsches Passwort. Auf dem Bildschirm steht: | Anmeldung fehlgeschlagen. |
 | Freitag, 17 Uhr, Release live. Der Kollege lacht: | Was soll schon schiefgehen? |
+
+## Stufe 7a — Adjektiv + Nomen
+
+> Entfällt: Im Wortfeld gibt es nur Verben, keine neuen Nomen.
 
 ## Stufe 7b — Adverb + Verb
 
@@ -146,3 +155,17 @@
 *Beim Release ist einiges **schiefgegangen*** (были накладки) → *die neue Funktion ist **misslungen*** (вышла плохой) → *am Ende ist das Projekt am Geld **gescheitert*** (закрыли).
 
 **fehlschlagen** рядом: конкретная попытка или процесс не сработали: *Der Test / das Deployment ist fehlgeschlagen.*
+
+### klappen vs. passen
+
+**klappen** — **получилось**: план или попытка удались. Смотрим на результат действия. *Hat das Verschieben geklappt? Hat alles geklappt?*
+
+**passen** — **подходит**: по времени, размеру, к ситуации. Смотрим на удобство или соответствие. *Dienstag passt mir. Die Hose passt. Passt!* (= ок, договорились)
+
+**Пересекаются** только при выборе времени: *Dienstag passt / klappt*. passt = «мне удобно», klappt = «получится».
+
+**Нельзя заменить**: на вопрос о результате («Und?» после попытки) отвечают только *Hat geklappt!* ❌ *Das passt* звучит как «ок, меня устраивает», а не «получилось».
+
+**Проверка**: «удалось?» → *klappen*. «удобно / подходит?» → *passen*.
+
+**Обе в одной ситуации**: *Passt dir Dienstag?* — *Ja, passt.* … *Und, hat das Verschieben geklappt?* — *Ja, hat geklappt.*
