@@ -17,7 +17,7 @@
 | Neue App, erst mal testen. | Ich probiere die App mal aus. |
 | Großes Problem, lange gewartet. Montag: Start. | Am Montag gehen wir das Problem an. |
 | Steuererklärung, schon März. Jetzt endlich! | Ich gehe die Steuererklärung jetzt an. |
-| Kollege: anderer Weg zur Lösung als du. | Er geht anders an das Problem heran. |
+| Kollege: anderer Weg zur Lösung als du. | Er geht anders an das Problem heran. / Er geht das Problem anders an. |
 | Neuer Job, viel Unbekanntes, keine Panik. | Ich gehe ruhig an die Sache heran. |
 | Hotel voll. Die Rezeption telefoniert lange für dich. | Sie bemüht sich sehr. |
 | Deutsch: noch Fehler, aber jeden Tag lernen. | Ich bemühe mich. |
@@ -47,7 +47,7 @@
 | Neues Klettergerüst auf dem Spielplatz. Die Kinder zögern. | Probiert es aus! |
 | Kollege schiebt die Aufgabe seit Wochen vor sich her. | Geh es endlich an! |
 | Morgen Prüfung, deine Tochter ist nervös. | Geh ganz ruhig an die Aufgabe heran! |
-| Hausaufgaben, schnell und schlampig. | Bemüh dich bitte ein bisschen mehr! |
+| Hausaufgaben in fünf Minuten, voller Fehler. | Geh nicht so schnell und schlampig an die Hausaufgaben heran! Bemüh dich bitte ein bisschen mehr! |
 
 ## Stufe 5 — Zeiten
 
@@ -87,6 +87,13 @@
 | Nicht warten, nicht raten: genau die Ursache suchen. | Wir gehen das Problem gezielt an. |
 | Erst eine Liste, dann Punkt für Punkt. | Er geht systematisch an die Sache heran. |
 | Er hat alles getan, aber es hat nicht geklappt. | Er hat sich redlich bemüht. |
+| Plan A klappt nicht. Neue Idee. | Wir gehen das Problem anders an. / Wir gehen anders an das Problem heran. |
+| Streit mit dem Nachbarn. Kein Geschrei. | Ich gehe ruhig an das Gespräch heran. |
+| Fahrprüfung morgen, gut vorbereitet. | Ich gehe entspannt an die Prüfung heran. |
+| Umzug: Liste, Kisten, Plan. | Wir gehen den Umzug strukturiert an. |
+| Puzzle, 1000 Teile. Erst der Rand. | Wir gehen das Puzzle Schritt für Schritt an. |
+| Kollege: Code in zehn Minuten, voller Fehler. | Er geht schlampig an die Aufgabe heran. |
+| Arbeitszeugnis, Code für „schwach“. | Er hat sich stets bemüht. |
 
 ---
 
