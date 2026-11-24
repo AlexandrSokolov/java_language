@@ -11,7 +11,11 @@
 | Leo sagt Sofie, warum sie noch kein Kaninchen haben. | Er erklärt es ihr. |
 | Luisa ist sauer und erzählt Papa von Klara. | Sie beklagt sich bei Papa über Klara. |
 
-## Stufe 2 — Fragen
+## Stufe 2 — Artikel
+
+> Entfällt: Im Wortfeld gibt es nur Verben, keine neuen Nomen.
+
+## Stufe 3 — Fragen
 
 | Situation / Frage | Antwort |
 |---|---:|
@@ -25,7 +29,16 @@
 | \_\_\_ w\_\_ beklagt sich Luisa? (Papa) | (Bei wem?) Sie beklagt sich bei Papa. |
 | \_\_\_ w\_\_ beklagt sie sich? (Klara) | (Über wen?) Sie beklagt sich über ihre Schwester. |
 
-## Stufe 3 (Imperativ)
+## Stufe 4 — da-Wörter
+
+| Situation / Frage | Antwort |
+|---|---:|
+| Das Spielzeug ist kaputt. Dein Sohn ruft: „Blödes Ding!“ | Er schimpft darüber. |
+| Die Lehrerin war böse, dein Sohn kommt traurig nach Hause. | Sie hat mit ihm geschimpft. |
+| Suppe kalt. Der Gast ruft den Kellner. | Er beklagt sich bei ihm darüber. |
+| Tor! Die Fans rufen „Juhu!“ | Sie jubeln darüber. |
+
+## Stufe 5 — Imperativ
 
 | Situation / Frage | Antwort |
 |---|---:|
@@ -43,7 +56,7 @@
 | Dein Sohn sagt den ganzen Tag: „Das ist unfair! Immer ich!“ | Beklag dich nicht! |
 | Die Kinder sagen beim Abendessen: „Das Essen ist doof!“ | Beklagt euch nicht! |
 
-## Stufe 4 (Zeiten)
+## Stufe 6 — Zeiten
 
 | Situation / Frage | Antwort |
 |---|---:|
@@ -66,7 +79,7 @@
 | Gestern hat Klara Teddy gebissen. Luisa ist sauer zu Papa gegangen. Was hat sie gemacht? (Klara) | Sie hat sich bei Papa über Klara beklagt. |
 | Im Restaurant ist dein Essen kalt. Und du? | Ich würde mich beim Kellner beklagen. |
 
-## Stufe 5 (Ausdrücke)
+## Stufe 7 — Ausdrücke
 
 | Situation / Frage | Antwort |
 |---|---:|
@@ -86,7 +99,11 @@
 | Dein Sohn ist immer unzufrieden. | Worüber beklagst du dich schon wieder? |
 | Im Hotel ist das Zimmer schmutzig. | Ich beklage mich an der Rezeption. |
 
-## Stufe 6 (Spiegel)
+## Stufe 8a — Adjektiv + Nomen
+
+> Entfällt: Im Wortfeld gibt es nur Verben, keine neuen Nomen.
+
+## Stufe 8 (Alternative) — Spiegel
 
 | Situation / Frage | Antwort |
 |---|---:|

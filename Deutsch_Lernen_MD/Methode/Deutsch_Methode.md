@@ -91,22 +91,24 @@
 | 1c — Adjektive / Adverbien | прилагательные, наречия (по мере надобности) | *Tränen in den Augen.* → *Er ist traurig.* |
 | 2 — Artikel (der / den / dem) | склонённый указательный артикль в конце фразы, без существительного | *Das Baby weint. (Schnuller, geben)* → *Gib mir den!* |
 | 3 — Fragen | правильный вопрос + падеж | *W\_\_ tröstet Mama? (Paul)* → *(Wen?) Sie tröstet ihn.* |
-| 4 — Imperativ | du / ihr / Sie, только глаголы файла | *Die Kinder rennen mit dem Kinderwagen.* → *Schiebt den Kinderwagen langsam!* |
-| 5 — Zeiten | Präsens, Perfekt, Präteritum (книжное), werden, würde/wäre, Modalverben | *Und gestern?* → *Gestern hat er geschimpft.* |
-| 6 — Ausdrücke | готовые фразы на каждый день, собеседование, экзамен | *Das Baby riecht nicht gut.* → *Die Windel ist voll.* |
-| 7a — Adjektiv + Nomen | окончания прилагательных, mein/dieser | *Er spielt mit sein_ klein_ Schwester.* → *mit seiner kleinen Schwester* |
-| 7b — Adverb + Verb | устойчивое наречие при глаголе | *Bis Freitag? Viel Zeit, kleine Aufgabe.* → *Das schaffen wir locker.* |
-| 7 (альтернатива) — Spiegel | по ответу придумать вопрос, коротко, 1 на слово | *Er erklärt es seiner Schwester.* → *Wem erklärt Leo das?* |
+| 4 — da-Wörter | глагол с постоянным предлогом, краткий ответ с *da(r)-* | *Startup zu. Grund: das Geld.* → *Es ist daran gescheitert.* |
+| 5 — Imperativ | du / ihr / Sie, только глаголы файла | *Die Kinder rennen mit dem Kinderwagen.* → *Schiebt den Kinderwagen langsam!* |
+| 6 — Zeiten | Präsens, Perfekt, Präteritum (книжное), werden, würde/wäre, Modalverben | *Und gestern?* → *Gestern hat er geschimpft.* |
+| 7 — Ausdrücke | готовые фразы на каждый день, собеседование, экзамен | *Das Baby riecht nicht gut.* → *Die Windel ist voll.* |
+| 8a — Adjektiv + Nomen | окончания прилагательных, mein/dieser | *Er spielt mit sein_ klein_ Schwester.* → *mit seiner kleinen Schwester* |
+| 8b — Adverb + Verb | устойчивое наречие при глаголе | *Bis Freitag? Viel Zeit, kleine Aufgabe.* → *Das schaffen wir locker.* |
+| 8 (альтернатива) — Spiegel | по ответу придумать вопрос, коротко, 1 на слово | *Er erklärt es seiner Schwester.* → *Wem erklärt Leo das?* |
 
 **Nebensätze в лексические файлы не входят.** Это отдельный навык: беглость союзов и порядка слов, а не применение слова, и длинная левая часть ломает быстрый темп. Тренируем изолированно в `Verbindungen/`. Управление самого слова (*es schaffen, … zu tun*; *Mir gelingt es, … zu*) — не Nebensatz, оно остаётся в Zeiten и Ausdrücke.
 
 ### Нумерация и пропуски
 - Номера ступеней **одинаковые во всех файлах**, даже если какие-то пропущены: запрос «Stufe 3 из всех файлов» должен работать везде.
-- Если в файле нет новых существительных (семантическое поле глаголов), Stufe 2 и 7a пропускаем.
+- Если в файле нет новых существительных (семантическое поле глаголов), Stufe 2 и 8a пропускаем.
+- Если в файле нет глаголов с постоянным предлогом, пропускаем Stufe 4.
 - Пропущенная ступень **остаётся в файле**: заголовок и строка `> Entfällt: …` с причиной (например, *Im Wortfeld gibt es nur Verben, keine neuen Nomen.*), чтобы было видно, что ступень пропущена намеренно.
 
 ### Главное правило: каждая ступень — только слова этого файла
-- Ступени 2–7 тренируют **только новые слова файла**. В каждой строке ответ строится вокруг слова файла: артикль, падеж, время, императив, выражение — именно для него.
+- Ступени 2–8 тренируют **только новые слова файла**. В каждой строке ответ строится вокруг слова файла: артикль, падеж, время, императив, выражение — именно для него.
 - Общие глаголы и слова (*setzen, bringen, geben, sein, nehmen, verlieren, brauchen…*) **не становятся предметом тренировки**. Они допустимы только как фон в ситуации, если без них никак.
 - Если для слова в ступени нет естественной ситуации, строку не делаем. Ступень из 1–2 строк или без ступени вовсе — это нормально. Лучше пусто, чем общая речь.
 
@@ -124,6 +126,13 @@
 - По возможности используем глаголы файла: *Er nuckelt an dem. Er schiebt den.*
 - Genitiv не берём: в речи он заменяется на *von dem*.
 
+### Stufe 4: da-Wörter
+- Отдельная независимая ступень сразу после Fragen. Только для глаголов файла с **постоянным предлогом**: *zurechtkommen mit, scheitern an, sich beklagen über, sich bemühen um*.
+- Цель — вбить управление глагола: голое *daran / damit* можно сказать, только если помнишь предлог.
+- Слева короткая ситуация, предмет назван, **без подсказок в скобках**: глагол и предлог вспоминаю сам.
+- Справа короткая фраза с **da(r)- + предлог**: *damit, daran, darüber, darum*. *r* вставляется, если предлог начинается с гласной: *dar-an, dar-auf, dar-über*.
+- Иногда строка про **человека** для контраста: тогда не *da-*, а предлог + местоимение: *Ich komme gut mit ihm zurecht.*
+
 ### Правила составления
 - **Левая часть не должна подсказывать ответ.** В ней нет нужного глагола или формы. Только ситуация, из которой ответ однозначен, даже если исходный текст забыт.
 - **Ответ — целая фраза**, а не одно слово (кроме Stufe 2 и коротких ответов на вопрос в Stufe 3).
@@ -135,11 +144,11 @@
   - Подсказка в скобках **без артикля**: *(Krabbeldecke)*, а не *(die Krabbeldecke)*. Артикль и падежную форму вспоминаю сам.
   - **Предлог слева никогда не показываем**, на его месте `___`: *\_\_\_ w\_\_ schafft ihr das? (Montag)* → *(Bis wann?) Bis Montag.* Не *Bis w\_\_ …*: предлог — половина ответа.
   - Справа в скобках правильный вопрос: *(Wem?)*, *(Mit wem?)*, *(Worüber?)*. Про людей спрашиваем *über wen / mit wem*, про вещи — *worüber / womit*.
-- **Stufe 4 (Imperativ)**: только глаголы файла в повелительной форме: *Schieb den Kinderwagen langsam!* Не *Setz dich!, Sei leise!, Bring mir…* Используем и **du**, и **ihr** (обращение к нескольким детям), иногда **Sie**. Если у глагола нет естественного императива (*gelingen, schiefgehen, schaffen*), строки нет. Подбадривания по смыслу группы (*Augen zu und durch!, Beiß die Zähne zusammen!*) идут в Stufe 6, и только вместе с глаголом файла: *Augen zu und durch, wir schaffen das!*
-- **Stufe 5 (Zeiten)**: время тренируем на глаголах файла: *hat gewickelt, ist eingeschlafen, nuckelte*. Не *hat verloren, brauchte*.
-- **Stufe 6 (Ausdrücke)**: каждое выражение содержит слово файла.
-- **Stufe 7a**: существительное в связке — из файла.
-- **Stufe 7b**: глагол из файла + **устойчивое наречие именно этого глагола**, самое распространённое: *locker / spielend / kaum schaffen, einwandfrei funktionieren, reibungslos klappen, kläglich scheitern*. Не обстоятельства времени и места (*gerade noch, in letzter Sekunde, sofort*): они относятся к ситуации, а не к глаголу. Нет такой пары — строку не делаем.
+- **Stufe 5 (Imperativ)**: только глаголы файла в повелительной форме: *Schieb den Kinderwagen langsam!* Не *Setz dich!, Sei leise!, Bring mir…* Используем и **du**, и **ihr** (обращение к нескольким детям), иногда **Sie**. Если у глагола нет естественного императива (*gelingen, schiefgehen, schaffen*), строки нет. Подбадривания по смыслу группы (*Augen zu und durch!, Beiß die Zähne zusammen!*) идут в Stufe 7, и только вместе с глаголом файла: *Augen zu und durch, wir schaffen das!*
+- **Stufe 6 (Zeiten)**: время тренируем на глаголах файла: *hat gewickelt, ist eingeschlafen, nuckelte*. Не *hat verloren, brauchte*.
+- **Stufe 7 (Ausdrücke)**: каждое выражение содержит слово файла.
+- **Stufe 8a**: существительное в связке — из файла.
+- **Stufe 8b**: глагол из файла + **устойчивое наречие именно этого глагола**, самое распространённое: *locker / spielend / kaum schaffen, einwandfrei funktionieren, reibungslos klappen, kläglich scheitern*. Не обстоятельства времени и места (*gerade noch, in letzter Sekunde, sofort*): они относятся к ситуации, а не к глаголу. Нет такой пары — строку не делаем.
 - **Объём**: не раздувать. Структуры повторяются от файла к файлу, поэтому 1–2 примера на слово в ступени достаточно.
 
 ### Грамматические заметки
@@ -168,6 +177,6 @@
 Работа и решение проблем:
 - `Wortfelder/`: `Gelingen_Scheitern`, `Angehen_Versuchen`
 
-По актуальным правилам сделаны `Baby_Kleinkind`, `Gelingen_Scheitern` и `Angehen_Versuchen`. Остальные файлы пока в старой нумерации; при переделке из них убираем Nebensätze (из `Verben_des_Sagens` уже убраны).
+В `Wortfelder/` (`Verben_des_Sagens`, `Gelingen_Scheitern`, `Angehen_Versuchen`) уже новая нумерация со Stufe 4 — da-Wörter. По остальным актуальным правилам сделаны `Baby_Kleinkind`, `Gelingen_Scheitern` и `Angehen_Versuchen`. Файлы в `Themen/` пока в старой нумерации; при переделке сдвигаем номера, добавляем Stufe 4 и убираем Nebensätze (из `Verben_des_Sagens` уже убраны).
 
-Следующие шаги: остальные группы глаголов (обращение с предметами, движение, решение проблем), урок из учебника B1 по фото словаря, документ со связками и Nebensätze, IT- и бизнес-чанки для собеседования.
+Следующие шаги: остальные группы глаголов (обращение с предметами, движение, решение проблем), урок из учебника B1 по фото словаря, документ со связками и Nebensätze, IT- и бизнес-чанки для собеседования, файл `Pronominaladverbien` (сначала обсудить).

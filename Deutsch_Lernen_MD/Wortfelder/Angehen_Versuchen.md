@@ -37,7 +37,16 @@
 | W\_\_\_ bemühst du dich? (Stelle als Entwickler) | (Worum?) Um eine Stelle als Entwickler. |
 | \_\_\_ w\_\_ bemüht sich die Lehrerin? (neue Kinder) | (Um wen?) Um die neuen Kinder. |
 
-## Stufe 4 — Imperativ
+## Stufe 4 — da-Wörter
+
+| Situation / Frage | Antwort |
+|---|---:|
+| Prüfung morgen. Keine Panik. | Ich gehe ruhig daran heran. |
+| Neues Projekt: erst eine Liste, dann Punkt für Punkt. | Ich gehe systematisch daran heran. |
+| Stelle als Entwickler: Bewerbung, Gespräche, Tests. | Ich bemühe mich darum. |
+| Neue Kinder in der Klasse. Die Lehrerin hilft ihnen viel. | Sie bemüht sich um sie. |
+
+## Stufe 5 — Imperativ
 
 | Situation / Frage | Antwort |
 |---|---:|
@@ -49,7 +58,7 @@
 | Morgen Prüfung, deine Tochter ist nervös. | Geh ganz ruhig an die Aufgabe heran! |
 | Hausaufgaben in fünf Minuten, voller Fehler. | Geh nicht so schnell und schlampig an die Hausaufgaben heran! Bemüh dich bitte ein bisschen mehr! |
 
-## Stufe 5 — Zeiten
+## Stufe 6 — Zeiten
 
 | Situation / Frage | Antwort |
 |---|---:|
@@ -62,7 +71,7 @@
 | Kunde unzufrieden, obwohl ihr viel getan habt. | Wir haben uns sehr bemüht. |
 | Chef: „Klappt das bis Freitag?“ Versprechen. (werden) | Ich werde mich bemühen. |
 
-## Stufe 6 — Ausdrücke
+## Stufe 7 — Ausdrücke
 
 | Situation / Frage | Antwort |
 |---|---:|
@@ -75,11 +84,11 @@
 | Ein Gast will das Geschirr abräumen. Du sagst höflich: | Bemühen Sie sich nicht! |
 | E-Mail an den Kunden: Die Lösung kommt bald. | Wir bemühen uns um eine schnelle Lösung. |
 
-## Stufe 7a — Adjektiv + Nomen
+## Stufe 8a — Adjektiv + Nomen
 
 > Entfällt: Im Wortfeld gibt es nur Verben, keine neuen Nomen.
 
-## Stufe 7b — Adverb + Verb
+## Stufe 8b — Adverb + Verb
 
 | Situation / Frage | Antwort |
 |---|---:|

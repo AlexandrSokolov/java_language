@@ -45,13 +45,22 @@
 | W\_\_\_ scheiterst du immer? (Grammatik) | (Woran?) An der Grammatik. |
 | W\_\_ ist schiefgegangen? (Präsentation) | (Was?) Die Präsentation ist schiefgegangen. |
 
-## Stufe 4 — Imperativ
+## Stufe 4 — da-Wörter
+
+| Situation / Frage | Antwort |
+|---|---:|
+| Neue App im Büro, keine Probleme. | Ich komme gut damit zurecht. |
+| Neuer Kollege, kein Stress miteinander. | Ich komme gut mit ihm zurecht. |
+| Startup zu. Grund: das Geld. | Es ist daran gescheitert. |
+| Führerscheinprüfung: Einparken zu schwer, nicht bestanden. | Ich bin daran gescheitert. |
+
+## Stufe 5 — Imperativ
 
 | Situation / Frage | Antwort |
 |---|---:|
 | Der Bug muss bis morgen weg. Zum Kollegen: | Krieg das bitte bis morgen hin! |
 
-## Stufe 5 — Zeiten
+## Stufe 6 — Zeiten
 
 | Situation / Frage | Antwort |
 |---|---:|
@@ -72,7 +81,7 @@
 | Gestern Präsentation: Beamer kaputt, Folien weg. | Gestern ist alles schiefgegangen. |
 | Morgen ist die Prüfung, du hast alles gelernt. Dein Freund sagt: (können, nichts) | Da kann nichts schiefgehen. |
 
-## Stufe 6 — Ausdrücke
+## Stufe 7 — Ausdrücke
 
 | Situation / Frage | Antwort |
 |---|---:|
@@ -93,11 +102,11 @@
 | Falsches Passwort. Auf dem Bildschirm steht: | Anmeldung fehlgeschlagen. |
 | Freitag, 17 Uhr, Release live. Der Kollege lacht: | Was soll schon schiefgehen? |
 
-## Stufe 7a — Adjektiv + Nomen
+## Stufe 8a — Adjektiv + Nomen
 
 > Entfällt: Im Wortfeld gibt es nur Verben, keine neuen Nomen.
 
-## Stufe 7b — Adverb + Verb
+## Stufe 8b — Adverb + Verb
 
 | Situation / Frage | Antwort |
 |---|---:|
